@@ -128,10 +128,7 @@ painted_galaxy_create_spiritualist_fe = {
 		allow_negative_traits = no
 	}
 	last_created_species = {
-		modify_species = {
-			species = this
-			add_trait = trait_psionic
-		}
+		add_psionic_trait = yes
 	}
 	create_country = {
 		name = random
