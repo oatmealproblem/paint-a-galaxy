@@ -4,11 +4,11 @@ on_game_start = {
 	events = {
 		painted_galaxy_fe.1 # spawn fallen empires
 		painted_galaxy_ratling.1 # spawn missing ratling systems
-		painted_galaxy_advanced_start.1 # create advanced starts
 		painted_galaxy_marauder.1 # spawn missing marauder systems
-		painted_galaxy_msi.1 # spawn missing MSI systems
 		painted_galaxy_precursor.1 # add precursor star flag near players
 		painted_galaxy_guaranteed_colony.1 # spawn guaranteed colonies according to settings
+		painted_galaxy_advanced_start.1 # create advanced starts (should happen after creating guaranteed colonies)
+		painted_galaxy_msi.1 # spawn missing MSI systems (should happen after creating advanced starts)
 	}
 }
 
