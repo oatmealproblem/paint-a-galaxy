@@ -1,0 +1,16 @@
+painted_galaxy_spawn_weight = {
+	base = 10
+	[[PREFERRED] add = 100 ]
+	# without randomness, the player always spawns in the same place
+	# these values add some semi-random weight based on leader age
+	modifier = {
+		add = 10
+		ruler = {
+			check_variable_arithmetic = {
+				which = trigger:leader_age
+				modulo = $RANDOM_MODULO$
+				value = $RANDOM_VALUE$
+			}
+		}
+	}
+}

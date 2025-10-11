@@ -142,19 +142,12 @@ export function generateStellarisGalaxy(
 
 			let initializer = '';
 			let spawnWeight = '';
-			const preferredModifier = preferredHomeStars.includes(star.toString())
-				? 'modifier = { add = 100 always = yes }' // simply increasing the base weight doesn't work for some reason, need to use a modifier
-				: '';
-			// without any randomness, the player always spawns in the lowest ID spawn systems
-			// adding some weight depending on the modulo of ruler age introduces that randomness (ruler age is random within a reasonable range)
-			const randomModifier =
-				// don't add randomModifier for preferred spawns; math seems to break if you add multiple modifiers to spawn weight
-				preferredModifier === ''
-					? `modifier = { add = 10 ruler = { check_variable_arithmetic = { which = trigger:leader_age modulo = 10 value = ${i % 10} } } }`
-					: '';
 			if (potentialHomeStars.includes(star.toString())) {
 				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
-				spawnWeight = `spawn_weight = { base = 10 ${preferredModifier} ${randomModifier} }`;
+				const params = preferredHomeStars.includes(star.toString())
+					? `|PREFERRED|yes|RANDOM_MODULO|${preferredHomeStars.length}|RANDOM_VALUE|${preferredHomeStars.indexOf(star.toString())}|`
+					: `|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
+				spawnWeight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
 			} else if (systems1JumpFromSpawn.has(star.toString())) {
 				// all systems with 1 of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
