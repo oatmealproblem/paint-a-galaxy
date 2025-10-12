@@ -1,7 +1,7 @@
 import { Array, Iterable, pipe } from 'effect';
 
 import { FALLEN_EMPIRE_SPAWN_RADIUS, HEIGHT, SPAWNS_PER_MAX_AI_EMPIRE, WIDTH } from './constants';
-import { arePointsEqual } from './utils';
+import { are_points_equal } from './utils';
 
 const COMMON = `
 	priority = 10
@@ -77,146 +77,148 @@ const HUGE = `
 	extra_crisis_strength = { 10 25 }
 `;
 
-export function generateStellarisGalaxy(
+export function generate_stellaris_galaxy(
 	name: string,
 	stars: [number, number][],
 	connections: [[number, number], [number, number]][],
 	wormholes: [[number, number], [number, number]][],
-	potentialHomeStars: string[],
-	preferredHomeStars: string[],
+	potential_home_stars: string[],
+	preferred_home_stars: string[],
 	nebulas: [number, number, number][],
 ): string {
-	const aiEmpireSettings = `
- 	num_empires = { min = 0 max = ${Math.round(potentialHomeStars.length / SPAWNS_PER_MAX_AI_EMPIRE)} }	#limits player customization; AI empires don't account for all spawns, so we need to set the max lower than the number of spawn points
-	num_empire_default = ${Math.round(potentialHomeStars.length / SPAWNS_PER_MAX_AI_EMPIRE / 2)}
+	const ai_empire_settings = `
+ 	num_empires = { min = 0 max = ${Math.round(potential_home_stars.length / SPAWNS_PER_MAX_AI_EMPIRE)} }	#limits player customization; AI empires don't account for all spawns, so we need to set the max lower than the number of spawn points
+	num_empire_default = ${Math.round(potential_home_stars.length / SPAWNS_PER_MAX_AI_EMPIRE / 2)}
 	`;
 
-	let sizeBasedSettings = TINY;
-	if (stars.length >= 400) sizeBasedSettings = SMALL;
-	if (stars.length >= 600) sizeBasedSettings = MEDIUM;
-	if (stars.length >= 800) sizeBasedSettings = LARGE;
-	if (stars.length >= 1000) sizeBasedSettings = HUGE;
+	let size_based_settings = TINY;
+	if (stars.length >= 400) size_based_settings = SMALL;
+	if (stars.length >= 600) size_based_settings = MEDIUM;
+	if (stars.length >= 800) size_based_settings = LARGE;
+	if (stars.length >= 1000) size_based_settings = HUGE;
 
-	const fallenEmpireSpawns: { star: [number, number]; direction: 'n' | 'e' | 's' | 'w' }[] = [];
+	const fallen_empire_spawns: { star: [number, number]; direction: 'n' | 'e' | 's' | 'w' }[] = [];
 	for (const star of stars) {
 		for (const direction of ['n', 'e', 's', 'w'] as const) {
 			if (
-				canSpawnFallenEmpireInDirection(
+				can_spawn_fallen_empire_in_direction(
 					star,
 					direction,
 					stars,
-					fallenEmpireSpawns.map((fe) => getFallenEmpireOrigin(fe.star, fe.direction)),
+					fallen_empire_spawns.map((fe) => get_fallen_empire_origin(fe.star, fe.direction)),
 				)
 			) {
-				fallenEmpireSpawns.push({ star, direction });
+				fallen_empire_spawns.push({ star, direction });
 			}
 		}
 	}
 
-	const keyToId = Object.fromEntries(stars.map((coords, i) => [coords.toString(), i]));
+	const key_to_id = Object.fromEntries(stars.map((coords, i) => [coords.toString(), i]));
 
-	const systems1JumpFromSpawn = new Set(
+	const systems_1_jump_from_spawn = new Set(
 		connections.flatMap(([from, to]) => {
-			const fromIsSpawn = potentialHomeStars.includes(from.toString());
-			const toIsSpawn = potentialHomeStars.includes(to.toString());
-			if (fromIsSpawn && !toIsSpawn) return [to.toString()];
-			if (toIsSpawn && !fromIsSpawn) return [from.toString()];
+			const from_is_spawn = potential_home_stars.includes(from.toString());
+			const to_is_spawn = potential_home_stars.includes(to.toString());
+			if (from_is_spawn && !to_is_spawn) return [to.toString()];
+			if (to_is_spawn && !from_is_spawn) return [from.toString()];
 			return [];
 		}),
 	);
-	const systems2JumpsFromSpawn = new Set(
+	const systems_2_jumps_from_spawn = new Set(
 		connections.flatMap(([from, to]) => {
-			const fromIsSpawn = potentialHomeStars.includes(from.toString());
-			const toIsSpawn = potentialHomeStars.includes(to.toString());
-			const fromIsAdjacent = systems1JumpFromSpawn.has(from.toString());
-			const toIsAdjacent = systems1JumpFromSpawn.has(to.toString());
-			if (fromIsAdjacent && !toIsAdjacent && !toIsSpawn) return [to.toString()];
-			if (toIsAdjacent && !fromIsAdjacent && !fromIsSpawn) return [from.toString()];
+			const from_is_spawn = potential_home_stars.includes(from.toString());
+			const to_is_spawn = potential_home_stars.includes(to.toString());
+			const from_is_adjacent = systems_1_jump_from_spawn.has(from.toString());
+			const to_is_adjacent = systems_1_jump_from_spawn.has(to.toString());
+			if (from_is_adjacent && !to_is_adjacent && !to_is_spawn) return [to.toString()];
+			if (to_is_adjacent && !from_is_adjacent && !from_is_spawn) return [from.toString()];
 			return [];
 		}),
 	);
 
-	const systemsEntries = stars
+	const systems_entries = stars
 		.map((star, i) => {
-			const basics = `id = "${keyToId[star.toString()]}" position = { x = ${-(star[0] - WIDTH / 2)} y = ${star[1] - HEIGHT / 2} }`;
+			const basics = `id = "${key_to_id[star.toString()]}" position = { x = ${-(star[0] - WIDTH / 2)} y = ${star[1] - HEIGHT / 2} }`;
 
 			let initializer = '';
-			let spawnWeight = '';
-			if (potentialHomeStars.includes(star.toString())) {
+			let spawn_weight = '';
+			if (potential_home_stars.includes(star.toString())) {
 				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
-				const params = preferredHomeStars.includes(star.toString())
-					? `|PREFERRED|yes|RANDOM_MODULO|${preferredHomeStars.length}|RANDOM_VALUE|${preferredHomeStars.indexOf(star.toString())}|`
+				const params = preferred_home_stars.includes(star.toString())
+					? `|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(star.toString())}|`
 					: `|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
-				spawnWeight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
-			} else if (systems1JumpFromSpawn.has(star.toString())) {
+				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
+			} else if (systems_1_jump_from_spawn.has(star.toString())) {
 				// all systems with 1 of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
-				initializer = `initializer = ${getRandomSystemBasicSystemInitializer()}`;
-			} else if (systems2JumpsFromSpawn.has(star.toString())) {
+				initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
+			} else if (systems_2_jumps_from_spawn.has(star.toString())) {
 				// in a random galaxy, all systems within 2 of a spawn also get the "empire_cluster" effect
 				// however, not all spawn points will actually be used, so we don't want to overly restrict system spawns, so a random chance is used
 				// the chance is based on the number systems within 2 jumps of a spawn point, so it scaled inversely with the connectedness and number of spawns
 				// eg on a low connectivity map, systems within 2 are more likely to get a basic init; this helps empires not get boxed in by hostile creatures etc
-				const numBasicSystems =
-					potentialHomeStars.length + systems1JumpFromSpawn.size + systems2JumpsFromSpawn.size;
-				const chance = 1 - numBasicSystems / stars.length;
+				const num_basic_systems =
+					potential_home_stars.length +
+					systems_1_jump_from_spawn.size +
+					systems_2_jumps_from_spawn.size;
+				const chance = 1 - num_basic_systems / stars.length;
 				if (Math.random() < chance) {
-					initializer = `initializer = ${getRandomSystemBasicSystemInitializer()}`;
+					initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
 				}
 			}
 
-			const thisStarFallenEmpireSpawns = fallenEmpireSpawns.filter((fe) => fe.star === star);
-			const feSpawnEffect =
-				thisStarFallenEmpireSpawns.length > 0
-					? `set_star_flag = painted_galaxy_fe_spawn ${thisStarFallenEmpireSpawns.map((fe) => `set_star_flag = painted_galaxy_fe_spawn_${fe.direction}`).join(' ')}`
+			const this_star_fallen_empire_spawns = fallen_empire_spawns.filter((fe) => fe.star === star);
+			const fe_spawn_effect =
+				this_star_fallen_empire_spawns.length > 0
+					? `set_star_flag = painted_galaxy_fe_spawn ${this_star_fallen_empire_spawns.map((fe) => `set_star_flag = painted_galaxy_fe_spawn_${fe.direction}`).join(' ')}`
 					: '';
 
-			const wormholeIndex = wormholes.findIndex(
-				(wh) => arePointsEqual(star, wh[0]) || arePointsEqual(star, wh[1]),
+			const wohmhole_index = wormholes.findIndex(
+				(wh) => are_points_equal(star, wh[0]) || are_points_equal(star, wh[1]),
 			);
-			const wormholeEffect =
-				wormholeIndex >= 0 ? `set_star_flag = painted_galaxy_wormhole_${wormholeIndex}` : '';
+			const wormhole_effect =
+				wohmhole_index >= 0 ? `set_star_flag = painted_galaxy_wormhole_${wohmhole_index}` : '';
 
-			const effects = [feSpawnEffect, wormholeEffect];
+			const effects = [fe_spawn_effect, wormhole_effect];
 			const effect = effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
-			return `\tsystem = { ${basics} ${initializer} ${spawnWeight} ${effect} }`;
+			return `\tsystem = { ${basics} ${initializer} ${spawn_weight} ${effect} }`;
 		})
 		.join('\n');
 
-	const hyperlanesEntries = connections
+	const hyperlanes_entries = connections
 		.map(
 			([a, b]) =>
-				`\tadd_hyperlane = { from = "${keyToId[a.toString()]}" to = "${keyToId[b.toString()]}" }`,
+				`\tadd_hyperlane = { from = "${key_to_id[a.toString()]}" to = "${key_to_id[b.toString()]}" }`,
 		)
 		.join('\n');
 
 	// find groups of overlapping nebulas, so we can treat them as a single non-circular nebula
 	// (only the largest nebula in each groups gets a name on the map, the rest are given a blank name)
-	let nebulaGroups: [number, number, number][][] = [];
+	let nebula_groups: [number, number, number][][] = [];
 	for (const nebula of nebulas) {
-		const overlappingGroups = nebulaGroups.filter((group) =>
+		const overlapping_groups = nebula_groups.filter((group) =>
 			group.some(
-				(groupNebula) =>
-					Math.hypot(groupNebula[0] - nebula[0], groupNebula[1] - nebula[1]) <
-					groupNebula[2] + nebula[2],
+				(group_nebula) =>
+					Math.hypot(group_nebula[0] - nebula[0], group_nebula[1] - nebula[1]) <
+					group_nebula[2] + nebula[2],
 			),
 		);
-		if (overlappingGroups.length === 0) {
+		if (overlapping_groups.length === 0) {
 			// create new group containing just this nebula
-			nebulaGroups.push([nebula]);
-		} else if (overlappingGroups.length === 1) {
+			nebula_groups.push([nebula]);
+		} else if (overlapping_groups.length === 1) {
 			// add to group
-			overlappingGroups[0].push(nebula);
+			overlapping_groups[0].push(nebula);
 		} else {
 			// remove the overlapping groups
-			nebulaGroups = nebulaGroups.filter((group) => !overlappingGroups.includes(group));
+			nebula_groups = nebula_groups.filter((group) => !overlapping_groups.includes(group));
 			// create a new group combining the overlapping groups and this nebula
-			nebulaGroups.push([...overlappingGroups.flat(), nebula]);
+			nebula_groups.push([...overlapping_groups.flat(), nebula]);
 		}
 	}
 	// sort nebulas in each group by size
-	nebulaGroups.forEach((group) => group.sort((a, b) => b[2] - a[2]));
-	const nebulaEntries = nebulaGroups
+	nebula_groups.forEach((group) => group.sort((a, b) => b[2] - a[2]));
+	const nebula_entries = nebula_groups
 		.flatMap((group) =>
 			group.map(
 				([x, y, r], i) =>
@@ -229,21 +231,21 @@ export function generateStellarisGalaxy(
 		`static_galaxy_scenario = {`,
 		`\tname="${name}"`,
 		COMMON,
-		aiEmpireSettings,
-		sizeBasedSettings,
-		systemsEntries,
-		hyperlanesEntries,
-		nebulaEntries,
+		ai_empire_settings,
+		size_based_settings,
+		systems_entries,
+		hyperlanes_entries,
+		nebula_entries,
 		'}',
 	].join('\n\n');
 }
 
-export function calcNumStartingStars(stars: [number, number][]) {
+export function calc_num_starting_stars(stars: [number, number][]) {
 	// 6 per 200 is the vanilla num_empires max, but somethings cause additional empires to spawn (players, some origins), so lets increase by 50%
 	return Math.round((stars.length / 200) * 6 * SPAWNS_PER_MAX_AI_EMPIRE);
 }
 
-function getFallenEmpireOrigin(
+function get_fallen_empire_origin(
 	star: [number, number],
 	direction: 'n' | 's' | 'e' | 'w',
 ): [number, number] {
@@ -259,13 +261,13 @@ function getFallenEmpireOrigin(
 	}
 }
 
-function canSpawnFallenEmpireInDirection(
+function can_spawn_fallen_empire_in_direction(
 	star: [number, number],
 	direction: 'n' | 's' | 'e' | 'w',
 	stars: [number, number][],
-	fallenEmpireSpawns: [number, number][],
+	fallen_empire_spawns: [number, number][],
 ) {
-	const origin = getFallenEmpireOrigin(star, direction);
+	const origin = get_fallen_empire_origin(star, direction);
 	// origin is not near edge of canvas
 	if (
 		origin[0] < FALLEN_EMPIRE_SPAWN_RADIUS ||
@@ -280,14 +282,14 @@ function canSpawnFallenEmpireInDirection(
 			(point) =>
 				Math.hypot(point[0] - origin[0], point[1] - origin[1]) >= FALLEN_EMPIRE_SPAWN_RADIUS,
 		) &&
-		fallenEmpireSpawns.every(
+		fallen_empire_spawns.every(
 			(point) =>
 				Math.hypot(point[0] - origin[0], point[1] - origin[1]) >= FALLEN_EMPIRE_SPAWN_RADIUS * 2,
 		)
 	);
 }
 
-const WEIGHTED_MISC_SYSTEM_INITALIZERS = pipe(
+const WEIGHTED_MISC_SYSTEM_INITIALIZERS = pipe(
 	Iterable.empty(),
 	Iterable.appendAll(Iterable.replicate('basic_init_01', 20)),
 	Iterable.appendAll(Iterable.replicate('basic_init_02', 20)),
@@ -302,7 +304,7 @@ const WEIGHTED_MISC_SYSTEM_INITALIZERS = pipe(
 	Iterable.appendAll(Iterable.replicate('trinary_init_02', 3)),
 	Array.fromIterable,
 );
-function getRandomSystemBasicSystemInitializer() {
-	const index = Math.floor(Math.random() * WEIGHTED_MISC_SYSTEM_INITALIZERS.length);
-	return WEIGHTED_MISC_SYSTEM_INITALIZERS[index];
+function get_random_system_basic_system_initializer() {
+	const index = Math.floor(Math.random() * WEIGHTED_MISC_SYSTEM_INITIALIZERS.length);
+	return WEIGHTED_MISC_SYSTEM_INITIALIZERS[index];
 }

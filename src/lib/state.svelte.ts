@@ -4,13 +4,13 @@ export class LocalStorageState<T> {
 	#key: string;
 	#current: T = $state()!;
 
-	constructor(key: string, defaultValue: T) {
+	constructor(key: string, default_value: T) {
 		this.#key = `${LOCALSTORAGE_PREFIX}-${key}`;
 		const unparsed = localStorage.getItem(this.#key);
 		if (unparsed) {
 			this.#current = JSON.parse(unparsed);
 		} else {
-			this.#current = defaultValue;
+			this.#current = default_value;
 		}
 
 		$effect(() => {
