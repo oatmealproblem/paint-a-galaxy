@@ -1,6 +1,7 @@
 # Paint a Galaxy
 
 Generate a semi-random galaxy to play in Stellaris
+
 - Paint where you want stars
 - Generate stars
 - Generate connections

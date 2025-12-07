@@ -5,7 +5,8 @@
 	import createGraph, { type Graph, type Link } from 'ngraph.graph';
 	// @ts-expect-error -- no 1st or 3rd party type available
 	import kruskal from 'ngraph.kruskal';
-	import { onMount, untrack } from 'svelte';
+	import { onMount } from 'svelte';
+	import { Portal, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { calc_num_starting_stars, generate_stellaris_galaxy } from '$lib/generateStellarisGalaxy';
 	import { LocalStorageState } from '$lib/state.svelte';
@@ -21,6 +22,7 @@
 		CUSTOM_NEBULA_MIN_RADIUS,
 	} from '$lib/constants';
 	import { are_points_equal } from '$lib/utils';
+	import { resolve } from '$app/paths';
 
 	let canvas = $state<HTMLCanvasElement>();
 	let ctx = $derived(canvas?.getContext('2d'));
@@ -669,7 +671,7 @@
 	}}
 />
 
-<div class="container">
+<div class="flex flex-row">
 	<div class="canvas" style:width={WIDTH} style:height={HEIGHT}>
 		<canvas
 			width={WIDTH}
@@ -750,7 +752,7 @@
 		>
 			<path
 				d={stroke_path}
-				fill={brush_mode.current === MODE_DRAW ? '#FFFFFF' : 'var(--pico-background-color)'}
+				fill={brush_mode.current === MODE_DRAW ? '#FFFFFF' : 'var(--color-surface-50-950)'}
 				opacity={brush_opacity.current}
 			/>
 			<path
@@ -769,7 +771,7 @@
 					y1={from[1]}
 					x2={to[0]}
 					y2={to[1]}
-					stroke="var(--pico-background-color)"
+					stroke="var(--color-surface-50-950)"
 					stroke-opacity="0.5"
 					stroke-width="3"
 				/>
@@ -797,7 +799,14 @@
 			{/each}
 			{#each stars.current as [x, y] (`${[x, y]}`)}
 				{#if step === Step.SPAWNS && preferred_home_stars.current.includes([x, y].toString())}
-					<circle cx={x} cy={y} r="5" fill="none" stroke="var(--pico-primary)" stroke-width="2" />
+					<circle
+						cx={x}
+						cy={y}
+						r="5"
+						fill="none"
+						stroke="var(--color-primary-500)"
+						stroke-width="2"
+					/>
 				{/if}
 				<circle
 					cx={x}
@@ -810,11 +819,11 @@
 							: '2.5'}
 					fill={(toggling_hyperlane_from && are_points_equal([x, y], toggling_hyperlane_from)) ||
 					(toggling_wormhole_from && are_points_equal([x, y], toggling_wormhole_from))
-						? 'var(--pico-primary)'
+						? 'var(--color-primary-500)'
 						: step === Step.SPAWNS && potential_home_stars.current.includes([x, y].toString())
-							? 'var(--pico-primary)'
+							? 'var(--color-primary-500)'
 							: '#FFFFFF'}
-					stroke="var(--pico-background-color)"
+					stroke="var(--color-surface-50-950)"
 					stroke-width="1"
 					onclick={(e) => {
 						if (step === Step.STARS) {
@@ -830,9 +839,9 @@
 						{cx}
 						{cy}
 						{r}
-						fill="var(--pico-primary)"
+						fill="var(--color-primary-500)"
 						fill-opacity="0.25"
-						stroke="var(--pico-primary)"
+						stroke="var(--color-primary-500)"
 						stroke-width="1"
 						stroke-opacity="0.5"
 						onclick={(e) => {
@@ -854,25 +863,26 @@
 					cx={creating_nebula[0]}
 					cy={creating_nebula[1]}
 					r={creating_nebula[2]}
-					fill="var(--pico-primary)"
+					fill="var(--color-primary-500)"
 					fill-opacity="0.5"
-					stroke="var(--pico-primary)"
+					stroke="var(--color-primary-500)"
 					stroke-width="1"
 					stroke-opacity="1"
 				/>
 			{/if}
 		</svg>
 	</div>
-	<form class="controls">
+	<form class="w-96 p-4">
 		<details name="step" bind:open={paint_step_open}>
 			<summary>
 				<small>1.</small>
 				Paint
 			</summary>
 			<fieldset>
-				<label>
-					Brush Size
+				<label class="label">
+					<span class="label-text">Brush Size</span>
 					<input
+						class="input accent-primary-500!"
 						type="range"
 						min={1}
 						max={100}
@@ -881,9 +891,10 @@
 						data-value={brush_size.current}
 					/>
 				</label>
-				<label>
-					Opacity
+				<label class="label">
+					<span class="label-text">Opacity</span>
 					<input
+						class="input accent-primary-500!"
 						type="range"
 						min={0}
 						max={1}
@@ -892,9 +903,10 @@
 						data-value={brush_opacity.current}
 					/>
 				</label>
-				<label>
-					Blur
+				<label class="label">
+					<span class="label-text">Blur</span>
 					<input
+						class="input accent-primary-500!"
 						type="range"
 						min={0}
 						max={2}
@@ -903,31 +915,44 @@
 						data-value={brush_blur.current}
 					/>
 				</label>
-				<label>
-					Mode
-					<select class="bg-gray-800" bind:value={brush_mode.current}>
+				<label class="label">
+					<span class="label-text">Mode</span>
+					<select class="select" bind:value={brush_mode.current}>
 						<option>{MODE_DRAW}</option>
 						<option>{MODE_ERASE}</option>
 					</select>
 				</label>
-				<div role="group">
-					<button type="button" class="secondary" onclick={undo} disabled={strokes.length === 0}>
+				<div class="btn-group preset-outlined-surface-200-800">
+					<button
+						type="button"
+						class="btn preset-filled-secondary-500"
+						onclick={undo}
+						disabled={strokes.length === 0}
+					>
 						Undo
 					</button>
 					<button
 						type="button"
-						class="secondary"
+						class="btn preset-filled-secondary-500"
 						onclick={redo}
 						disabled={undone_strokes.length === 0}
 					>
 						Redo
 					</button>
 				</div>
-				<input type="button" class="secondary" onclick={clear} value="Clear Canvas" />
-				<hr />
-				<label>
-					...or upload an image
+				<div>
 					<input
+						type="button"
+						class="btn preset-filled-error-500"
+						onclick={clear}
+						value="Clear Canvas"
+					/>
+				</div>
+				<hr class="hr my-4" />
+				<label class="label">
+					<span class="label-text">...or upload an image</span>
+					<input
+						class="input"
 						type="file"
 						accept=".png,.jpg,.jpeg,.webp"
 						oninput={async (e) => {
@@ -960,14 +985,14 @@
 				Stars
 			</summary>
 			<fieldset>
-				<label>
-					Number of Stars
-					<input class="bg-gray-800" type="number" step={1} bind:value={number_of_stars.current} />
+				<label class="label">
+					<span class="label-text">Number of Stars</span>
+					<input class="input" type="number" step={1} bind:value={number_of_stars.current} />
 				</label>
-				<label>
-					Loosen Clusters
+				<label class="label">
+					<span class="label-text">Loosen Clusters</span>
 					<input
-						class="bg-gray-800"
+						class="input accent-primary-500!"
 						type="range"
 						min={0}
 						max={20}
@@ -976,7 +1001,12 @@
 						data-value={cluster_diffusion.current}
 					/>
 				</label>
-				<input type="button" onclick={generate_stars} value="Generate Stars" />
+				<input
+					class="btn preset-filled-primary-500 block w-full"
+					type="button"
+					onclick={generate_stars}
+					value="Generate Stars"
+				/>
 				<small>Click the map to add and remove stars</small>
 			</fieldset>
 		</details>
@@ -998,9 +1028,10 @@
 				Hyperlanes
 			</summary>
 			<fieldset>
-				<label>
-					Density
+				<label class="label">
+					<span class="label-text">Density</span>
 					<input
+						class="input accent-primary-500!"
 						type="range"
 						min={0}
 						max={1}
@@ -1009,9 +1040,10 @@
 						data-value={connectedness.current}
 					/>
 				</label>
-				<label>
-					Max Distance
+				<label class="label">
+					<span class="label-text">Max Distance</span>
 					<input
+						class="input accent-primary-500!"
 						type="range"
 						min={0}
 						max={MAX_CONNECTION_LENGTH}
@@ -1021,12 +1053,17 @@
 					/>
 				</label>
 				<fieldset>
-					<label>
-						Allow Disconnected
-						<input type="checkbox" bind:checked={allow_disconnected.current} />
+					<label class="flex items-center space-x-2">
+						<input class="checkbox" type="checkbox" bind:checked={allow_disconnected.current} />
+						<span class="label-text">Allow Disconnected</span>
 					</label>
 				</fieldset>
-				<input type="button" onclick={generate_connections} value="Generate Hyperlanes" />
+				<input
+					class="btn preset-filled-primary-500 block w-full"
+					type="button"
+					onclick={generate_connections}
+					value="Generate Hyperlanes"
+				/>
 				<small>Click one star then another to customize hyperlanes</small>
 			</fieldset>
 		</details>
@@ -1063,7 +1100,12 @@
 				<small>(optional)</small>
 			</summary>
 			<fieldset>
-				<input type="button" value="Randomize" onclick={randomize_nebulas} />
+				<input
+					class="btn preset-filled-primary-500 block w-full"
+					type="button"
+					value="Randomize"
+					onclick={randomize_nebulas}
+				/>
 				<small>Click and drag the map to create a nebula. Shift+click to delete a nebula.</small>
 			</fieldset>
 		</details>
@@ -1076,19 +1118,24 @@
 			</summary>
 			<fieldset>
 				<input
+					class="btn preset-filled-primary-500 block w-full"
 					type="button"
 					value="Randomize"
 					onclick={() => randomize_home_systems(make_graph_from_connections())}
 				/>
 				<small>
-					Click the map to customize spawn systems. Shift+click to make it a <span
-						data-tooltip="These are used first, before normal spawns"
-					>
-						preferred spawn.
-					</span>
-					In a single-player game with only one preferred spawn, the player will always spawn there.
+					Click the map to customize spawn systems. Shift+click to make it a <Tooltip>
+						<Tooltip.Trigger class="mark">preferred spawn</Tooltip.Trigger>
+						<Portal>
+							<Tooltip.Positioner>
+								<Tooltip.Content class="w-48 bg-surface-100-900 py-2 px-4">
+									These are used first, before normal spawns. In a single-player game with only one
+									preferred spawn, the player will always spawn there.
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						</Portal>
+					</Tooltip>.
 				</small>
-				<small></small>
 			</fieldset>
 		</details>
 		<hr />
@@ -1098,21 +1145,28 @@
 				Mod
 			</summary>
 			<fieldset>
-				<label>
-					Name <input bind:value={galaxy_name.current} />
+				<label class="label">
+					<span class="label-text">Name</span>
+					<input class="input" bind:value={galaxy_name.current} />
 				</label>
-				<a href="/" hidden download="{file_name}.txt" bind:this={download_link}>Download Map</a>
+				<a href={resolve('/')} hidden download="{file_name}.txt" bind:this={download_link}>
+					Download Map
+				</a>
 				<input
+					class="btn preset-filled-primary-500 block w-full"
 					type="button"
 					disabled={download_disabled}
 					onclick={download_mod}
 					value="Download Map"
 				/>
 				{#if download_invalid}
-					<input hidden aria-invalid="true" />
-					<small>You must generate stars and hyperlanes first</small>
+					<small class="text-error-700-300">You must generate stars and hyperlanes first</small>
 				{/if}
-				<a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115" target="_blank">
+				<a
+					class="anchor"
+					href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
+					target="_blank"
+				>
 					Subscribe and read instructions on the Workshop
 				</a>
 			</fieldset>
@@ -1121,10 +1175,6 @@
 </div>
 
 <style>
-	.container {
-		display: flex;
-		flex-flow: row;
-	}
 	.canvas {
 		border: 1px solid white;
 		position: relative;
@@ -1135,9 +1185,5 @@
 			top: 0;
 			left: 0;
 		}
-	}
-	.controls {
-		padding: var(--pico-spacing);
-		width: 100%;
 	}
 </style>
