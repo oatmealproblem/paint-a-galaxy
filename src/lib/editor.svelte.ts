@@ -160,9 +160,9 @@ export class Editor {
 	}
 
 	calculate_path(
+		tool_id: ToolId,
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 	): string {
-		const tool_id = this.primary_tool_id;
 		const settings = this.primary_tool_settings;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;

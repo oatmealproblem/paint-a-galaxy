@@ -54,7 +54,16 @@
 	);
 	let tool_points = $state<Coordinate[]>([]);
 	let stroke_path = $derived(
-		tool_points.length > 1 ? editor.calculate_path(tool_points) : '',
+		tool_points.length > 1 ?
+			editor.calculate_path(
+				pipe(
+					active_tool,
+					Option.map((value) => value.id),
+					Option.getOrElse(() => editor.primary_tool_id),
+				),
+				tool_points,
+			)
+		:	'',
 	);
 
 	const delaunay = $derived(
