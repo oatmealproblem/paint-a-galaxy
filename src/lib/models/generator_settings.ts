@@ -31,8 +31,8 @@ export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
 		Schema.greaterThanOrEqualTo(0),
 		Schema.optional,
 		Schema.withDefaults({
-			constructor: () => 100,
-			decoding: () => 100,
+			constructor: () => 50,
+			decoding: () => 50,
 		}),
 	),
 	allow_disconnected: Schema.Boolean.pipe(
