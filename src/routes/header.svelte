@@ -85,7 +85,7 @@
 	<Menu>
 		<Menu.Trigger class="btn">Project</Menu.Trigger>
 		<Portal>
-			<Menu.Positioner>
+			<Menu.Positioner class="z-10!">
 				<Menu.Content class="bg-surface-100-900">
 					{@render menu_item_command(
 						'new',
@@ -109,7 +109,7 @@
 								<ChevronRightIcon class="size-4" />
 							</Menu.ItemIndicator>
 							<Portal>
-								<Menu.Positioner>
+								<Menu.Positioner class="z-10!">
 									<Menu.Content class="bg-surface-100-900">
 										{#each editor().projects as project (project.name)}
 											<Menu.Item value={project.name}>
@@ -144,7 +144,7 @@
 	<Menu onSelect={on_edit_menu_select}>
 		<Menu.Trigger class="btn">Edit</Menu.Trigger>
 		<Portal>
-			<Menu.Positioner>
+			<Menu.Positioner class="z-10!">
 				<Menu.Content class="bg-surface-100-900">
 					<Menu.Item value="undo" disabled={!editor().can_undo}>
 						<Menu.ItemText>Undo</Menu.ItemText>
@@ -171,7 +171,7 @@
 	<Menu>
 		<Menu.Trigger class="btn">View</Menu.Trigger>
 		<Portal>
-			<Menu.Positioner>
+			<Menu.Positioner class="z-10!">
 				<Menu.Content class="bg-surface-100-900">
 					{@render menu_item_command(
 						'reset',
@@ -186,7 +186,7 @@
 								<ChevronRightIcon class="size-4" />
 							</Menu.ItemIndicator>
 							<Portal>
-								<Menu.Positioner>
+								<Menu.Positioner class="z-10!">
 									<Menu.Content class="bg-surface-100-900">
 										{@render menu_item_command(
 											'50%',
@@ -299,7 +299,7 @@
 	<Menu>
 		<Menu.Trigger class="btn">Community</Menu.Trigger>
 		<Portal>
-			<Menu.Positioner>
+			<Menu.Positioner class="z-10!">
 				<Menu.Content class="bg-surface-100-900">
 					<Menu.ItemGroup>
 						<Menu.ItemGroupLabel>
