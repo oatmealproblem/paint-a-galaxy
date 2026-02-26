@@ -263,7 +263,7 @@ export class Editor {
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 		ctx: CanvasRenderingContext2D,
 	) {
-		const settings = this.primary_tool_settings;
+		const settings = this.#all_tool_settings[tool_id];
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;

@@ -392,7 +392,10 @@
 					d={stroke_path}
 					fill={active_tool.value.render.color}
 					opacity={'opacity' in active_tool.value.default_settings ?
-						editor.primary_tool_settings.opacity
+						(active_tool.value.id === editor.primary_tool_id ?
+							editor.primary_tool_settings
+						:	editor.secondary_tool_settings
+						).opacity
 					:	1}
 				/>
 			{/if}
