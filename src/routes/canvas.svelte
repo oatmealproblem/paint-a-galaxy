@@ -157,7 +157,6 @@
 	onmouseup={(e) => {
 		if (e.button !== 0) return;
 		if (!ctx) return;
-		console.log(active_tool);
 		if (Option.isSome(active_tool)) {
 			if (active_tool.value.action_type === 'single_point' && tool_points[0]) {
 				editor.apply_tool(active_tool.value.id, tool_points[0], ctx);

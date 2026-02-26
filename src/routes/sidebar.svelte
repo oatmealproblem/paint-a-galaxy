@@ -54,7 +54,7 @@
 
 {#snippet tweak_description()}
 	Here you can optionally edit specific stars, hyperlanes, and more. When you're
-	done, click download and follow the instructions on <a
+	done, click Download and follow the instructions on <a
 		class="anchor text-primary-700-300"
 		target="_blank"
 		href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
