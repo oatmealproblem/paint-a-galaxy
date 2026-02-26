@@ -40,7 +40,7 @@
 		<Slider.Track>
 			<Slider.Range />
 		</Slider.Track>
-		<Slider.Thumb index={0}>
+		<Slider.Thumb index={0} class="cursor-pointer">
 			<Slider.HiddenInput />
 		</Slider.Thumb>
 	</Slider.Control>

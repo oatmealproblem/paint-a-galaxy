@@ -2,18 +2,40 @@
 	import { Icons } from '$lib/components/icons';
 	import { Steps } from '@skeletonlabs/skeleton-svelte';
 	import type { Step } from '$lib/models/step';
-	import type { Component } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import Generate from './steps/generate.svelte';
 	import Paint from './steps/paint.svelte';
 	import Tweak from './steps/tweak.svelte';
 	import { get_editor } from '$lib/editor.svelte';
-	import { tools } from '$lib/models/tool';
+	import { tool_pairs } from '$lib/models/tool';
 	import { generate_stellaris_galaxy } from '$lib/generate_galaxy_txt';
 
-	const steps: { id: Step; name: string; content: Component }[] = [
-		{ id: 'paint', name: 'Paint', content: Paint },
-		{ id: 'generate', name: 'Generate', content: Generate },
-		{ id: 'tweak', name: 'Tweak', content: Tweak },
+	const steps: {
+		id: Step;
+		name: string;
+		description: string | Snippet;
+		content: Component;
+	}[] = [
+		{
+			id: 'paint',
+			name: 'Paint',
+			content: Paint,
+			description:
+				"Paint the general shapes were you want stars to spawn. The brighter you paint, the more stars will spawn there. When you're ready, click Next.",
+		},
+		{
+			id: 'generate',
+			name: 'Generate',
+			content: Generate,
+			description:
+				'Click Generate to randomize the whole galaxy. Play with the settings below, or leave them be for a relatively "standard" galaxy. When you\'re satisfied, click Next.',
+		},
+		{
+			id: 'tweak',
+			name: 'Tweak',
+			content: Tweak,
+			description: tweak_description,
+		},
 	];
 
 	const editor = $derived(get_editor()());
@@ -30,6 +52,17 @@
 	}
 </script>
 
+{#snippet tweak_description()}
+	Here you can optionally edit specific stars, hyperlanes, and more. When you're
+	done, click download and follow the instructions on <a
+		class="anchor text-primary-700-300"
+		target="_blank"
+		href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
+	>
+		the Workshop page.
+	</a>
+{/snippet}
+
 <aside class="w-96 p-4 flex-none">
 	<Steps
 		class="flex flex-col h-full"
@@ -40,8 +73,13 @@
 			if (step) {
 				editor.step = step;
 				// select first tool for step
-				const tool = Object.values(tools).find((tool) => tool.step === step);
-				if (tool) editor.tool_id = tool.id;
+				const tool_pair = Object.values(tool_pairs).find(
+					(pair) => pair.step === step,
+				);
+				if (tool_pair) {
+					editor.primary_tool_id = tool_pair.primary.id;
+					editor.secondary_tool_id = tool_pair.secondary.id;
+				}
 			}
 		}}
 	>
@@ -61,6 +99,9 @@
 
 		{#each steps as step, i (step.id)}
 			<Steps.Content index={i} class="grow flex flex-col gap-4">
+				<p>
+					{#if typeof step.description === 'string'}{step.description}{:else}{@render step.description()}{/if}
+				</p>
 				<step.content />
 			</Steps.Content>
 		{/each}

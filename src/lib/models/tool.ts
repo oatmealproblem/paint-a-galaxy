@@ -2,6 +2,7 @@ import { Schema, Record } from 'effect';
 import type { Step } from './step';
 import type { Coordinate } from './coordinate';
 import { CANVAS_BACKGROUND } from '$lib/constants';
+import type { Icons } from '$lib/components/icons';
 
 export const ToolId = Schema.Literal(
 	// paint
@@ -10,7 +11,6 @@ export const ToolId = Schema.Literal(
 	'circle_draw',
 	'circle_erase',
 	// tweak
-	// 'details_open',
 	'hyperlane_toggle',
 	'nebula_create',
 	'nebula_delete',
@@ -38,7 +38,7 @@ interface _Tool<
 > {
 	id: Id;
 	name: string;
-	description: string;
+	description?: string;
 	step: Step;
 	action_type: ActionType;
 	default_settings: Settings;
@@ -56,7 +56,6 @@ const freehand_draw: _Tool<
 > = {
 	id: 'freehand_draw',
 	name: 'Draw Freehand',
-	description: 'TODO',
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
@@ -78,7 +77,6 @@ const freehand_erase: _Tool<
 > = {
 	id: 'freehand_erase',
 	name: 'Erase Freehand',
-	description: 'TODO',
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
@@ -100,7 +98,6 @@ const circle_draw: _Tool<
 > = {
 	id: 'circle_draw',
 	name: 'Draw Circle',
-	description: 'TODO',
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
@@ -121,7 +118,6 @@ const circle_erase: _Tool<
 > = {
 	id: 'circle_erase',
 	name: 'Erase Circle',
-	description: 'TODO',
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
@@ -135,24 +131,6 @@ const circle_erase: _Tool<
 	},
 };
 
-// const details_open: _Tool<
-// 	'details_open',
-// 	'single_point',
-// 	Record<string, never>
-// > = {
-// 	id: 'details_open',
-// 	name: 'Open Details',
-// 	description: 'TODO',
-// 	step: 'tweak',
-// 	action_type: 'single_point',
-// 	snap_to_solar_system: true,
-// 	render: {
-// 		type: 'none',
-// 		color: 'none',
-// 	},
-// 	default_settings: {},
-// };
-
 const hyperlane_toggle: _Tool<
 	'hyperlane_toggle',
 	'double_point',
@@ -160,7 +138,8 @@ const hyperlane_toggle: _Tool<
 > = {
 	id: 'hyperlane_toggle',
 	name: 'Toggle Hyperlane',
-	description: 'TODO',
+	description:
+		"Connect 2 systems with a hyperlane. If there's already a hyperlane, instead remove it.",
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
@@ -178,7 +157,8 @@ const nebula_create: _Tool<
 > = {
 	id: 'nebula_create',
 	name: 'Create Nebula',
-	description: 'TODO',
+	description:
+		'Create a nebula. A non-circular nebula can be created by overlapping multiple circles.',
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
@@ -196,7 +176,8 @@ const nebula_delete: _Tool<
 > = {
 	id: 'nebula_delete',
 	name: 'Delete Nebula',
-	description: 'TODO',
+	description:
+		'Delete a nebula. If there are overlapping nebulas where you click, only the smallest one is deleted.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
@@ -214,7 +195,7 @@ const solar_system_create: _Tool<
 > = {
 	id: 'solar_system_create',
 	name: 'Create Solar System',
-	description: 'TODO',
+	description: 'Create a solar system.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
@@ -232,7 +213,7 @@ const solar_system_delete: _Tool<
 > = {
 	id: 'solar_system_delete',
 	name: 'Delete Solar System',
-	description: 'TODO',
+	description: 'Delete the closest solar system.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
@@ -250,7 +231,8 @@ const spawn_preferred_toggle: _Tool<
 > = {
 	id: 'spawn_preferred_toggle',
 	name: 'Toggle Preferred Spawn',
-	description: 'TODO',
+	description:
+		'Mark a system as a preferred spawn. If it is already a preferred spawn, set it to no spawn. Preferred spawns are used first. If you set 1 preferred spawn, the player is guaranteed to spawn there. (This is unreliable in multiplayer.)',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
@@ -268,7 +250,8 @@ const spawn_toggle: _Tool<
 > = {
 	id: 'spawn_toggle',
 	name: 'Toggle Spawn',
-	description: 'TODO',
+	description:
+		'Mark a system as a spawn location. If it already a spawn location, set it to no spawn. Only "normal" empires use these spawn locations (ie not Fallen Empires or Marauders).',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
@@ -286,7 +269,8 @@ const wormhole_toggle: _Tool<
 > = {
 	id: 'wormhole_toggle',
 	name: 'Toggle Wormhole',
-	description: 'TODO',
+	description:
+		"Connect 2 systems with a wormhole, and remove any other wormholes in those systems (each system can only have 1 wormhole). If there's already a wormhole connecting these systems, instead remove it.",
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
@@ -303,13 +287,11 @@ export type ToolActionTypePayload = {
 	double_point: [Coordinate, Coordinate];
 };
 
-// the order of tools here determines their order in the UI
 export const tools = {
 	freehand_draw,
 	freehand_erase,
 	circle_draw,
 	circle_erase,
-	// details_open,
 	solar_system_create,
 	solar_system_delete,
 	spawn_toggle,
@@ -328,3 +310,63 @@ export const tools = {
 >;
 
 export type Tool = (typeof tools)[keyof typeof tools];
+
+export interface ToolPair {
+	id: string;
+	name: string;
+	step: Step;
+	primary: Tool;
+	secondary: Tool;
+	icon: keyof typeof Icons;
+}
+
+export const tool_pairs: ToolPair[] = [
+	{
+		id: 'freehand',
+		name: 'Freehand',
+		step: 'paint',
+		primary: tools.freehand_draw,
+		secondary: tools.freehand_erase,
+		icon: 'LineSquiggle',
+	},
+	{
+		id: 'circle',
+		name: 'Circle',
+		step: 'paint',
+		primary: tools.circle_draw,
+		secondary: tools.circle_erase,
+		icon: 'Circle',
+	},
+	{
+		id: 'solar-system',
+		name: 'Create/Delete Solar System',
+		step: 'tweak',
+		primary: tools.solar_system_create,
+		secondary: tools.solar_system_delete,
+		icon: 'Sparkle',
+	},
+	{
+		id: 'hyperlane',
+		name: 'Toggle Hyperlane/Wormhole',
+		step: 'tweak',
+		primary: tools.hyperlane_toggle,
+		secondary: tools.wormhole_toggle,
+		icon: 'Waypoints',
+	},
+	{
+		id: 'spawn',
+		name: 'Toggle Spawn',
+		step: 'tweak',
+		primary: tools.spawn_toggle,
+		secondary: tools.spawn_preferred_toggle,
+		icon: 'MapPin',
+	},
+	{
+		id: 'nebula',
+		name: 'Create/Delete Nebula',
+		step: 'tweak',
+		primary: tools.nebula_create,
+		secondary: tools.nebula_delete,
+		icon: 'Cloud',
+	},
+];

@@ -22,8 +22,10 @@ type EditorLayer = Layer.Layer<Actions | Generator | Projects | Tools | View>;
 
 export class Editor {
 	step = $state<Step>('paint');
-	#tool_id = $state<ToolId>('freehand_draw');
-	readonly tool = $derived(tools[this.#tool_id]);
+	primary_tool_id = $state<ToolId>('freehand_draw');
+	readonly primary_tool = $derived(tools[this.primary_tool_id]);
+	secondary_tool_id = $state<ToolId>('freehand_erase');
+	readonly secondary_tool = $derived(tools[this.secondary_tool_id]);
 	#all_tool_settings = $state.raw<
 		Readonly<Record<ToolId, Readonly<Record<ToolSettingId, number>>>>
 	>(
@@ -36,7 +38,12 @@ export class Editor {
 			})),
 		),
 	);
-	#tool_settings = $derived(this.#all_tool_settings[this.#tool_id]);
+	#primary_tool_settings = $derived(
+		this.#all_tool_settings[this.primary_tool_id],
+	);
+	#secondary_tool_settings = $derived(
+		this.#all_tool_settings[this.secondary_tool_id],
+	);
 	#view_settings = $state.raw(ViewSettings.default());
 	project = $state.raw<Project>()!;
 	projects = $state.raw<readonly ProjectListing[]>()!;
@@ -72,24 +79,28 @@ export class Editor {
 		return this.#view_settings;
 	}
 
-	get tool_id(): ToolId {
-		return this.#tool_id;
+	get primary_tool_settings() {
+		return this.#primary_tool_settings;
 	}
 
-	set tool_id(value: ToolId) {
-		this.#tool_id = value;
-	}
-
-	get tool_settings() {
-		return this.#tool_settings;
-	}
-
-	set tool_settings(value: Record<ToolSettingId, number>) {
+	set primary_tool_settings(value: Record<ToolSettingId, number>) {
 		this.#all_tool_settings = {
 			...this.#all_tool_settings,
-			[this.tool_id]: value,
+			[this.primary_tool_id]: value,
 		};
-		this.#save_tool_settings(this.tool_id, value);
+		this.#save_tool_settings(this.primary_tool_id, value);
+	}
+
+	get secondary_tool_settings() {
+		return this.#secondary_tool_settings;
+	}
+
+	set secondary_tool_settings(value: Record<ToolSettingId, number>) {
+		this.#all_tool_settings = {
+			...this.#all_tool_settings,
+			[this.secondary_tool_id]: value,
+		};
+		this.#save_tool_settings(this.secondary_tool_id, value);
 	}
 
 	#save_tool_settings(
@@ -151,8 +162,8 @@ export class Editor {
 	calculate_path(
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 	): string {
-		const tool_id = this.tool_id;
-		const settings = this.tool_settings;
+		const tool_id = this.primary_tool_id;
+		const settings = this.primary_tool_settings;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;
 			return tools_service.calculate_path(tool_id, settings, payload);
@@ -248,11 +259,11 @@ export class Editor {
 	}
 
 	apply_tool(
+		tool_id: ToolId,
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 		ctx: CanvasRenderingContext2D,
 	) {
-		const tool_id = this.tool_id;
-		const settings = this.tool_settings;
+		const settings = this.primary_tool_settings;
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;

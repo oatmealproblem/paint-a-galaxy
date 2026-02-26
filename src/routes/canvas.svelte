@@ -10,10 +10,11 @@
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
 	import type { SolarSystem } from '$lib/models/solar_system';
+	import type { Tool } from '$lib/models/tool';
 	import { Delaunay } from 'd3-delaunay';
 	import { select } from 'd3-selection';
 	import { zoom, zoomIdentity, type D3ZoomEvent } from 'd3-zoom';
-	import { Equal, Match, Option } from 'effect';
+	import { Boolean, Equal, Match, Option, pipe } from 'effect';
 
 	const editor = $derived(get_editor()());
 	const project = $derived(editor.project);
@@ -21,9 +22,22 @@
 	const hyperlanes = $derived(project.hyperlanes);
 	const wormholes = $derived(project.wormholes);
 	const nebulas = $derived(project.nebulas);
-	const current_tool = $derived(
-		editor.step === editor.tool.step ? editor.tool : null,
-	);
+	let is_shift_pressed = $state(false);
+	const current_tool = $derived.by(() => {
+		if (is_shift_pressed) {
+			if (editor.secondary_tool.step === editor.step) {
+				return Option.some(editor.secondary_tool);
+			} else {
+				return Option.none();
+			}
+		} else {
+			if (editor.primary_tool.step === editor.step) {
+				return Option.some(editor.primary_tool);
+			} else {
+				return Option.none();
+			}
+		}
+	});
 
 	let mouse_coordinates = $state.raw<
 		Option.Option<{
@@ -34,7 +48,7 @@
 		}>
 	>(Option.none());
 
-	let tool_active = $state(false);
+	let active_tool = $state<Option.Option<Tool>>(Option.none());
 	let snapped_solar_system = $state.raw<Option.Option<SolarSystem>>(
 		Option.none(),
 	);
@@ -142,14 +156,26 @@
 <svelte:document
 	onmouseup={(e) => {
 		if (e.button !== 0) return;
-		if (ctx && tool_active) {
-			if (editor.tool.action_type === 'single_point' && tool_points[0]) {
-				editor.apply_tool(tool_points[0], ctx);
+		if (!ctx) return;
+		console.log(active_tool);
+		if (Option.isSome(active_tool)) {
+			if (active_tool.value.action_type === 'single_point' && tool_points[0]) {
+				editor.apply_tool(active_tool.value.id, tool_points[0], ctx);
 			} else if (tool_points.length > 1) {
-				editor.apply_tool(tool_points, ctx);
+				editor.apply_tool(active_tool.value.id, tool_points, ctx);
 			}
-			tool_active = false;
+			active_tool = Option.none();
 			tool_points = [];
+		}
+	}}
+	onkeydown={(e) => {
+		if (e.key === 'Shift') {
+			is_shift_pressed = true;
+		}
+	}}
+	onkeyup={(e) => {
+		if (e.key === 'Shift') {
+			is_shift_pressed = false;
 		}
 	}}
 />
@@ -196,24 +222,36 @@
 	}}
 	onmousedown={(e) => {
 		if (e.button !== 0) return;
-		if (current_tool != null) {
-			const point =
-				current_tool?.snap_to_solar_system ?
-					Option.map(snapped_solar_system, (system) => system.coordinate)
-				:	Option.some(get_mouse_coordinates(e).canvas);
-			Option.match(point, {
-				onSome(value) {
-					tool_active = true;
-					tool_points = [value];
-				},
-				onNone() {},
-			});
+		if (Option.isSome(current_tool)) {
+			pipe(
+				current_tool,
+				Option.map((value) => value.snap_to_solar_system),
+				Option.getOrElse(() => false),
+				Boolean.match({
+					onTrue: () =>
+						Option.map(snapped_solar_system, (system) => system.coordinate),
+					onFalse: () => Option.some(get_mouse_coordinates(e).canvas),
+				}),
+				Option.match({
+					onSome(value) {
+						active_tool = current_tool;
+						tool_points = [value];
+					},
+					onNone() {},
+				}),
+			);
 		}
 	}}
 	onmousemove={(e) => {
 		const coordinates = get_mouse_coordinates(e);
 		mouse_coordinates = Option.some(coordinates);
-		if (delaunay && current_tool?.snap_to_solar_system) {
+		const snap_to_solar_system = pipe(
+			active_tool,
+			Option.orElse(() => current_tool),
+			Option.map((value) => value.snap_to_solar_system),
+			Option.getOrElse(() => false),
+		);
+		if (delaunay && snap_to_solar_system) {
 			const solar_system_index = delaunay.find(
 				coordinates.canvas.x,
 				coordinates.canvas.y,
@@ -222,14 +260,14 @@
 			snapped_solar_system = Option.fromNullable(solar_system);
 		}
 		const point =
-			current_tool?.snap_to_solar_system ?
+			snap_to_solar_system ?
 				Option.map(
 					snapped_solar_system,
 					(solar_system) => solar_system.coordinate,
 				)
 			:	Option.some(coordinates.canvas);
-		if (tool_active && Option.isSome(point)) {
-			Match.value(current_tool?.action_type).pipe(
+		if (Option.isSome(active_tool) && Option.isSome(point)) {
+			Match.value(active_tool.value.action_type).pipe(
 				Match.when('single_point', () => {
 					tool_points = [point.value];
 				}),
@@ -243,7 +281,6 @@
 				Match.when('multi_point', () => {
 					tool_points.push(point.value);
 				}),
-				Match.when(undefined, () => {}), // no tool, do nothing
 				Match.exhaustive,
 			);
 		}
@@ -351,12 +388,12 @@
 					L-Cluster
 				</text>
 			{/if}
-			{#if current_tool?.render.type === 'stroke'}
+			{#if Option.isSome(active_tool) && active_tool.value.render.type === 'stroke'}
 				<path
 					d={stroke_path}
-					fill={current_tool.render.color}
-					opacity={'opacity' in current_tool.default_settings ?
-						editor.tool_settings.opacity
+					fill={active_tool.value.render.color}
+					opacity={'opacity' in active_tool.value.default_settings ?
+						editor.primary_tool_settings.opacity
 					:	1}
 				/>
 			{/if}
@@ -409,7 +446,7 @@
 				/>
 			{/each}
 			{#each solar_systems as solar_system (solar_system.id)}
-				{#if Option.contains(snapped_solar_system, solar_system) || (current_tool?.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)))}
+				{#if Option.match( active_tool, { onNone: () => Option.isSome(current_tool) && current_tool.value.snap_to_solar_system && Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)) }, )}
 					<circle
 						cx={solar_system.coordinate.x}
 						cy={solar_system.coordinate.y}
@@ -443,13 +480,13 @@
 					/>
 				{/if}
 			{/each}
-			{#if current_tool?.render.type === 'line' && tool_points.length > 1}
+			{#if Option.isSome(active_tool) && active_tool.value.render.type === 'line' && tool_points.length > 1}
 				<line
 					x1={tool_points.at(0)?.x}
 					y1={tool_points.at(0)?.y}
 					x2={tool_points.at(-1)?.x}
 					y2={tool_points.at(-1)?.y}
-					stroke={current_tool.render.color}
+					stroke={active_tool.value.render.color}
 				/>
 			{/if}
 		</g>

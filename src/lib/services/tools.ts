@@ -204,7 +204,6 @@ export class Tools extends Context.Tag('Tools')<
 					),
 					Match.when(
 						Match.is(
-							// 'details_open',
 							'hyperlane_toggle',
 							'nebula_delete',
 							'solar_system_create',
@@ -266,7 +265,6 @@ export class Tools extends Context.Tag('Tools')<
 								];
 							}),
 					),
-					// Match.when('details_open', () => Effect.succeed([])),
 					Match.when('hyperlane_toggle', () => {
 						const [a_coordinate, b_coordinate] = get_double_payload(payload);
 						const a_solar_system = project.solar_systems.find((solar_system) =>
