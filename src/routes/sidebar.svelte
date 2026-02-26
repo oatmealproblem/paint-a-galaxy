@@ -28,7 +28,7 @@
 			name: 'Generate',
 			content: Generate,
 			description:
-				'Click Generate to randomize the whole galaxy. Play with the settings below, or leave them be for a relatively "standard" galaxy. When you\'re satisfied, click Next.',
+				"Randomize the galaxy according to your painting. Optionally play with the settings and regenerate. When you're satisfied, click Next.",
 		},
 		{
 			id: 'tweak',
@@ -53,8 +53,8 @@
 </script>
 
 {#snippet tweak_description()}
-	Here you can optionally edit specific stars, hyperlanes, and more. When you're
-	done, click Download and follow the instructions on <a
+	Edit specific stars, hyperlanes, and more. When you're done, click Download
+	and follow the instructions on <a
 		class="anchor text-primary-700-300"
 		target="_blank"
 		href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
@@ -99,7 +99,7 @@
 
 		{#each steps as step, i (step.id)}
 			<Steps.Content index={i} class="grow flex flex-col gap-4">
-				<p>
+				<p class="text-sm">
 					{#if typeof step.description === 'string'}{step.description}{:else}{@render step.description()}{/if}
 				</p>
 				<step.content />

@@ -138,8 +138,7 @@ const hyperlane_toggle: _Tool<
 > = {
 	id: 'hyperlane_toggle',
 	name: 'Toggle Hyperlane',
-	description:
-		"Connect 2 systems with a hyperlane. If there's already a hyperlane, instead remove it.",
+	description: 'Connect/disconnect 2 systems with a hyperlane.',
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
@@ -177,7 +176,7 @@ const nebula_delete: _Tool<
 	id: 'nebula_delete',
 	name: 'Delete Nebula',
 	description:
-		'Delete a nebula. If there are overlapping nebulas where you click, only the smallest one is deleted.',
+		'Delete a nebula. If there are overlapping nebulas, only the smallest is deleted.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
@@ -232,7 +231,7 @@ const spawn_preferred_toggle: _Tool<
 	id: 'spawn_preferred_toggle',
 	name: 'Toggle Preferred Spawn',
 	description:
-		'Mark a system as a preferred spawn. If it is already a preferred spawn, set it to no spawn. Preferred spawns are used first. If you set 1 preferred spawn, the player is guaranteed to spawn there. (This is unreliable in multiplayer.)',
+		'Mark/unmark preferred spawn. These are used first (ie by the player; unreliable in multiplayer).',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
@@ -251,7 +250,7 @@ const spawn_toggle: _Tool<
 	id: 'spawn_toggle',
 	name: 'Toggle Spawn',
 	description:
-		'Mark a system as a spawn location. If it already a spawn location, set it to no spawn. Only "normal" empires use these spawn locations (ie not Fallen Empires or Marauders).',
+		'Mark/unmark spawn. Only "normal" empires use these (not Fallen Empires or Marauders).',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
@@ -270,7 +269,7 @@ const wormhole_toggle: _Tool<
 	id: 'wormhole_toggle',
 	name: 'Toggle Wormhole',
 	description:
-		"Connect 2 systems with a wormhole, and remove any other wormholes in those systems (each system can only have 1 wormhole). If there's already a wormhole connecting these systems, instead remove it.",
+		'Connect/disconnect 2 systems with a wormhole. Each system can have only 1 wormhole.',
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,

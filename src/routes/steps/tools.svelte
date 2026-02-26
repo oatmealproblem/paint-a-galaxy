@@ -147,7 +147,7 @@
 	</header>
 
 	{#if tool.description}
-		<p>{tool.description}</p>
+		<p class="text-sm">{tool.description}</p>
 	{/if}
 
 	{#if 'size' in tool.default_settings}
