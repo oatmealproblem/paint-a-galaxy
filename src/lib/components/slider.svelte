@@ -27,7 +27,7 @@
 	}}
 >
 	<Slider.Label class="flex justify-between">
-		<span>{@render label()}</span>
+		<span class="flex gap-1">{@render label()}</span>
 		<span class="font-normal">
 			{#if output}
 				{@render output(value)}

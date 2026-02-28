@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Icons } from '$lib/components/icons';
+	import Info from '$lib/components/info.svelte';
 	import SectionHeader from '$lib/components/section_header.svelte';
 	import Slider from '$lib/components/slider.svelte';
 	import { get_editor } from '$lib/editor.svelte';
@@ -64,7 +65,13 @@
 	</div>
 	<SectionHeader>Solar Systems</SectionHeader>
 	<label class="label">
-		<span class="label-text">Number of Systems</span>
+		<span class="label-text flex gap-1">
+			Number of Systems
+			<Info>
+				Target number of solar systems. There might not be enough room for all
+				them depending other settings.
+			</Info>
+		</span>
 		<input
 			class="input bg-surface-100-900"
 			type="number"
@@ -84,7 +91,13 @@
 		on_value_change={(value) =>
 			editor().update_generator_setting('min_distance_between_systems', value)}
 	>
-		{#snippet label()}Min Distance{/snippet}
+		{#snippet label()}
+			Min Distance
+			<Info>
+				Minimum distance between solar systems. Decrease for denser galaxies,
+				increase for looser.
+			</Info>
+		{/snippet}
 	</Slider>
 	<SectionHeader>Hyperlanes</SectionHeader>
 	<Slider
@@ -95,7 +108,14 @@
 		on_value_change={(value) =>
 			editor().update_generator_setting('hyperlane_connectivity', value)}
 	>
-		{#snippet label()}Connectivity{/snippet}
+		{#snippet label()}
+			Connectivity
+			<Info>
+				Density of hyperlanes. At 100%, all potential non-crossing hyperlanes
+				are created. At 0%, only the minimum number to connect all solar systems
+				are created.
+			</Info>
+		{/snippet}
 		{#snippet output(value)}{Math.round(value * 100)}%{/snippet}
 	</Slider>
 	<Slider
@@ -106,7 +126,13 @@
 		on_value_change={(value) =>
 			editor().update_generator_setting('hyperlane_max_distance', value)}
 	>
-		{#snippet label()}Max Distance{/snippet}
+		{#snippet label()}
+			Max Distance
+			<Info>
+				Maximum hyperlane distance. Hyperlanes longer than this are removed,
+				unless they are necessary to keep all systems connected.
+			</Info>
+		{/snippet}
 	</Slider>
 	<Switch
 		checked={settings.allow_disconnected}
@@ -116,7 +142,13 @@
 		<Switch.Control>
 			<Switch.Thumb />
 		</Switch.Control>
-		<Switch.Label>Allow Disconencted</Switch.Label>
+		<Switch.Label class="flex gap-1">
+			Allow Disconencted
+			<Info>
+				If enabled, hyperlanes longer than Max Distance are removed even if it
+				would result in disconnected systems.
+			</Info>
+		</Switch.Label>
 		<Switch.HiddenInput />
 	</Switch>
 </form>

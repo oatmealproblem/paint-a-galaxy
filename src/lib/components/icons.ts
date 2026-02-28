@@ -6,6 +6,7 @@ import Circle from '@lucide/svelte/icons/circle';
 import Cloud from '@lucide/svelte/icons/cloud';
 import Download from '@lucide/svelte/icons/download';
 import FileImage from '@lucide/svelte/icons/file-image';
+import Info from '@lucide/svelte/icons/info';
 import LineSquiggle from '@lucide/svelte/icons/line-squiggle';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
@@ -22,6 +23,7 @@ export const Icons = {
 	Cloud,
 	Download,
 	FileImage,
+	Info,
 	LineSquiggle,
 	MapPin,
 	RotateCcw,
