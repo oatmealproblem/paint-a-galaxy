@@ -194,7 +194,8 @@ const solar_system_create: _Tool<
 > = {
 	id: 'solar_system_create',
 	name: 'Create Solar System',
-	description: 'Create a solar system.',
+	description:
+		'Create a solar system. Hyperlanes need to be created or generated separated.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
@@ -212,7 +213,8 @@ const solar_system_delete: _Tool<
 > = {
 	id: 'solar_system_delete',
 	name: 'Delete Solar System',
-	description: 'Delete the closest solar system.',
+	description:
+		'Delete the closest solar system and any connected hyperlanes or wormholes.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
