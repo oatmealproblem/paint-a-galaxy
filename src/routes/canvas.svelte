@@ -191,7 +191,10 @@
 	id={ID.canvas}
 	bind:this={container}
 	bind:clientHeight={container_height}
-	class="canvas h-full w-full overflow-hidden"
+	class={[
+		'canvas h-full w-full overflow-hidden',
+		{ 'cursor-crosshair': Option.isSome(current_tool) },
+	]}
 	style:width={CANVAS_WIDTH}
 	style:height={CANVAS_HEIGHT}
 	style:background={CANVAS_BACKGROUND}
