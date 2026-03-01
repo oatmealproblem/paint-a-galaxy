@@ -83,13 +83,7 @@
 	$effect(() => {
 		createImageBitmap(project.canvas).then((bitmap) => {
 			ctx?.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-			ctx?.drawImage(
-				bitmap,
-				// normally bitmap size == canvas size, so this will be 0,0
-				// but legacy project bitmaps are 900x900 and need to be centered
-				(CANVAS_WIDTH - bitmap.width) / 2,
-				(CANVAS_HEIGHT - bitmap.height) / 2,
-			);
+			ctx?.drawImage(bitmap, 0, 0);
 		});
 	});
 
@@ -476,10 +470,14 @@
 				{/if}
 				{#if solar_system.spawn_type === 'preferred'}
 					<path
-						d="M {solar_system.coordinate.x} {solar_system.coordinate.y - 4}
-						   l 4 4
-						   l -4 4
-						   l -4 -4
+						d="M {solar_system.coordinate.x} {solar_system.coordinate.y - 6}
+						   l 2 4
+						   l 4 2
+						   l -4 2
+						   l -2 4
+						   l -2 -4
+						   l -4 -2
+						   l 4 -2
 						   Z"
 						fill="var(--color-secondary-500)"
 						stroke="var(--color-surface-950)"
@@ -492,7 +490,7 @@
 						r={2.5}
 						fill={solar_system.spawn_type === 'disabled' ?
 							'var(--color-surface-50)'
-						:	'var(--color-secondary-300)'}
+						:	'var(--color-secondary-500)'}
 						stroke="var(--color-surface-950)"
 						stroke-width="1"
 					/>

@@ -17,6 +17,7 @@ import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 import { Nebula } from '$lib/models/nebula';
 import { Connection } from '$lib/models/connection';
 import { make_blank_image } from '$lib/canvas';
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from '$lib/constants';
 
 export class ProjectPersistenceError extends Schema.TaggedError<ProjectPersistenceError>(
 	'ProjectPersistenceError',
@@ -326,7 +327,24 @@ export class Projects extends Context.Tag('Projects')<
 					);
 					const canvas =
 						base_64_image_data ?
-							await fetch(base_64_image_data).then((resp) => resp.blob())
+							await fetch(base_64_image_data)
+								.then((resp) => resp.blob())
+								.then(async (blob) => {
+									const canvas = new OffscreenCanvas(
+										CANVAS_WIDTH,
+										CANVAS_HEIGHT,
+									);
+									const ctx = canvas.getContext('2d');
+									if (ctx === null) throw new Error('null ctx');
+									ctx.drawImage(
+										await createImageBitmap(blob),
+										LEGACY_COORDINATE_OFFSET,
+										LEGACY_COORDINATE_OFFSET,
+										CANVAS_WIDTH - LEGACY_COORDINATE_OFFSET * 2,
+										CANVAS_HEIGHT - LEGACY_COORDINATE_OFFSET * 2,
+									);
+									return canvas.convertToBlob({ type: 'jpeg', quality: 1 });
+								})
 						:	await make_blank_image();
 
 					return Project.make({

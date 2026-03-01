@@ -24,7 +24,7 @@
 	}
 </script>
 
-<form class="flex flex-col gap-6">
+<form class="flex flex-col gap-4">
 	<div class="input-group grid-cols-[auto_2.5rem]">
 		<button
 			class="ig-btn ps-14 preset-filled-primary-500"
