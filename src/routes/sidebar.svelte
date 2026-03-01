@@ -38,15 +38,15 @@
 		},
 	];
 
-	const editor = $derived(get_editor()());
+	const editor = get_editor();
 
 	function handle_download() {
-		const galaxy_txt = generate_stellaris_galaxy(editor.project);
+		const galaxy_txt = generate_stellaris_galaxy(editor().project);
 		const blob = new Blob([galaxy_txt], { type: 'text/plain' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `${editor.project.name}.txt`;
+		a.download = `${editor().project.name}.txt`;
 		a.click();
 		URL.revokeObjectURL(url);
 	}
@@ -67,18 +67,18 @@
 	<Steps
 		class="flex flex-col h-full"
 		count={steps.length}
-		step={steps.findIndex((step) => step.id === editor?.step)}
+		step={steps.findIndex((step) => step.id === editor()?.step)}
 		onStepChange={(details) => {
 			const step = steps[details.step]?.id;
 			if (step) {
-				editor.step = step;
+				editor().step = step;
 				// select first tool for step
 				const tool_pair = Object.values(tool_pairs).find(
 					(pair) => pair.step === step,
 				);
 				if (tool_pair) {
-					editor.primary_tool_id = tool_pair.primary.id;
-					editor.secondary_tool_id = tool_pair.secondary.id;
+					editor().primary_tool_id = tool_pair.primary.id;
+					editor().secondary_tool_id = tool_pair.secondary.id;
 				}
 			}
 		}}

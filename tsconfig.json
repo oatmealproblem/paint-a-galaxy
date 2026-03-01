@@ -15,7 +15,10 @@
 		"noImplicitReturns": true,
 		"noUncheckedIndexedAccess": true,
 		"moduleResolution": "bundler",
-		"plugins": [{ "name": "typescript-svelte-plugin" }, { "name": "@effect/language-service" }]
+		"plugins": [
+			{ "name": "typescript-svelte-plugin" },
+			{ "name": "@effect/language-service" }
+		]
 	}
 	// Path aliases are handled by https://svelte.dev/docs/kit/configuration#alias
 	// except $lib which is handled by https://svelte.dev/docs/kit/configuration#files

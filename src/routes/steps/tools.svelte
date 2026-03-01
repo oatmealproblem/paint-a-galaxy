@@ -17,15 +17,15 @@
 	};
 	const { step }: Props = $props();
 
-	const editor = $derived(get_editor()());
+	const editor = get_editor();
 
 	function on_value_change(
 		setting: ToolSettingId,
 		key: 'primary_tool_settings' | 'secondary_tool_settings',
 	) {
 		return (value: number) => {
-			editor[key] = {
-				...editor[key],
+			editor()[key] = {
+				...editor()[key],
 				[setting]: value,
 			};
 		};
@@ -35,16 +35,16 @@
 <SegmentedControl
 	value={tool_pairs.find(
 		(tool_pair) =>
-			tool_pair.primary.id === editor.primary_tool_id ||
-			tool_pair.secondary?.id === editor.primary_tool_id,
+			tool_pair.primary.id === editor().primary_tool_id ||
+			tool_pair.secondary?.id === editor().primary_tool_id,
 	)?.id}
 	onValueChange={(details) => {
 		const tool_pair = tool_pairs.find(
 			(tool_pair) => tool_pair.id === details.value,
 		);
 		if (!tool_pair) return;
-		editor.primary_tool_id = tool_pair.primary.id;
-		editor.secondary_tool_id = tool_pair.secondary.id;
+		editor().primary_tool_id = tool_pair.primary.id;
+		editor().secondary_tool_id = tool_pair.secondary.id;
 	}}
 >
 	<SegmentedControl.Label>Tool</SegmentedControl.Label>
@@ -99,10 +99,10 @@
 			<Tooltip.Trigger
 				class="btn btn-icon p-0 size-5 relative top-2"
 				onclick={() => {
-					const primary = editor.secondary_tool_id;
-					const secondary = editor.primary_tool_id;
-					editor.primary_tool_id = primary;
-					editor.secondary_tool_id = secondary;
+					const primary = editor().secondary_tool_id;
+					const secondary = editor().primary_tool_id;
+					editor().primary_tool_id = primary;
+					editor().secondary_tool_id = secondary;
 				}}
 			>
 				<Icons.ArrowDownUp size={20} />
@@ -125,7 +125,7 @@
 				<Tooltip.Trigger
 					class="btn btn-icon p-0 size-5 relative top-2"
 					onclick={() => {
-						editor[key] = { ...editor[key], ...tool.default_settings };
+						editor()[key] = { ...editor()[key], ...tool.default_settings };
 					}}
 				>
 					<Icons.RotateCcw size={20} />
@@ -155,7 +155,7 @@
 			min={0}
 			max={100}
 			step={1}
-			value={editor[key].size}
+			value={editor()[key].size}
 			on_value_change={on_value_change('size', key)}
 		>
 			{#snippet label()}Size{/snippet}
@@ -167,7 +167,7 @@
 			min={0}
 			max={1}
 			step={0.01}
-			value={editor[key].opacity}
+			value={editor()[key].opacity}
 			on_value_change={on_value_change('opacity', key)}
 		>
 			{#snippet label()}Strength{/snippet}
@@ -180,7 +180,7 @@
 			min={0}
 			max={2}
 			step={0.1}
-			value={editor[key].blur}
+			value={editor()[key].blur}
 			on_value_change={on_value_change('blur', key)}
 		>
 			{#snippet label()}Blur{/snippet}
@@ -190,7 +190,7 @@
 {/snippet}
 
 <SectionHeader>Primary</SectionHeader>
-{@render settings(editor.primary_tool, 'primary_tool_settings')}
+{@render settings(editor().primary_tool, 'primary_tool_settings')}
 
 <SectionHeader>Secondary</SectionHeader>
-{@render settings(editor.secondary_tool, 'secondary_tool_settings')}
+{@render settings(editor().secondary_tool, 'secondary_tool_settings')}

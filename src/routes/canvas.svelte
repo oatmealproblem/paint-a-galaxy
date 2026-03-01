@@ -16,8 +16,8 @@
 	import { zoom, zoomIdentity, type D3ZoomEvent } from 'd3-zoom';
 	import { Boolean, Equal, Match, Option, pipe } from 'effect';
 
-	const editor = $derived(get_editor()());
-	const project = $derived(editor.project);
+	const editor = get_editor();
+	const project = $derived(editor().project);
 	const solar_systems = $derived(project.solar_systems);
 	const hyperlanes = $derived(project.hyperlanes);
 	const wormholes = $derived(project.wormholes);
@@ -25,14 +25,14 @@
 	let is_shift_pressed = $state(false);
 	const current_tool = $derived.by(() => {
 		if (is_shift_pressed) {
-			if (editor.secondary_tool.step === editor.step) {
-				return Option.some(editor.secondary_tool);
+			if (editor().secondary_tool.step === editor().step) {
+				return Option.some(editor().secondary_tool);
 			} else {
 				return Option.none();
 			}
 		} else {
-			if (editor.primary_tool.step === editor.step) {
-				return Option.some(editor.primary_tool);
+			if (editor().primary_tool.step === editor().step) {
+				return Option.some(editor().primary_tool);
 			} else {
 				return Option.none();
 			}
@@ -55,11 +55,11 @@
 	let tool_points = $state<Coordinate[]>([]);
 	let stroke_path = $derived(
 		tool_points.length > 1 ?
-			editor.calculate_path(
+			editor().calculate_path(
 				pipe(
 					active_tool,
 					Option.map((value) => value.id),
-					Option.getOrElse(() => editor.primary_tool_id),
+					Option.getOrElse(() => editor().primary_tool_id),
 				),
 				tool_points,
 			)
@@ -67,7 +67,7 @@
 	);
 
 	const delaunay = $derived(
-		solar_systems.length > 0 && editor.step === 'tweak' ?
+		solar_systems.length > 0 && editor().step === 'tweak' ?
 			new Delaunay(
 				solar_systems.flatMap((system) => [
 					system.coordinate.x,
@@ -168,9 +168,9 @@
 		if (!ctx) return;
 		if (Option.isSome(active_tool)) {
 			if (active_tool.value.action_type === 'single_point' && tool_points[0]) {
-				editor.apply_tool(active_tool.value.id, tool_points[0], ctx);
+				editor().apply_tool(active_tool.value.id, tool_points[0], ctx);
 			} else if (tool_points.length > 1) {
-				editor.apply_tool(active_tool.value.id, tool_points, ctx);
+				editor().apply_tool(active_tool.value.id, tool_points, ctx);
 			}
 			active_tool = Option.none();
 			tool_points = [];
@@ -314,12 +314,12 @@
 					bind:this={canvas}
 					width={CANVAS_WIDTH}
 					height={CANVAS_HEIGHT}
-					style:opacity={editor.step === 'paint' ? '100%'
-					: editor.step === 'generate' ? '50%'
+					style:opacity={editor().step === 'paint' ? '100%'
+					: editor().step === 'generate' ? '50%'
 					: '0%'}
 				></canvas>
 			</foreignObject>
-			{#if editor.view_settings.show_center_mark}
+			{#if editor().view_settings.show_center_mark}
 				<path
 					d="M {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 - CENTER_MARK_SIZE}
 					   L {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 + CENTER_MARK_SIZE}
@@ -330,7 +330,7 @@
 					stroke-width="1"
 				/>
 			{/if}
-			{#if editor.view_settings.show_map_limit}
+			{#if editor().view_settings.show_map_limit}
 				{@const pattern_size = 20}
 				{@const stripe_size = 5}
 				<pattern
@@ -363,7 +363,7 @@
 					stroke-width="2"
 				/>
 			{/if}
-			{#if editor.view_settings.show_l_cluster}
+			{#if editor().view_settings.show_l_cluster}
 				{@const pattern_size = 20}
 				{@const stripe_size = 5}
 				<pattern
@@ -404,9 +404,9 @@
 					d={stroke_path}
 					fill={active_tool.value.render.color}
 					opacity={'opacity' in active_tool.value.default_settings ?
-						(active_tool.value.id === editor.primary_tool_id ?
-							editor.primary_tool_settings
-						:	editor.secondary_tool_settings
+						(active_tool.value.id === editor().primary_tool_id ?
+							editor().primary_tool_settings
+						:	editor().secondary_tool_settings
 						).opacity
 					:	1}
 				/>
