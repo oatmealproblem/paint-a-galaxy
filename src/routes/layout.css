@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@import '@skeletonlabs/skeleton';
+@import '@skeletonlabs/skeleton-svelte';
+@import '@skeletonlabs/skeleton/themes/wintry';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:disabled,
+[data-disabled] {
+	cursor: not-allowed;
+	opacity: 0.5;
+}

@@ -9,12 +9,17 @@ const config = {
 	kit: {
 		router: { resolution: 'client', type: 'hash' },
 		output: {
-			bundleStrategy: 'inline'
+			bundleStrategy: 'inline',
 		},
 		adapter: adapter({
-			fallback: 'index.html'
-		})
-	}
+			fallback: 'index.html',
+		}),
+	},
+	compilerOptions: {
+		experimental: {
+			async: true,
+		},
+	},
 };
 
 export default config;
