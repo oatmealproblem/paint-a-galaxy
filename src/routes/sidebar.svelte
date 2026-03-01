@@ -63,7 +63,7 @@
 	</a>
 {/snippet}
 
-<aside class="w-96 p-4 flex-none">
+<aside class="w-96 p-4 flex-none overflow-auto">
 	<Steps
 		class="flex flex-col h-full"
 		count={steps.length}

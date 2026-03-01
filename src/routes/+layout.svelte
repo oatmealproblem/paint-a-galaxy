@@ -17,7 +17,7 @@
 	<title>Paint a Galaxy</title>
 </svelte:head>
 
-<div class="w-full h-full flex flex-col">
+<div class="w-full h-full flex flex-col overflow-hidden">
 	<svelte:boundary>
 		{#snippet pending()}
 			<div class="text-center">Loading...</div>
