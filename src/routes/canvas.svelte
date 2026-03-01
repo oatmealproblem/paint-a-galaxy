@@ -15,6 +15,7 @@
 	import { select } from 'd3-selection';
 	import { zoom, zoomIdentity, type D3ZoomEvent } from 'd3-zoom';
 	import { Boolean, Equal, Match, Option, pipe } from 'effect';
+	import custom_crosshair from './crosshair.svg?inline';
 
 	const editor = get_editor();
 	const project = $derived(editor().project);
@@ -160,6 +161,8 @@
 			stellaris: canvas_coordinate.to_stellaris_coordinate(),
 		};
 	}
+
+	const custom_cursor = `url("${custom_crosshair}") 10 10, crosshair`;
 </script>
 
 <svelte:document
@@ -191,10 +194,11 @@
 	id={ID.canvas}
 	bind:this={container}
 	bind:clientHeight={container_height}
-	class={[
-		'canvas h-full w-full overflow-hidden',
-		{ 'cursor-crosshair': Option.isSome(current_tool) },
-	]}
+	class="canvas h-full w-full overflow-hidden"
+	style:cursor={Option.match(current_tool, {
+		onSome: () => custom_cursor,
+		onNone: () => 'auto',
+	})}
 	style:width={CANVAS_WIDTH}
 	style:height={CANVAS_HEIGHT}
 	style:background={CANVAS_BACKGROUND}
