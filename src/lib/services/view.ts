@@ -28,19 +28,15 @@ export class View extends Context.Tag('View')<
 				pipe(
 					keyval.get('settings.view', ViewSettings),
 					Effect.map(Option.getOrElse(() => ViewSettings.default())),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ViewPersistenceError.make({
 									message: `Unexpected error loading view settings`,
 									cause: error,
 								}),
 							),
-					}),
-					Effect.catch('_tag', {
-						failure: 'ParseError',
-						onFailure: (error) =>
+						ParseError: (error) =>
 							Effect.fail(
 								ViewPersistenceError.make({
 									message: `Error parsing saved view settings`,

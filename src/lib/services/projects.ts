@@ -51,19 +51,15 @@ export class Projects extends Context.Tag('Projects')<
 					Effect.map((option) =>
 						Option.getOrElse(option, () => [] as ProjectListing[]),
 					),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Unexpected error loading projects list`,
 									cause: error,
 								}),
 							),
-					}),
-					Effect.catch('_tag', {
-						failure: 'ParseError',
-						onFailure: (error) =>
+						ParseError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Error parsing saved projects list`,
@@ -117,19 +113,15 @@ export class Projects extends Context.Tag('Projects')<
 						}),
 					),
 					Effect.tap(raise_or_insert_project_listing),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Unexpected error loading project "${project.name}"`,
 									cause: error,
 								}),
 							),
-					}),
-					Effect.catch('_tag', {
-						failure: 'ParseError',
-						onFailure: (error) =>
+						ParseError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Error parsing saved project "${project.name}"`,
@@ -150,19 +142,15 @@ export class Projects extends Context.Tag('Projects')<
 					Effect.flatMap((project) =>
 						keyval.set(`project.${project.name}`, project),
 					),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Unexpected error saving project "${project.name}"`,
 									cause: error,
 								}),
 							),
-					}),
-					Effect.catch('_tag', {
-						failure: 'ParseError',
-						onFailure: (error) =>
+						ParseError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Error encoding project "${project.name}"`,
@@ -180,9 +168,8 @@ export class Projects extends Context.Tag('Projects')<
 					Effect.succeed(project),
 					Effect.tap(delete_project_listing),
 					Effect.flatMap((project) => keyval.delete(`project.${project.name}`)),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ProjectPersistenceError.make({
 									message: `Unexpected error saving project "${project.name}"`,

@@ -97,19 +97,15 @@ export class Tools extends Context.Tag('Tools')<
 							}),
 						}),
 					),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ToolsPersistenceError.make({
 									message: `Unexpected error loading settings for tool "${tool_id}"`,
 									cause: error,
 								}),
 							),
-					}),
-					Effect.catch('_tag', {
-						failure: 'ParseError',
-						onFailure: (error) =>
+						ParseError: (error) =>
 							Effect.fail(
 								ToolsPersistenceError.make({
 									message: `Error parsing saved settings for tool "${tool_id}"`,
@@ -131,9 +127,8 @@ export class Tools extends Context.Tag('Tools')<
 							Struct.pick(...Record.keys(tools[tool_id].default_settings)),
 						),
 					),
-					Effect.catch('_tag', {
-						failure: 'KeyValError',
-						onFailure: (error) =>
+					Effect.catchTags({
+						KeyValError: (error) =>
 							Effect.fail(
 								ToolsPersistenceError.make({
 									message: `Unexpected error saving settings for tool "${tool_id}"`,
