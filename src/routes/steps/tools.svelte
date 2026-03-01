@@ -1,6 +1,11 @@
 <script lang="ts">
 	import type { Step } from '$lib/models/step';
-	import { tool_pairs, ToolSettingId, type Tool } from '$lib/models/tool';
+	import {
+		tool_pairs,
+		ToolId,
+		ToolSettingId,
+		type Tool,
+	} from '$lib/models/tool';
 	import { get_editor } from '$lib/editor.svelte';
 	import Slider from '$lib/components/slider.svelte';
 	import {
@@ -19,15 +24,12 @@
 
 	const editor = get_editor();
 
-	function on_value_change(
-		setting: ToolSettingId,
-		key: 'primary_tool_settings' | 'secondary_tool_settings',
-	) {
+	function on_value_change(tool_id: ToolId, setting: ToolSettingId) {
 		return (value: number) => {
-			editor()[key] = {
-				...editor()[key],
+			editor().update_tool_settings(tool_id, {
+				...editor().tool_settings[tool_id],
 				[setting]: value,
-			};
+			});
 		};
 	}
 </script>
@@ -85,14 +87,11 @@
 	</SegmentedControl.Control>
 </SegmentedControl>
 
-{#snippet settings(
-	tool: Tool,
-	key: 'primary_tool_settings' | 'secondary_tool_settings',
-)}
+{#snippet settings(tool: Tool)}
 	<header class="flex gap-2 items-baseline">
 		<h3 class="inline font-bold text-surface-900-100">{tool.name}</h3>
 		<em class="text-sm text-surface-800-200">
-			{#if key === 'secondary_tool_settings'}shift+{/if}click{#if tool.action_type !== 'single_point'}+drag{/if}
+			{#if tool.id === editor().secondary_tool_id}shift+{/if}click{#if tool.action_type !== 'single_point'}+drag{/if}
 		</em>
 		<div class="grow"></div>
 		<Tooltip positioning={{ placement: 'top' }}>
@@ -125,7 +124,10 @@
 				<Tooltip.Trigger
 					class="btn btn-icon p-0 size-5 relative top-2 text-tertiary-700-300"
 					onclick={() => {
-						editor()[key] = { ...editor()[key], ...tool.default_settings };
+						editor().update_tool_settings(tool.id, {
+							...editor().tool_settings[tool.id],
+							...tool.default_settings,
+						});
 					}}
 				>
 					<Icons.RotateCcw size={20} />
@@ -155,8 +157,8 @@
 			min={0}
 			max={100}
 			step={1}
-			value={editor()[key].size}
-			on_value_change={on_value_change('size', key)}
+			value={editor().tool_settings[tool.id].size}
+			on_value_change={on_value_change(tool.id, 'size')}
 		>
 			{#snippet label()}Size{/snippet}
 		</Slider>
@@ -167,8 +169,8 @@
 			min={0}
 			max={1}
 			step={0.01}
-			value={editor()[key].opacity}
-			on_value_change={on_value_change('opacity', key)}
+			value={editor().tool_settings[tool.id].opacity}
+			on_value_change={on_value_change(tool.id, 'opacity')}
 		>
 			{#snippet label()}Strength{/snippet}
 			{#snippet output(value)}{Math.round(value * 100)}%{/snippet}
@@ -180,8 +182,8 @@
 			min={0}
 			max={2}
 			step={0.1}
-			value={editor()[key].blur}
-			on_value_change={on_value_change('blur', key)}
+			value={editor().tool_settings[tool.id].blur}
+			on_value_change={on_value_change(tool.id, 'blur')}
 		>
 			{#snippet label()}Blur{/snippet}
 			{#snippet output(value)}{value}x{/snippet}
@@ -190,7 +192,7 @@
 {/snippet}
 
 <SectionHeader>Primary</SectionHeader>
-{@render settings(editor().primary_tool, 'primary_tool_settings')}
+{@render settings(editor().primary_tool)}
 
 <SectionHeader>Secondary</SectionHeader>
-{@render settings(editor().secondary_tool, 'secondary_tool_settings')}
+{@render settings(editor().secondary_tool)}
