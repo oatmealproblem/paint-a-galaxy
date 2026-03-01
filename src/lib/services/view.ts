@@ -2,7 +2,7 @@ import { Context, Effect, Layer, Option, pipe, Schema } from 'effect';
 import { KeyVal } from './key_val';
 import { ViewSettings } from '$lib/models/view_settings';
 
-export class ViewPersistenceError extends Schema.TaggedError<ViewPersistenceError>(
+class ViewPersistenceError extends Schema.TaggedError<ViewPersistenceError>(
 	'ViewPersistenceError',
 )('ViewPersistenceError', {
 	message: Schema.String,

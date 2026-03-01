@@ -32,7 +32,7 @@ import { Connection } from '$lib/models/connection';
 import { Nebula } from '$lib/models/nebula';
 import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 
-export class ToolsPersistenceError extends Schema.TaggedError<ToolsPersistenceError>(
+class ToolsPersistenceError extends Schema.TaggedError<ToolsPersistenceError>(
 	'ToolsPersistenceError',
 )('ToolsPersistenceError', {
 	message: Schema.String,

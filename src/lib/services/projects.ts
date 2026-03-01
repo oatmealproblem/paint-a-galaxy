@@ -19,7 +19,7 @@ import { Connection } from '$lib/models/connection';
 import { make_blank_image } from '$lib/canvas';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '$lib/constants';
 
-export class ProjectPersistenceError extends Schema.TaggedError<ProjectPersistenceError>(
+class ProjectPersistenceError extends Schema.TaggedError<ProjectPersistenceError>(
 	'ProjectPersistenceError',
 )('ProjectPersistenceError', {
 	message: Schema.String,

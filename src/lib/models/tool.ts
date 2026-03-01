@@ -312,7 +312,7 @@ export const tools = {
 
 export type Tool = (typeof tools)[keyof typeof tools];
 
-export interface ToolPair {
+interface ToolPair {
 	id: string;
 	name: string;
 	step: Step;

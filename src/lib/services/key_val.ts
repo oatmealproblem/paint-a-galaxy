@@ -1,7 +1,7 @@
 import { Context, Effect, Layer, Option, ParseResult, Schema } from 'effect';
 import { get, set, del } from 'idb-keyval';
 
-export class KeyValError extends Schema.TaggedError<KeyValError>('KeyValError')(
+class KeyValError extends Schema.TaggedError<KeyValError>('KeyValError')(
 	'KeyValError',
 	{
 		message: Schema.String,
