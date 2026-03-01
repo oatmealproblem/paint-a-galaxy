@@ -241,7 +241,7 @@
 						value="show_center_mark"
 						checked={editor().view_settings.show_center_mark}
 						onCheckedChange={(checked) => {
-							editor().update_view_setting('show_center_mark', checked);
+							editor().update_view_settings({ show_center_mark: checked });
 						}}
 					>
 						<Menu.ItemText>Show Center Mark</Menu.ItemText>
@@ -254,7 +254,7 @@
 						value="show_map_limit"
 						checked={editor().view_settings.show_map_limit}
 						onCheckedChange={(checked) => {
-							editor().update_view_setting('show_map_limit', checked);
+							editor().update_view_settings({ show_map_limit: checked });
 						}}
 					>
 						<Menu.ItemText>Show Map Limit</Menu.ItemText>
@@ -273,7 +273,7 @@
 						value="show_l_cluster"
 						checked={editor().view_settings.show_l_cluster}
 						onCheckedChange={(checked) => {
-							editor().update_view_setting('show_l_cluster', checked);
+							editor().update_view_settings({ show_l_cluster: checked });
 						}}
 					>
 						<Menu.ItemText>Show L-Cluster</Menu.ItemText>

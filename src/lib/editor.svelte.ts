@@ -410,14 +410,13 @@ export class Editor {
 		);
 	}
 
-	update_view_setting<Key extends keyof ViewSettings>(
-		key: Key,
-		value: ViewSettings[Key],
+	update_view_settings(
+		partial: Partial<Parameters<typeof ViewSettings.make>[0]>,
 	): Promise<void> {
 		const original_settings = this.#view_settings;
 		const updated_settings = ViewSettings.make({
 			...this.#view_settings,
-			[key]: value,
+			...partial,
 		});
 		const effect = Effect.gen(function* () {
 			const view_service = yield* View;
@@ -432,15 +431,14 @@ export class Editor {
 		);
 	}
 
-	update_generator_setting<Key extends keyof GeneratorSettings>(
-		key: Key,
-		value: GeneratorSettings[Key],
+	update_generator_settings(
+		partial: Partial<Parameters<typeof GeneratorSettings.make>[0]>,
 	) {
 		this.project = new Project({
 			...this.project,
 			generator_settings: GeneratorSettings.make({
 				...this.project.generator_settings,
-				[key]: value,
+				...partial,
 			}),
 		});
 	}

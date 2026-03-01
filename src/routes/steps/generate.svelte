@@ -4,18 +4,23 @@
 	import SectionHeader from '$lib/components/section_header.svelte';
 	import Slider from '$lib/components/slider.svelte';
 	import { get_editor } from '$lib/editor.svelte';
+	import { GeneratorSettings } from '$lib/models/generator_settings';
 	import { Menu, Portal, Switch } from '@skeletonlabs/skeleton-svelte';
 
 	const editor = get_editor();
 	const settings = $derived(editor().project.generator_settings);
 
 	function on_generate_option_selected({ value }: { value: string }) {
-		editor().generate({
-			solar_systems: value === 'all' || value === 'solar_systems',
-			hyperlanes: value === 'all' || value === 'hyperlanes',
-			spawns: value === 'all' || value === 'spawns',
-			nebulas: value === 'all' || value === 'nebulas',
-		});
+		if (value === 'reset') {
+			editor().update_generator_settings(GeneratorSettings.default());
+		} else {
+			editor().generate({
+				solar_systems: value === 'all' || value === 'solar_systems',
+				hyperlanes: value === 'all' || value === 'hyperlanes',
+				spawns: value === 'all' || value === 'spawns',
+				nebulas: value === 'all' || value === 'nebulas',
+			});
+		}
 	}
 </script>
 
@@ -58,6 +63,10 @@
 						<Menu.Item value="nebulas">
 							<Menu.ItemText>Nebulas Only</Menu.ItemText>
 						</Menu.Item>
+						<Menu.Separator />
+						<Menu.Item value="reset">
+							<Menu.ItemText>Reset Settings</Menu.ItemText>
+						</Menu.Item>
 					</Menu.Content>
 				</Menu.Positioner>
 			</Portal>
@@ -79,7 +88,8 @@
 			step={1}
 			bind:value={
 				() => settings.number_of_systems,
-				(value) => editor().update_generator_setting('number_of_systems', value)
+				(value) =>
+					editor().update_generator_settings({ number_of_systems: value })
 			}
 		/>
 	</label>
@@ -89,7 +99,9 @@
 		step={1}
 		value={settings.min_distance_between_systems}
 		on_value_change={(value) =>
-			editor().update_generator_setting('min_distance_between_systems', value)}
+			editor().update_generator_settings({
+				min_distance_between_systems: value,
+			})}
 	>
 		{#snippet label()}
 			Min Distance
@@ -106,7 +118,7 @@
 		step={0.01}
 		value={settings.hyperlane_connectivity}
 		on_value_change={(value) =>
-			editor().update_generator_setting('hyperlane_connectivity', value)}
+			editor().update_generator_settings({ hyperlane_connectivity: value })}
 	>
 		{#snippet label()}
 			Connectivity
@@ -124,7 +136,7 @@
 		step={1}
 		value={settings.hyperlane_max_distance}
 		on_value_change={(value) =>
-			editor().update_generator_setting('hyperlane_max_distance', value)}
+			editor().update_generator_settings({ hyperlane_max_distance: value })}
 	>
 		{#snippet label()}
 			Max Distance
@@ -137,7 +149,9 @@
 	<Switch
 		checked={settings.allow_disconnected}
 		onCheckedChange={(details) =>
-			editor().update_generator_setting('allow_disconnected', details.checked)}
+			editor().update_generator_settings({
+				allow_disconnected: details.checked,
+			})}
 	>
 		<Switch.Control>
 			<Switch.Thumb />
