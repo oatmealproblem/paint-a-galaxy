@@ -37,10 +37,10 @@
 		</span>
 	</Slider.Label>
 	<Slider.Control>
-		<Slider.Track>
-			<Slider.Range />
+		<Slider.Track class="cursor-pointer bg-surface-200-800">
+			<Slider.Range class="bg-primary-500" />
 		</Slider.Track>
-		<Slider.Thumb index={0} class="cursor-pointer">
+		<Slider.Thumb index={0} class="cursor-pointer bg-primary-500">
 			<Slider.HiddenInput />
 		</Slider.Thumb>
 	</Slider.Control>

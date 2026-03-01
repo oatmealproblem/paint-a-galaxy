@@ -87,11 +87,17 @@
 			{#each steps as step, i (step.id)}
 				<Steps.Item index={i}>
 					<Steps.Trigger>
-						<Steps.Indicator>{i + 1}</Steps.Indicator>
+						<Steps.Indicator
+							class="border-surface-300-700 data-complete:border-primary-500 data-current:border-primary-500 data-current:border-2"
+						>
+							{i + 1}
+						</Steps.Indicator>
 						{step.name}
 					</Steps.Trigger>
 					{#if i < steps.length - 1}
-						<Steps.Separator />
+						<Steps.Separator
+							class="border-surface-300-700 data-complete:border-primary-500 data-complete:border-1"
+						/>
 					{/if}
 				</Steps.Item>
 			{/each}
@@ -99,7 +105,7 @@
 
 		{#each steps as step, i (step.id)}
 			<Steps.Content index={i} class="grow flex flex-col gap-4">
-				<p class="text-sm">
+				<p class="text-sm text-surface-900-100">
 					{#if typeof step.description === 'string'}{step.description}{:else}{@render step.description()}{/if}
 				</p>
 				<step.content />

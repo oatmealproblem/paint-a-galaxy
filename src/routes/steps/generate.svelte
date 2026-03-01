@@ -24,7 +24,7 @@
 	}
 </script>
 
-<form class="flex flex-col gap-4">
+<form class="flex flex-col gap-6">
 	<div class="input-group grid-cols-[auto_2.5rem]">
 		<button
 			class="ig-btn ps-14 preset-filled-primary-500"
@@ -41,7 +41,7 @@
 			</Menu.Trigger>
 			<Portal>
 				<Menu.Positioner>
-					<Menu.Content class="bg-surface-100-900">
+					<Menu.Content class="bg-surface-100-900 border-surface-300-700">
 						<Menu.Item value="all">
 							<Menu.ItemText>Generate All</Menu.ItemText>
 						</Menu.Item>
@@ -63,7 +63,7 @@
 						<Menu.Item value="nebulas">
 							<Menu.ItemText>Nebulas Only</Menu.ItemText>
 						</Menu.Item>
-						<Menu.Separator />
+						<Menu.Separator class="border-surface-300-700" />
 						<Menu.Item value="reset">
 							<Menu.ItemText>Reset Settings</Menu.ItemText>
 						</Menu.Item>
@@ -82,7 +82,7 @@
 			</Info>
 		</span>
 		<input
-			class="input bg-surface-100-900"
+			class="input ring-surface-300-700 bg-surface-100-900"
 			type="number"
 			min={0}
 			step={1}

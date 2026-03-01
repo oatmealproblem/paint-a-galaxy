@@ -7,7 +7,7 @@
 </script>
 
 <Tooltip positioning={{ placement: 'top' }}>
-	<Tooltip.Trigger>
+	<Tooltip.Trigger class="cursor-help">
 		<Icons.Info class="text-secondary-800-200" size={16} />
 	</Tooltip.Trigger>
 	<Portal>

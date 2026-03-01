@@ -48,8 +48,8 @@
 	}}
 >
 	<SegmentedControl.Label>Tool</SegmentedControl.Label>
-	<SegmentedControl.Control>
-		<SegmentedControl.Indicator />
+	<SegmentedControl.Control class="border-surface-300-700">
+		<SegmentedControl.Indicator class="bg-primary-500" />
 		{#each tool_pairs.filter((tool_pair) => tool_pair.step === step) as tool_pair (tool_pair.id)}
 			{@const Icon = Icons[tool_pair.icon]}
 			<Tooltip positioning={{ placement: 'top' }}>
@@ -61,7 +61,7 @@
 								aria-label={tool_pair.name}
 							>
 								<SegmentedControl.ItemText>
-									<Icon class="size-4" />
+									<Icon class="size-4 text-surface-950-50" />
 								</SegmentedControl.ItemText>
 								<SegmentedControl.ItemHiddenInput />
 							</SegmentedControl.Item>
@@ -90,14 +90,14 @@
 	key: 'primary_tool_settings' | 'secondary_tool_settings',
 )}
 	<header class="flex gap-2 items-baseline">
-		<h3 class="inline font-bold">{tool.name}</h3>
-		<em class="text-sm">
+		<h3 class="inline font-bold text-surface-900-100">{tool.name}</h3>
+		<em class="text-sm text-surface-800-200">
 			{#if key === 'secondary_tool_settings'}shift+{/if}click{#if tool.action_type !== 'single_point'}+drag{/if}
 		</em>
 		<div class="grow"></div>
 		<Tooltip positioning={{ placement: 'top' }}>
 			<Tooltip.Trigger
-				class="btn btn-icon p-0 size-5 relative top-2"
+				class="btn btn-icon p-0 size-5 relative top-2 text-tertiary-700-300"
 				onclick={() => {
 					const primary = editor().secondary_tool_id;
 					const secondary = editor().primary_tool_id;
@@ -123,7 +123,7 @@
 		{#if !Record.isEmptyRecord(tool.default_settings)}
 			<Tooltip positioning={{ placement: 'top' }}>
 				<Tooltip.Trigger
-					class="btn btn-icon p-0 size-5 relative top-2"
+					class="btn btn-icon p-0 size-5 relative top-2 text-tertiary-700-300"
 					onclick={() => {
 						editor()[key] = { ...editor()[key], ...tool.default_settings };
 					}}
@@ -147,7 +147,7 @@
 	</header>
 
 	{#if tool.description}
-		<p class="text-sm">{tool.description}</p>
+		<p class="text-sm text-surface-900-100">{tool.description}</p>
 	{/if}
 
 	{#if 'size' in tool.default_settings}

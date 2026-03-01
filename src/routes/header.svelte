@@ -86,7 +86,7 @@
 		<Menu.Trigger class="btn">Project</Menu.Trigger>
 		<Portal>
 			<Menu.Positioner class="z-10!">
-				<Menu.Content class="bg-surface-100-900">
+				<Menu.Content class="bg-surface-100-900 border-surface-300-700">
 					{@render menu_item_command(
 						'new',
 						'New...',
@@ -102,6 +102,7 @@
 								throw new Error('menu selection is missing in projects');
 							editor().open_project(listing);
 						}}
+						positioning={{ offset: { mainAxis: 8, crossAxis: -8 } }}
 					>
 						<Menu.TriggerItem value="open">
 							<Menu.ItemText>Open</Menu.ItemText>
@@ -110,7 +111,9 @@
 							</Menu.ItemIndicator>
 							<Portal>
 								<Menu.Positioner class="z-10!">
-									<Menu.Content class="bg-surface-100-900">
+									<Menu.Content
+										class="bg-surface-100-900 border-surface-300-700"
+									>
 										{#each editor().projects as project (project.name)}
 											<Menu.Item value={project.name}>
 												<Menu.ItemText>{project.name}</Menu.ItemText>
@@ -121,9 +124,11 @@
 							</Portal>
 						</Menu.TriggerItem>
 					</Menu>
-					<Menu.Separator />
+					<Menu.Separator class="border-surface-300-700" />
 					<Menu.ItemGroup>
-						<Menu.ItemGroupLabel>{editor().project.name}</Menu.ItemGroupLabel>
+						<Menu.ItemGroupLabel class="text-surface-800-200">
+							{editor().project.name}
+						</Menu.ItemGroupLabel>
 						{@render menu_item_command(
 							'rename',
 							'Rename...',
@@ -145,7 +150,7 @@
 		<Menu.Trigger class="btn">Edit</Menu.Trigger>
 		<Portal>
 			<Menu.Positioner class="z-10!">
-				<Menu.Content class="bg-surface-100-900">
+				<Menu.Content class="bg-surface-100-900 border-surface-300-700">
 					<Menu.Item value="undo" disabled={!editor().can_undo}>
 						<Menu.ItemText>Undo</Menu.ItemText>
 						<kbd class="bg-surface-200-800 rounded-base p-1">ctrl+z</kbd>
@@ -154,7 +159,7 @@
 						<Menu.ItemText>Redo</Menu.ItemText>
 						<kbd class="bg-surface-200-800 rounded-base p-1">ctrl+y</kbd>
 					</Menu.Item>
-					<Menu.Separator />
+					<Menu.Separator class="border-surface-300-700" />
 					{@render menu_item_command(
 						'upload',
 						'Upload Image...',
@@ -172,14 +177,14 @@
 		<Menu.Trigger class="btn">View</Menu.Trigger>
 		<Portal>
 			<Menu.Positioner class="z-10!">
-				<Menu.Content class="bg-surface-100-900">
+				<Menu.Content class="bg-surface-100-900 border-surface-300-700">
 					{@render menu_item_command(
 						'reset',
 						'Reset Camera',
 						CUSTOM_COMMAND.reset_zoom,
 						ID.canvas,
 					)}
-					<Menu>
+					<Menu positioning={{ offset: { mainAxis: 8, crossAxis: -8 } }}>
 						<Menu.TriggerItem value="set_zoom">
 							<Menu.ItemText>Set Zoom</Menu.ItemText>
 							<Menu.ItemIndicator>
@@ -187,7 +192,9 @@
 							</Menu.ItemIndicator>
 							<Portal>
 								<Menu.Positioner class="z-10!">
-									<Menu.Content class="bg-surface-100-900">
+									<Menu.Content
+										class="bg-surface-100-900 border-surface-300-700"
+									>
 										{@render menu_item_command(
 											'50%',
 											'50%',
@@ -235,7 +242,7 @@
 							</Portal>
 						</Menu.TriggerItem>
 					</Menu>
-					<Menu.Separator />
+					<Menu.Separator class="border-surface-300-700" />
 					<Menu.OptionItem
 						type="checkbox"
 						value="show_center_mark"
@@ -300,9 +307,9 @@
 		<Menu.Trigger class="btn">Community</Menu.Trigger>
 		<Portal>
 			<Menu.Positioner class="z-10!">
-				<Menu.Content class="bg-surface-100-900">
+				<Menu.Content class="bg-surface-100-900 border-surface-300-700">
 					<Menu.ItemGroup>
-						<Menu.ItemGroupLabel>
+						<Menu.ItemGroupLabel class="text-surface-800-200">
 							Get Help and Give Suggestions
 						</Menu.ItemGroupLabel>
 						{@render menu_item_link(
@@ -321,9 +328,11 @@
 							'https://github.com/oatmealproblem/paint-a-galaxy/issues',
 						)}
 					</Menu.ItemGroup>
-					<Menu.Separator />
+					<Menu.Separator class="border-surface-300-700" />
 					<Menu.ItemGroup>
-						<Menu.ItemGroupLabel>Support Me</Menu.ItemGroupLabel>
+						<Menu.ItemGroupLabel class="text-surface-800-200">
+							Support Me
+						</Menu.ItemGroupLabel>
 						{@render menu_item_link(
 							'github_sponsors',
 							'Github Sponsors',
