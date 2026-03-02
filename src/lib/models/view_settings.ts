@@ -22,6 +22,20 @@ export class ViewSettings extends Schema.Class<ViewSettings>('ViewSettings')({
 			decoding: () => true,
 		}),
 	),
+	show_giga_core: Schema.Boolean.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => false,
+			decoding: () => false,
+		}),
+	),
+	show_giga_aeternum: Schema.Boolean.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => false,
+			decoding: () => false,
+		}),
+	),
 }) {
 	static default() {
 		return this.make({});

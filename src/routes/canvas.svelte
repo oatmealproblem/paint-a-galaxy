@@ -157,6 +157,8 @@
 	}
 
 	const custom_cursor = `url("${custom_crosshair}") 10 10, crosshair`;
+	const warning_pattern_size = 20;
+	const warning_pattern_stripe_size = 5;
 </script>
 
 <svelte:document
@@ -361,29 +363,31 @@
 					stroke-width="2"
 				/>
 			{/if}
+			<pattern
+				id="warning_pattern"
+				patternUnits="userSpaceOnUse"
+				patternTransform="rotate(-45)"
+				height={warning_pattern_size}
+				width={warning_pattern_size}
+			>
+				<rect
+					height={warning_pattern_size}
+					width={warning_pattern_size}
+					fill="none"
+				/>
+				<rect
+					height={warning_pattern_stripe_size}
+					width={warning_pattern_size}
+					class="fill-warning-500/25"
+				/>
+			</pattern>
 			{#if editor().view_settings.show_l_cluster}
-				{@const pattern_size = 20}
-				{@const stripe_size = 5}
-				<pattern
-					id="l_cluster_pattern"
-					patternUnits="userSpaceOnUse"
-					patternTransform="rotate(-45)"
-					height={pattern_size}
-					width={pattern_size}
-				>
-					<rect height={pattern_size} width={pattern_size} fill="none" />
-					<rect
-						height={stripe_size}
-						width={pattern_size}
-						class="fill-warning-500/25"
-					/>
-				</pattern>
 				<circle
 					cx={CANVAS_WIDTH / 2 + 420}
 					cy={CANVAS_HEIGHT / 2 - 420}
 					r={70}
 					class="stroke-warning-500"
-					fill="url(#l_cluster_pattern)"
+					fill="url(#warning_pattern)"
 					stroke-width="2"
 				/>
 				<text
@@ -395,6 +399,38 @@
 					font-size={24}
 				>
 					L-Cluster
+				</text>
+			{/if}
+			{#if editor().view_settings.show_giga_core}
+				<circle
+					cx={CANVAS_WIDTH / 2}
+					cy={CANVAS_HEIGHT / 2}
+					r={100}
+					class="stroke-warning-500"
+					fill="url(#warning_pattern)"
+					stroke-width="2"
+				/>
+			{/if}
+			{#if editor().view_settings.show_giga_aeternum}
+				<circle
+					cx={CANVAS_WIDTH / 2}
+					cy={CANVAS_HEIGHT / 2}
+					r={65}
+					class="stroke-warning-500"
+					fill="url(#warning_pattern)"
+					stroke-width="2"
+				/>
+			{/if}
+			{#if editor().view_settings.show_giga_core || editor().view_settings.show_giga_aeternum}
+				<text
+					x={CANVAS_WIDTH / 2}
+					y={CANVAS_HEIGHT / 2}
+					class="fill-warning-500"
+					dominant-baseline="middle"
+					text-anchor="middle"
+					font-size={24}
+				>
+					Core
 				</text>
 			{/if}
 			{#if Option.isSome(active_tool) && active_tool.value.render.type === 'stroke'}

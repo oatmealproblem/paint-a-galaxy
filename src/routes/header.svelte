@@ -252,7 +252,7 @@
 						}}
 					>
 						<Menu.ItemText>Show Center Mark</Menu.ItemText>
-						<Menu.ItemIndicator class="hidden data-[state=checked]:block">
+						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
 							<CheckIcon class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
@@ -265,7 +265,7 @@
 						}}
 					>
 						<Menu.ItemText>Show Map Limit</Menu.ItemText>
-						<Menu.ItemIndicator class="hidden data-[state=checked]:block">
+						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
 							<CheckIcon class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
@@ -284,10 +284,46 @@
 						}}
 					>
 						<Menu.ItemText>Show L-Cluster</Menu.ItemText>
-						<Menu.ItemIndicator class="hidden data-[state=checked]:block">
+						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
 							<CheckIcon class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
+					<Menu.Separator class="border-surface-300-700" />
+					<Menu.ItemGroup>
+						<Menu.ItemGroupLabel class="text-surface-800-200">
+							Gigastructural Engineering
+						</Menu.ItemGroupLabel>
+						<Menu.OptionItem
+							type="checkbox"
+							value="show_giga_core"
+							checked={editor().view_settings.show_giga_core}
+							onCheckedChange={(checked) => {
+								editor().update_view_settings({ show_giga_core: checked });
+							}}
+						>
+							<Menu.ItemText>Show Random Core</Menu.ItemText>
+							<Menu.ItemIndicator
+								class="hidden data-[state=checked]:block ms-2"
+							>
+								<CheckIcon class="size-4" />
+							</Menu.ItemIndicator>
+						</Menu.OptionItem>
+						<Menu.OptionItem
+							type="checkbox"
+							value="show_giga_aeternum"
+							checked={editor().view_settings.show_giga_aeternum}
+							onCheckedChange={(checked) => {
+								editor().update_view_settings({ show_giga_aeternum: checked });
+							}}
+						>
+							<Menu.ItemText>Show Aeternum</Menu.ItemText>
+							<Menu.ItemIndicator
+								class="hidden data-[state=checked]:block ms-2"
+							>
+								<CheckIcon class="size-4" />
+							</Menu.ItemIndicator>
+						</Menu.OptionItem>
+					</Menu.ItemGroup>
 					<!-- <Menu.Separator /> -->
 					<!-- <Menu.OptionItem type="checkbox" checked={false} value="grid">
 						<Menu.ItemText>Show Grid</Menu.ItemText>
