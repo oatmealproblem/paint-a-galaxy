@@ -7,7 +7,7 @@ import {
 	type ToolSettingId,
 } from './models/tool';
 import { Project, ProjectListing } from './models/project';
-import { Effect, Layer, pipe, Record } from 'effect';
+import { Effect, Layer, Match, pipe, Record } from 'effect';
 import { Projects } from './services/projects';
 import { KeyVal } from './services/key_val';
 import { Tools } from './services/tools';
@@ -39,6 +39,17 @@ export class Editor {
 		),
 	);
 	#view_settings = $state.raw(ViewSettings.default());
+	readonly current_step_canvas_opacity = $derived(
+		Match.value(this.step).pipe(
+			Match.when('paint', () => this.view_settings.canvas_opacity_paint_step),
+			Match.when(
+				'generate',
+				() => this.view_settings.canvas_opacity_generate_step,
+			),
+			Match.when('tweak', () => this.view_settings.canvas_opacity_tweak_step),
+			Match.exhaustive,
+		),
+	);
 	project = $state.raw<Project>()!;
 	projects = $state.raw<readonly ProjectListing[]>()!;
 	#layer: EditorLayer;

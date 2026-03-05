@@ -81,6 +81,25 @@
 	</Menu.Item>
 {/snippet}
 
+{#snippet menu_item_canvas_opacity(value: number)}
+	<Menu.OptionItem
+		type="radio"
+		value="canvas-opacity-{value}"
+		checked={editor().current_step_canvas_opacity === value}
+		onCheckedChange={(checked) => {
+			if (checked) {
+				const setting = `canvas_opacity_${editor().step}_step` as const;
+				editor().update_view_settings({ [setting]: value });
+			}
+		}}
+	>
+		<Menu.ItemText>{value * 100}%</Menu.ItemText>
+		<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
+			<CheckIcon class="size-4" />
+		</Menu.ItemIndicator>
+	</Menu.OptionItem>
+{/snippet}
+
 <header class="bg-surface-200-800 flex">
 	<Menu>
 		<Menu.Trigger class="btn">Project</Menu.Trigger>
@@ -237,6 +256,36 @@
 											CUSTOM_COMMAND.set_zoom_800,
 											ID.canvas,
 										)}
+									</Menu.Content>
+								</Menu.Positioner>
+							</Portal>
+						</Menu.TriggerItem>
+					</Menu>
+					<Menu.Separator class="border-surface-300-700" />
+					<Menu positioning={{ offset: { mainAxis: 8, crossAxis: -8 } }}>
+						<Menu.TriggerItem value="set_canvas_opacity">
+							<Menu.ItemText>
+								Canvas Opacity: {editor().current_step_canvas_opacity * 100}%
+							</Menu.ItemText>
+							<Menu.ItemIndicator>
+								<ChevronRightIcon class="size-4" />
+							</Menu.ItemIndicator>
+							<Portal>
+								<Menu.Positioner class="z-10!">
+									<Menu.Content
+										class="bg-surface-100-900 border-surface-300-700"
+									>
+										{@render menu_item_canvas_opacity(0)}
+										{@render menu_item_canvas_opacity(0.1)}
+										{@render menu_item_canvas_opacity(0.2)}
+										{@render menu_item_canvas_opacity(0.3)}
+										{@render menu_item_canvas_opacity(0.4)}
+										{@render menu_item_canvas_opacity(0.5)}
+										{@render menu_item_canvas_opacity(0.6)}
+										{@render menu_item_canvas_opacity(0.7)}
+										{@render menu_item_canvas_opacity(0.8)}
+										{@render menu_item_canvas_opacity(0.9)}
+										{@render menu_item_canvas_opacity(1.0)}
 									</Menu.Content>
 								</Menu.Positioner>
 							</Portal>

@@ -1,6 +1,27 @@
 import { Schema } from 'effect';
 
 export class ViewSettings extends Schema.Class<ViewSettings>('ViewSettings')({
+	canvas_opacity_paint_step: Schema.Number.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 1,
+			decoding: () => 1,
+		}),
+	),
+	canvas_opacity_generate_step: Schema.Number.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 0.5,
+			decoding: () => 0.5,
+		}),
+	),
+	canvas_opacity_tweak_step: Schema.Number.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 0,
+			decoding: () => 0,
+		}),
+	),
 	show_center_mark: Schema.Boolean.pipe(
 		Schema.optional,
 		Schema.withDefaults({

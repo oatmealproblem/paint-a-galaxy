@@ -314,9 +314,7 @@
 					bind:this={canvas}
 					width={CANVAS_WIDTH}
 					height={CANVAS_HEIGHT}
-					style:opacity={editor().step === 'paint' ? '100%'
-					: editor().step === 'generate' ? '50%'
-					: '0%'}
+					style:opacity={editor().current_step_canvas_opacity}
 				></canvas>
 			</foreignObject>
 			{#if editor().view_settings.show_center_mark}
