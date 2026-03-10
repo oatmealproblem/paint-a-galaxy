@@ -5,17 +5,23 @@
 		CANVAS_WIDTH,
 		CENTER_MARK_SIZE,
 		CUSTOM_COMMAND,
+		DETAILS_DEFAULT_HEIGHT,
+		DETAILS_DEFAULT_WIDTH,
 		ID,
 	} from '$lib/constants';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
-	import type { SolarSystem } from '$lib/models/solar_system';
+	import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 	import type { Tool } from '$lib/models/tool';
 	import { Delaunay } from 'd3-delaunay';
 	import { select } from 'd3-selection';
 	import { zoom, zoomIdentity, type D3ZoomEvent } from 'd3-zoom';
 	import { Boolean, Equal, Match, Option, pipe } from 'effect';
 	import custom_crosshair from './crosshair.svg?inline';
+	import type { Nebula } from '$lib/models/nebula';
+	import type { Project } from '$lib/models/project';
+	import SolarSystemDetails from './solar_system_details.svelte';
+	import ContextMenu from './context_menu.svelte';
 
 	const editor = get_editor();
 	const project = $derived(editor().project);
@@ -68,7 +74,7 @@
 	);
 
 	const delaunay = $derived(
-		solar_systems.length > 0 && editor().step === 'tweak' ?
+		solar_systems.length > 0 ?
 			new Delaunay(
 				solar_systems.flatMap((system) => [
 					system.coordinate.x,
@@ -111,13 +117,14 @@
 			return true;
 		})
 		.on('zoom', (e: D3ZoomEvent<SVGSVGElement, unknown>) => {
+			context_menu_data = Option.none();
 			transform = e.transform;
 		});
 	$effect(() => {
 		if (svg) select(svg).call(zoom_behavior);
 	});
 
-	function get_mouse_coordinates(event: MouseEvent) {
+	function get_mouse_coordinates(event: { clientX: number; clientY: number }) {
 		if (container == null) throw new Error('null canvas container');
 		const bbox = container.getBoundingClientRect();
 		const container_coordinate = Coordinate.make({
@@ -159,6 +166,55 @@
 	const custom_cursor = `url("${custom_crosshair}") 10 10, crosshair`;
 	const warning_pattern_size = 20;
 	const warning_pattern_stripe_size = 5;
+
+	let context_menu_data = $state.raw<
+		Option.Option<{
+			solar_system: Option.Option<SolarSystem>;
+			nebulas: Nebula[];
+			coordinate: Coordinate;
+			coordinate_has_solar_system: boolean;
+		}>
+	>(Option.none());
+
+	function update_context_menu_data(project: Project, coordinate: Coordinate) {
+		const coordinate_has_solar_system = project.solar_systems.some(
+			(solar_system) =>
+				Equal.equals(solar_system.coordinate, coordinate.to_rounded()),
+		);
+		let solar_system: Option.Option<SolarSystem> = Option.none();
+		if (delaunay) {
+			const solar_system_index = delaunay.find(coordinate.x, coordinate.y);
+			solar_system = Option.fromNullable(
+				project.solar_systems[solar_system_index],
+			);
+		}
+		const nebulas = project.nebulas.filter(
+			(nebula) => nebula.coordinate.distance_to(coordinate) <= nebula.radius,
+		);
+		context_menu_data = Option.some({
+			coordinate,
+			coordinate_has_solar_system,
+			nebulas,
+			solar_system,
+		});
+	}
+
+	let details_position = $state({
+		x: document.body.clientWidth / 2 - DETAILS_DEFAULT_WIDTH / 2,
+		y: document.body.clientHeight / 2 - DETAILS_DEFAULT_HEIGHT / 2,
+	});
+	let details_size = $state({
+		width: DETAILS_DEFAULT_WIDTH,
+		height: DETAILS_DEFAULT_HEIGHT,
+	});
+	let details_opened_solar_system_id = $state.raw<Option.Option<SolarSystemId>>(
+		Option.none(),
+	);
+	const details_opened_solar_system = $derived(
+		Option.flatMap(details_opened_solar_system_id, (value) =>
+			editor().project.get_solar_system(value),
+		),
+	);
 </script>
 
 <svelte:document
@@ -186,6 +242,16 @@
 		}
 	}}
 />
+
+<SolarSystemDetails
+	solar_system_id={details_opened_solar_system_id}
+	on_close_requested={() => {
+		details_opened_solar_system_id = Option.none();
+	}}
+	bind:position={details_position}
+	bind:size={details_size}
+/>
+
 <main
 	id={ID.canvas}
 	bind:this={container}
@@ -232,6 +298,12 @@
 		},
 	}}
 	onmousedown={(e) => {
+		if (Option.isSome(context_menu_data)) {
+			if (e.button === 2 && Option.isSome(mouse_coordinates)) {
+				update_context_menu_data(project, mouse_coordinates.value.canvas);
+			}
+			return;
+		}
 		if (e.button !== 0) return;
 		if (Option.isSome(current_tool)) {
 			pipe(
@@ -262,7 +334,7 @@
 			Option.map((value) => value.snap_to_solar_system),
 			Option.getOrElse(() => false),
 		);
-		if (delaunay && snap_to_solar_system) {
+		if (delaunay) {
 			const solar_system_index = delaunay.find(
 				coordinates.canvas.x,
 				coordinates.canvas.y,
@@ -301,258 +373,311 @@
 		snapped_solar_system = Option.none();
 	}}
 >
-	<svg
-		bind:this={svg}
-		class="w-full h-full"
-		viewBox="0 0 {CANVAS_WIDTH} {CANVAS_HEIGHT}"
-		width={CANVAS_WIDTH}
-		height={CANVAS_HEIGHT}
+	<ContextMenu
+		data={context_menu_data}
+		on_open={() => {
+			if (Option.isSome(mouse_coordinates)) {
+				update_context_menu_data(project, mouse_coordinates.value.canvas);
+			}
+		}}
+		on_close={() => {
+			context_menu_data = Option.none();
+		}}
+		ctx={ctx!}
+		open_solar_system_details={(id) => {
+			details_opened_solar_system_id = Option.some(id);
+		}}
 	>
-		<g transform="translate({transform.x},{transform.y}) scale({transform.k})">
-			<foreignObject x="0" y="0" width={CANVAS_WIDTH} height={CANVAS_HEIGHT}>
-				<canvas
-					bind:this={canvas}
-					width={CANVAS_WIDTH}
-					height={CANVAS_HEIGHT}
-					style:opacity={editor().current_step_canvas_opacity}
-				></canvas>
-			</foreignObject>
-			{#if editor().view_settings.show_center_mark}
-				<path
-					d="M {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 - CENTER_MARK_SIZE}
-					   L {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 + CENTER_MARK_SIZE}
-					   M {CANVAS_WIDTH / 2 - CENTER_MARK_SIZE} {CANVAS_HEIGHT / 2}
-					   L {CANVAS_WIDTH / 2 + CENTER_MARK_SIZE} {CANVAS_HEIGHT / 2}"
-					fill="none"
-					class="stroke-secondary-500"
-					stroke-width="1"
-				/>
-			{/if}
-			{#if editor().view_settings.show_map_limit}
-				{@const pattern_size = 20}
-				{@const stripe_size = 5}
+		<svg
+			bind:this={svg}
+			class="w-full h-full"
+			viewBox="0 0 {CANVAS_WIDTH} {CANVAS_HEIGHT}"
+			width={CANVAS_WIDTH}
+			height={CANVAS_HEIGHT}
+		>
+			<g
+				transform="translate({transform.x},{transform.y}) scale({transform.k})"
+			>
+				<foreignObject x="0" y="0" width={CANVAS_WIDTH} height={CANVAS_HEIGHT}>
+					<canvas
+						bind:this={canvas}
+						width={CANVAS_WIDTH}
+						height={CANVAS_HEIGHT}
+						style:opacity={editor().current_step_canvas_opacity}
+					></canvas>
+				</foreignObject>
+				{#if editor().view_settings.show_center_mark}
+					<path
+						d="M {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 - CENTER_MARK_SIZE}
+						   L {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 + CENTER_MARK_SIZE}
+						   M {CANVAS_WIDTH / 2 - CENTER_MARK_SIZE} {CANVAS_HEIGHT / 2}
+						   L {CANVAS_WIDTH / 2 + CENTER_MARK_SIZE} {CANVAS_HEIGHT / 2}"
+						fill="none"
+						class="stroke-secondary-500"
+						stroke-width="1"
+					/>
+				{/if}
+				{#if editor().view_settings.show_map_limit}
+					{@const pattern_size = 20}
+					{@const stripe_size = 5}
+					<pattern
+						id="map_limit_pattern"
+						patternUnits="userSpaceOnUse"
+						patternTransform="rotate(-45)"
+						height={pattern_size}
+						width={pattern_size}
+					>
+						<rect height={pattern_size} width={pattern_size} />
+						<rect
+							height={stripe_size}
+							width={pattern_size}
+							class="fill-error-500/25"
+						/>
+					</pattern>
+					<path
+						d="M -1000000 -1000000
+						   H 1000000
+						   V 1000000
+						   H-1000000
+						   Z
+						   M -1 -1
+						   v {CANVAS_HEIGHT + 2}
+						   h {CANVAS_WIDTH + 2}
+						   v-{CANVAS_HEIGHT + 2}
+						   Z"
+						class="stroke-error-500"
+						fill="url(#map_limit_pattern)"
+						stroke-width="2"
+					/>
+				{/if}
 				<pattern
-					id="map_limit_pattern"
+					id="warning_pattern"
 					patternUnits="userSpaceOnUse"
 					patternTransform="rotate(-45)"
-					height={pattern_size}
-					width={pattern_size}
-				>
-					<rect height={pattern_size} width={pattern_size} />
-					<rect
-						height={stripe_size}
-						width={pattern_size}
-						class="fill-error-500/25"
-					/>
-				</pattern>
-				<path
-					d="M -1000000 -1000000
-					   H 1000000
-					   V 1000000
-					   H-1000000
-					   Z
-					   M -1 -1
-					   v {CANVAS_HEIGHT + 2}
-					   h {CANVAS_WIDTH + 2}
-					   v-{CANVAS_HEIGHT + 2}
-					   Z"
-					class="stroke-error-500"
-					fill="url(#map_limit_pattern)"
-					stroke-width="2"
-				/>
-			{/if}
-			<pattern
-				id="warning_pattern"
-				patternUnits="userSpaceOnUse"
-				patternTransform="rotate(-45)"
-				height={warning_pattern_size}
-				width={warning_pattern_size}
-			>
-				<rect
 					height={warning_pattern_size}
 					width={warning_pattern_size}
-					fill="none"
-				/>
-				<rect
-					height={warning_pattern_stripe_size}
-					width={warning_pattern_size}
-					class="fill-warning-500/25"
-				/>
-			</pattern>
-			{#if editor().view_settings.show_l_cluster}
-				<circle
-					cx={CANVAS_WIDTH / 2 + 420}
-					cy={CANVAS_HEIGHT / 2 - 420}
-					r={70}
-					class="stroke-warning-500"
-					fill="url(#warning_pattern)"
-					stroke-width="2"
-				/>
-				<text
-					x={CANVAS_WIDTH / 2 + 420}
-					y={CANVAS_HEIGHT / 2 - 420}
-					class="fill-warning-500"
-					dominant-baseline="middle"
-					text-anchor="middle"
-					font-size={24}
 				>
-					L-Cluster
-				</text>
-			{/if}
-			{#if editor().view_settings.show_giga_core}
-				<circle
-					cx={CANVAS_WIDTH / 2}
-					cy={CANVAS_HEIGHT / 2}
-					r={100}
-					class="stroke-warning-500"
-					fill="url(#warning_pattern)"
-					stroke-width="2"
-				/>
-			{/if}
-			{#if editor().view_settings.show_giga_aeternum}
-				<circle
-					cx={CANVAS_WIDTH / 2}
-					cy={CANVAS_HEIGHT / 2}
-					r={65}
-					class="stroke-warning-500"
-					fill="url(#warning_pattern)"
-					stroke-width="2"
-				/>
-			{/if}
-			{#if editor().view_settings.show_giga_core || editor().view_settings.show_giga_aeternum}
-				<text
-					x={CANVAS_WIDTH / 2}
-					y={CANVAS_HEIGHT / 2}
-					class="fill-warning-500"
-					dominant-baseline="middle"
-					text-anchor="middle"
-					font-size={24}
-				>
-					Core
-				</text>
-			{/if}
-			{#if Option.isSome(active_tool) && active_tool.value.render.type === 'stroke'}
-				<path
-					d={stroke_path}
-					fill={active_tool.value.render.color}
-					opacity={'opacity' in active_tool.value.default_settings ?
-						editor().tool_settings[active_tool.value.id].opacity
-					:	1}
-				/>
-			{/if}
-			{#each nebulas as nebula (nebula.key)}
-				<circle
-					cx={nebula.coordinate.x}
-					cy={nebula.coordinate.y}
-					r={nebula.radius}
-					fill="var(--color-tertiary-500)"
-					fill-opacity="0.25"
-					stroke="var(--color-tertiary-500)"
-					stroke-width="1"
-					stroke-opacity="0.5"
-				/>
-			{/each}
-			{#each hyperlanes as connection (connection.key)}
-				{@const from = project.get_solar_system(connection.a).coordinate}
-				{@const to = project.get_solar_system(connection.b).coordinate}
-				<line
-					x1={from.x}
-					y1={from.y}
-					x2={to.x}
-					y2={to.y}
-					stroke={CANVAS_BACKGROUND}
-					stroke-opacity="0.5"
-					stroke-width="3"
-				/>
-				<line
-					x1={from.x}
-					y1={from.y}
-					x2={to.x}
-					y2={to.y}
-					stroke="#FFFFFF"
-					stroke-opacity="0.5"
-					stroke-width="1"
-				/>
-			{/each}
-			{#each wormholes as connection (connection.key)}
-				{@const from = project.get_solar_system(connection.a).coordinate}
-				{@const to = project.get_solar_system(connection.b).coordinate}
-				<line
-					x1={from.x}
-					y1={from.y}
-					x2={to.x}
-					y2={to.y}
-					stroke="var(--color-tertiary-600)"
-					stroke-opacity="1"
-					stroke-width="1"
-					stroke-dasharray="3"
-				/>
-			{/each}
-			{#each solar_systems as solar_system (solar_system.id)}
-				{#if Option.match( active_tool, { onNone: () => Option.isSome(current_tool) && current_tool.value.snap_to_solar_system && Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)) }, )}
-					<circle
-						cx={solar_system.coordinate.x}
-						cy={solar_system.coordinate.y}
-						r="5"
+					<rect
+						height={warning_pattern_size}
+						width={warning_pattern_size}
 						fill="none"
-						stroke="var(--color-primary-500)"
-						stroke-width="1"
 					/>
-				{/if}
-				{#if solar_system.spawn_type === 'preferred'}
-					<path
-						d="M {solar_system.coordinate.x} {solar_system.coordinate.y - 6}
-						   l 2 4
-						   l 4 2
-						   l -4 2
-						   l -2 4
-						   l -2 -4
-						   l -4 -2
-						   l 4 -2
-						   Z"
-						fill="var(--color-secondary-500)"
-						stroke="var(--color-surface-950)"
-						stroke-width="1"
+					<rect
+						height={warning_pattern_stripe_size}
+						width={warning_pattern_size}
+						class="fill-warning-500/25"
 					/>
-				{:else}
+				</pattern>
+				{#if editor().view_settings.show_l_cluster}
 					<circle
-						cx={solar_system.coordinate.x}
-						cy={solar_system.coordinate.y}
-						r={2.5}
-						fill={solar_system.spawn_type === 'disabled' ?
-							'var(--color-surface-50)'
-						:	'var(--color-secondary-500)'}
-						stroke="var(--color-surface-950)"
-						stroke-width="1"
+						cx={CANVAS_WIDTH / 2 + 420}
+						cy={CANVAS_HEIGHT / 2 - 420}
+						r={70}
+						class="stroke-warning-500"
+						fill="url(#warning_pattern)"
+						stroke-width="2"
+					/>
+					<text
+						x={CANVAS_WIDTH / 2 + 420}
+						y={CANVAS_HEIGHT / 2 - 420}
+						class="fill-warning-500"
+						dominant-baseline="middle"
+						text-anchor="middle"
+						font-size={24}
+					>
+						L-Cluster
+					</text>
+				{/if}
+				{#if editor().view_settings.show_giga_core}
+					<circle
+						cx={CANVAS_WIDTH / 2}
+						cy={CANVAS_HEIGHT / 2}
+						r={100}
+						class="stroke-warning-500"
+						fill="url(#warning_pattern)"
+						stroke-width="2"
 					/>
 				{/if}
-			{/each}
-			{#if Option.isSome(active_tool) && active_tool.value.render.type === 'line' && tool_points.length > 1}
-				<line
-					x1={tool_points.at(0)?.x}
-					y1={tool_points.at(0)?.y}
-					x2={tool_points.at(-1)?.x}
-					y2={tool_points.at(-1)?.y}
-					stroke={active_tool.value.render.color}
-				/>
-			{/if}
-		</g>
-	</svg>
+				{#if editor().view_settings.show_giga_aeternum}
+					<circle
+						cx={CANVAS_WIDTH / 2}
+						cy={CANVAS_HEIGHT / 2}
+						r={65}
+						class="stroke-warning-500"
+						fill="url(#warning_pattern)"
+						stroke-width="2"
+					/>
+				{/if}
+				{#if editor().view_settings.show_giga_core || editor().view_settings.show_giga_aeternum}
+					<text
+						x={CANVAS_WIDTH / 2}
+						y={CANVAS_HEIGHT / 2}
+						class="fill-warning-500"
+						dominant-baseline="middle"
+						text-anchor="middle"
+						font-size={24}
+					>
+						Core
+					</text>
+				{/if}
+				{#if Option.isSome(active_tool) && active_tool.value.render.type === 'stroke'}
+					<path
+						d={stroke_path}
+						fill={active_tool.value.render.color}
+						opacity={'opacity' in active_tool.value.default_settings ?
+							editor().tool_settings[active_tool.value.id].opacity
+						:	1}
+					/>
+				{/if}
+				{#each nebulas as nebula (nebula.key)}
+					<circle
+						cx={nebula.coordinate.x}
+						cy={nebula.coordinate.y}
+						r={nebula.radius}
+						fill="var(--color-tertiary-500)"
+						fill-opacity="0.25"
+						stroke="var(--color-tertiary-500)"
+						stroke-width="1"
+						stroke-opacity="0.5"
+					/>
+				{/each}
+				{#each hyperlanes as connection (connection.key)}
+					{@const from = project.get_solar_system_unsafe(
+						connection.a,
+					).coordinate}
+					{@const to = project.get_solar_system_unsafe(connection.b).coordinate}
+					<line
+						x1={from.x}
+						y1={from.y}
+						x2={to.x}
+						y2={to.y}
+						stroke={CANVAS_BACKGROUND}
+						stroke-opacity="0.5"
+						stroke-width="3"
+					/>
+					<line
+						x1={from.x}
+						y1={from.y}
+						x2={to.x}
+						y2={to.y}
+						stroke="#FFFFFF"
+						stroke-opacity="0.5"
+						stroke-width="1"
+					/>
+				{/each}
+				{#each wormholes as connection (connection.key)}
+					{@const from = project.get_solar_system_unsafe(
+						connection.a,
+					).coordinate}
+					{@const to = project.get_solar_system_unsafe(connection.b).coordinate}
+					<line
+						x1={from.x}
+						y1={from.y}
+						x2={to.x}
+						y2={to.y}
+						stroke="var(--color-tertiary-600)"
+						stroke-opacity="1"
+						stroke-width="1"
+						stroke-dasharray="3"
+					/>
+				{/each}
+
+				<!-- connecting line from details box to solar system -->
+				{#if Option.isSome(details_opened_solar_system)}
+					{@const solar_system = details_opened_solar_system.value}
+					{@const details_coordinate = get_mouse_coordinates({
+						clientX: details_position.x + details_size.width / 2,
+						clientY: details_position.y + details_size.height / 2,
+					}).canvas}
+					<line
+						class="stroke-primary-500"
+						stroke-width={3 / transform.k}
+						x1={solar_system.coordinate.x}
+						y1={solar_system.coordinate.y}
+						x2={details_coordinate.x}
+						y2={details_coordinate.y}
+					/>
+				{/if}
+
+				{#each solar_systems as solar_system (solar_system.id)}
+					{#if Option.match( context_menu_data, { onNone: () => Option.match( active_tool, { onNone: () => Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)) }, ), onSome: (value) => Option.contains(value.solar_system, solar_system) }, )}
+						<circle
+							cx={solar_system.coordinate.x}
+							cy={solar_system.coordinate.y}
+							r="5"
+							fill="none"
+							stroke="var(--color-primary-500)"
+							stroke-width="1"
+						/>
+					{/if}
+					{#if solar_system.spawn_type === 'preferred'}
+						<path
+							d="M {solar_system.coordinate.x} {solar_system.coordinate.y - 6}
+							   l 2 4
+							   l 4 2
+							   l -4 2
+							   l -2 4
+							   l -2 -4
+							   l -4 -2
+							   l 4 -2
+							   Z"
+							fill="var(--color-secondary-500)"
+							stroke="var(--color-surface-950)"
+							stroke-width="1"
+						/>
+					{:else}
+						<circle
+							cx={solar_system.coordinate.x}
+							cy={solar_system.coordinate.y}
+							r={2.5}
+							fill={solar_system.spawn_type === 'disabled' ?
+								'var(--color-surface-50)'
+							:	'var(--color-secondary-500)'}
+							stroke="var(--color-surface-950)"
+							stroke-width="1"
+						/>
+					{/if}
+				{/each}
+				{#if Option.isSome(active_tool) && active_tool.value.render.type === 'line' && tool_points.length > 1}
+					<line
+						x1={tool_points.at(0)?.x}
+						y1={tool_points.at(0)?.y}
+						x2={tool_points.at(-1)?.x}
+						y2={tool_points.at(-1)?.y}
+						stroke={active_tool.value.render.color}
+					/>
+				{/if}
+			</g>
+		</svg>
+	</ContextMenu>
+
 	{#if Option.isSome(mouse_coordinates)}
 		{@const coordinates = Option.getOrThrow(mouse_coordinates)}
 		<div
 			class={[
-				'absolute bottom-0 bg-surface-50/75 text-surface-950 px-1 pointer-events-none',
+				'absolute bottom-0 bg-surface-50/75 text-surface-950 px-1 pointer-events-none text-xs',
 				{
 					'right-0':
-						coordinates.container.x < 100 &&
-						coordinates.container.y > container_height - 24,
+						coordinates.container.x < 240 &&
+						coordinates.container.y > container_height - 36,
 				},
 			]}
 		>
 			{Math.round(coordinates.stellaris.x)}, {Math.round(
 				coordinates.stellaris.y,
 			)}
+
+			{#if Option.isSome(snapped_solar_system)}
+				{@const stellaris_coordinate =
+					snapped_solar_system.value.coordinate.to_stellaris_coordinate()}
+				<div>
+					closest system
+					{#if Option.isSome(snapped_solar_system.value.name)}
+						<em>{snapped_solar_system.value.name.value}</em>
+					{/if}
+					{stellaris_coordinate.x}, {stellaris_coordinate.y}
+				</div>
+			{/if}
 		</div>
 	{/if}
 </main>

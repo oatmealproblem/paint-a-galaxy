@@ -1,4 +1,4 @@
-import { Array, Iterable, pipe } from 'effect';
+import { Array, Iterable, Option, pipe } from 'effect';
 
 import {
 	FALLEN_EMPIRE_SPAWN_RADIUS,
@@ -29,7 +29,7 @@ const COMMON = `
 	num_wormhole_pairs_default = 1
 	num_gateways = { min = 0 max = 5 }
 	num_gateways_default = 1
-	num_hyperlanes = { min=0.5 max= 3 }
+	num_hyperlanes = { min= 0.5 max= 3 }
 	num_hyperlanes_default = 1
 	colonizable_planet_odds = 1.0
 	primitive_odds = 1.0
@@ -161,23 +161,30 @@ export function generate_stellaris_galaxy(project: Project): string {
 	);
 
 	const systems_entries = project.solar_systems
-		.map((star, i) => {
-			const basics = `id = "${star.id}" position = { x = ${star.coordinate.to_stellaris_coordinate().x} y = ${star.coordinate.to_stellaris_coordinate().y} }`;
+		.map((solar_system, i) => {
+			const basics = `id = "${solar_system.id}" position = { x = ${solar_system.coordinate.to_stellaris_coordinate().x} y = ${solar_system.coordinate.to_stellaris_coordinate().y} }`;
 
+			const name = solar_system.name.pipe(
+				Option.match({
+					onNone: () => '',
+					onSome: (value) =>
+						`name = "${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`,
+				}),
+			);
 			let initializer = '';
 			let spawn_weight = '';
-			if (potential_home_stars.includes(star)) {
+			if (potential_home_stars.includes(solar_system)) {
 				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
 				const params =
-					preferred_home_stars.includes(star) ?
-						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(star)}|`
+					preferred_home_stars.includes(solar_system) ?
+						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
-			} else if (systems_1_jump_from_spawn.has(star.id)) {
+			} else if (systems_1_jump_from_spawn.has(solar_system.id)) {
 				// all systems with 1 of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
 				initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
-			} else if (systems_2_jumps_from_spawn.has(star.id)) {
+			} else if (systems_2_jumps_from_spawn.has(solar_system.id)) {
 				// in a random galaxy, all systems within 2 of a spawn also get the "empire_cluster" effect
 				// however, not all spawn points will actually be used, so we don't want to overly restrict system spawns, so a random chance is used
 				// the chance is based on the number systems within 2 jumps of a spawn point, so it scaled inversely with the connectedness and number of spawns
@@ -193,7 +200,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 			}
 
 			const this_star_fallen_empire_spawns = fallen_empire_spawns.filter(
-				(fe) => fe.solar_system === star,
+				(fe) => fe.solar_system === solar_system,
 			);
 			const fe_spawn_effect =
 				this_star_fallen_empire_spawns.length > 0 ?
@@ -201,7 +208,8 @@ export function generate_stellaris_galaxy(project: Project): string {
 				:	'';
 
 			const wormhole_index = project.wormholes.findIndex(
-				(connection) => connection.a === star.id || connection.b === star.id,
+				(connection) =>
+					connection.a === solar_system.id || connection.b === solar_system.id,
 			);
 			const wormhole_effect =
 				wormhole_index >= 0 ?
@@ -211,7 +219,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 			const effects = [fe_spawn_effect, wormhole_effect];
 			const effect =
 				effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
-			return `\tsystem = { ${basics} ${initializer} ${spawn_weight} ${effect} }`;
+			return `\tsystem = { ${basics} ${name} ${initializer} ${spawn_weight} ${effect} }`;
 		})
 		.join('\n');
 

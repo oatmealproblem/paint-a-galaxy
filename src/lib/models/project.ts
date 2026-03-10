@@ -38,12 +38,15 @@ export class Project extends Schema.Class<Project>('Project')({
 		}),
 	),
 }) {
-	get_solar_system(id: SolarSystemId): SolarSystem {
+	get_solar_system(id: SolarSystemId): Option.Option<SolarSystem> {
 		return pipe(
 			this.solar_systems,
 			Array.findFirst((solar_system) => solar_system.id === id),
-			Option.getOrThrow,
 		);
+	}
+
+	get_solar_system_unsafe(id: SolarSystemId): SolarSystem {
+		return Option.getOrThrow(this.get_solar_system(id));
 	}
 
 	static async make_empty(name: string) {

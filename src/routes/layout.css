@@ -5,8 +5,6 @@
 @import '@skeletonlabs/skeleton-svelte';
 @import '@skeletonlabs/skeleton/themes/wintry';
 
-@custom-variant dark (&:where(.dark, .dark *));
-
 :disabled,
 [data-disabled] {
 	cursor: not-allowed;
