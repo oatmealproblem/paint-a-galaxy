@@ -233,7 +233,7 @@ const spawn_preferred_toggle: _Tool<
 	id: 'spawn_preferred_toggle',
 	name: 'Toggle Preferred Spawn',
 	description:
-		'Mark/unmark preferred spawn. These are used first (ie by the player; unreliable in multiplayer).',
+		'Mark/unmark preferred spawn. Right-click the map and Open Details for more info and options.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,

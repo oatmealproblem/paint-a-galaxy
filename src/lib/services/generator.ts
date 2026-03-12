@@ -9,7 +9,6 @@ import {
 	RANDOM_NEBULA_MAX_RADIUS,
 	RANDOM_NEBULA_MIN_DISTANCE,
 	RANDOM_NEBULA_MIN_RADIUS,
-	SPAWNS_PER_MAX_AI_EMPIRE,
 } from '$lib/constants';
 import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 import { Coordinate } from '$lib/models/coordinate';
@@ -299,10 +298,8 @@ export class Generator extends Context.Tag('Generator')<
 			});
 
 			// find home stars
-			// 6 per 200 is the vanilla num_empires max, but somethings cause additional empires to spawn (players, some origins), so lets increase by 50%
-			const num_spawns = Math.round(
-				(project.solar_systems.length / 200) * 6 * SPAWNS_PER_MAX_AI_EMPIRE,
-			);
+			// 6 per 200 is the vanilla num_empires max
+			const num_spawns = Math.round((project.solar_systems.length / 200) * 6);
 			const new_spawns: SolarSystem[] = [];
 			const start_index = Math.floor(
 				Math.random() * (project.solar_systems.length - num_spawns),

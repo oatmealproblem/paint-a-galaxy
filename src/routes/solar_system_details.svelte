@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounced_value } from '$lib/attachments/debounced_value.svelte';
 	import { Icons } from '$lib/components/icons';
+	import Info from '$lib/components/info.svelte';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Action } from '$lib/models/action';
 
@@ -115,7 +116,42 @@
 							/>
 						</label>
 						<label>
-							<span class="label-text">Spawn</span>
+							<span class="label-text flex gap-1">
+								Spawn
+								<Info>
+									<dl class="flex flex-col gap-1">
+										<div class="ms-4 -indent-4">
+											<dt class="font-bold inline">Disabled</dt>
+											<dd class="inline">Empires will not spawn here.</dd>
+										</div>
+										<div class="ms-4 -indent-4">
+											<dt class="font-bold inline">Enabled</dt>
+											<dd class="inline">Empires can spawn here.</dd>
+										</div>
+										<div class="ms-4 -indent-4">
+											<dt class="font-bold inline">Preferred</dt>
+											<dd class="inline">
+												Empires will spawn here before using normal <em>
+													Enabled
+												</em>
+												locations. In single player, the player is first, so if there's
+												only one
+												<em>Preferred</em>
+												location, they will start there.
+											</dd>
+										</div>
+										<div class="ms-4 -indent-4">
+											<dt class="font-bold inline">Reserved</dt>
+											<dd class="inline">
+												Empires will only spawn here if they have the matching
+												species trait (eg Reserved Spawn A). This can be used to
+												precisely control the locations of all players and
+												custom-designed AI empires.
+											</dd>
+										</div>
+									</dl>
+								</Info>
+							</span>
 							<select
 								class="select ring-surface-300-700 bg-surface-200-800"
 								value={solar_system.value.spawn_type}
@@ -125,10 +161,8 @@
 											old_value: solar_system.value,
 											new_value: new SolarSystem({
 												...solar_system.value,
-												spawn_type: e.currentTarget.value as
-													| 'disabled'
-													| 'enabled'
-													| 'preferred',
+												spawn_type: e.currentTarget
+													.value as SolarSystem['spawn_type'],
 											}),
 										}),
 									])}
@@ -136,6 +170,32 @@
 								<option value="disabled">Disabled</option>
 								<option value="enabled">Enabled</option>
 								<option value="preferred">Preferred</option>
+								<option value="reserved_a">Reserved A</option>
+								<option value="reserved_b">Reserved B</option>
+								<option value="reserved_c">Reserved C</option>
+								<option value="reserved_d">Reserved D</option>
+								<option value="reserved_e">Reserved E</option>
+								<option value="reserved_f">Reserved F</option>
+								<option value="reserved_g">Reserved G</option>
+								<option value="reserved_h">Reserved H</option>
+								<option value="reserved_i">Reserved I</option>
+								<option value="reserved_j">Reserved J</option>
+								<option value="reserved_k">Reserved K</option>
+								<option value="reserved_l">Reserved L</option>
+								<option value="reserved_m">Reserved M</option>
+								<option value="reserved_n">Reserved N</option>
+								<option value="reserved_o">Reserved O</option>
+								<option value="reserved_p">Reserved P</option>
+								<option value="reserved_q">Reserved Q</option>
+								<option value="reserved_r">Reserved R</option>
+								<option value="reserved_s">Reserved S</option>
+								<option value="reserved_t">Reserved T</option>
+								<option value="reserved_u">Reserved U</option>
+								<option value="reserved_v">Reserved V</option>
+								<option value="reserved_w">Reserved W</option>
+								<option value="reserved_x">Reserved X</option>
+								<option value="reserved_y">Reserved Y</option>
+								<option value="reserved_z">Reserved Z</option>
 							</select>
 						</label>
 					{/if}

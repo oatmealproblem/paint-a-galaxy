@@ -1,0 +1,22 @@
+trait_painted_galaxy_reserved_spawn_$VALUE$ = {
+	cost = 0
+	icon = "gfx/interface/icons/traits/trait_painted_galaxy_reserved_spawn_$VALUE$.dds"
+
+	allowed_archetypes = { BIOLOGICAL LITHOID MACHINE }
+	category = normal
+	initial = yes
+	randomized = no
+	hidden = yes
+	ai_weight = {
+		weight = 0
+	}
+	species_potential_add = {
+		always = no
+	}
+	species_possible_remove = {
+		always = no
+	}
+	species_possible_merge_add = {
+		always = no
+	}
+}

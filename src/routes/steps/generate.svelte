@@ -157,7 +157,7 @@
 			<Switch.Thumb />
 		</Switch.Control>
 		<Switch.Label class="flex gap-1">
-			Allow Disconencted
+			Allow Disconnected
 			<Info>
 				If enabled, hyperlanes longer than Max Distance are removed even if it
 				would result in disconnected systems.

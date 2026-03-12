@@ -9,11 +9,14 @@ on_game_start = {
 		painted_galaxy_guaranteed_colony.1 # spawn guaranteed colonies according to settings
 		painted_galaxy_advanced_start.1 # create advanced starts (should happen after creating guaranteed colonies)
 		painted_galaxy_msi.1 # spawn missing MSI systems (should happen after creating advanced starts)
+		painted_galaxy_reserved_spawn.1 # remove reserved spawn traits
 	}
 }
 
+# this happens before on_game_start
 empire_init_capital_planet = {
 	events = {
+		painted_galaxy_extra_spawn.1 # delete empires that spawned in a system without spawn_weight
 		painted_galaxy_homeworld.1 # correct home planets
 	}
 }

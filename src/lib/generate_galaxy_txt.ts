@@ -3,7 +3,6 @@ import { Array, Iterable, Option, pipe } from 'effect';
 import {
 	FALLEN_EMPIRE_SPAWN_RADIUS,
 	CANVAS_HEIGHT,
-	SPAWNS_PER_MAX_AI_EMPIRE,
 	CANVAS_WIDTH,
 } from './constants';
 import type { Project } from './models/project';
@@ -94,8 +93,8 @@ export function generate_stellaris_galaxy(project: Project): string {
 	);
 
 	const ai_empire_settings = `
- 	num_empires = { min = 0 max = ${Math.round(potential_home_stars.length / SPAWNS_PER_MAX_AI_EMPIRE)} }	#limits player customization; AI empires don't account for all spawns, so we need to set the max lower than the number of spawn points
-	num_empire_default = ${Math.round(potential_home_stars.length / SPAWNS_PER_MAX_AI_EMPIRE / 2)}
+ 	num_empires = { min = 0 max = ${potential_home_stars.length - 1} }	# reduce max by 1 to save a spot for the player
+	num_empire_default = ${Math.round((potential_home_stars.length - 1) / 2)}
 	`;
 
 	let size_based_settings = TINY;
@@ -176,7 +175,9 @@ export function generate_stellaris_galaxy(project: Project): string {
 			if (potential_home_stars.includes(solar_system)) {
 				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
 				const params =
-					preferred_home_stars.includes(solar_system) ?
+					solar_system.spawn_type.startsWith('reserved') ?
+						`|RESERVED|${solar_system.spawn_type.at(-1)}|RANDOM_MODULO|3|RANDOM_VALUE|${i % 3}|`
+					: solar_system.spawn_type === 'preferred' ?
 						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;

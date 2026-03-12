@@ -11,7 +11,7 @@
 		<Icons.Info class="text-secondary-800-200" size={16} />
 	</Tooltip.Trigger>
 	<Portal>
-		<Tooltip.Positioner>
+		<Tooltip.Positioner class="z-100!">
 			<Tooltip.Content
 				class="card p-2 preset-filled-surface-950-50 text-sm max-w-xs"
 			>

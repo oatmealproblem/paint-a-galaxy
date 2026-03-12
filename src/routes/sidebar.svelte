@@ -53,14 +53,16 @@
 </script>
 
 {#snippet tweak_description()}
-	Edit specific stars, hyperlanes, and more. When you're done, click Download
-	and follow the instructions on <a
-		class="anchor text-primary-700-300"
-		target="_blank"
-		href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
-	>
-		the Workshop page.
-	</a>
+	<p>
+		Manually edit using the tools below, or right-click the map for more. Then
+		click Download and follow <a
+			class="anchor text-primary-700-300"
+			target="_blank"
+			href="https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115"
+		>
+			the instructions on the Workshop.
+		</a>
+	</p>
 {/snippet}
 
 <aside class="w-96 p-4 flex-none overflow-auto">
@@ -105,9 +107,9 @@
 
 		{#each steps as step, i (step.id)}
 			<Steps.Content index={i} class="grow flex flex-col gap-4">
-				<p class="text-sm text-surface-900-100">
+				<div class="text-sm text-surface-900-100 flex flex-col gap-2">
 					{#if typeof step.description === 'string'}{step.description}{:else}{@render step.description()}{/if}
-				</p>
+				</div>
 				<step.content />
 			</Steps.Content>
 		{/each}

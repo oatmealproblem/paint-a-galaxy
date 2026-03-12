@@ -10,8 +10,6 @@ export const DETAILS_DEFAULT_HEIGHT = 320;
 export const CENTER_MARK_SIZE = 10;
 // search for empty circles to dynamically spawn FEs on game start
 export const FALLEN_EMPIRE_SPAWN_RADIUS = 50;
-// AI empires don't account for all spawns, so we need to have more spawn locations than allowed AI empires
-export const SPAWNS_PER_MAX_AI_EMPIRE = 1.5;
 // number of nebulas to generate when randomizing
 export const NUM_RANDOM_NEBULAS = 6;
 // min and max radius of random nebulas

@@ -604,10 +604,15 @@
 						<circle
 							cx={solar_system.coordinate.x}
 							cy={solar_system.coordinate.y}
-							r="5"
+							r={(
+								solar_system.spawn_type === 'disabled' ||
+								solar_system.spawn_type === 'enabled'
+							) ?
+								5
+							:	7}
 							fill="none"
 							stroke="var(--color-primary-500)"
-							stroke-width="1"
+							stroke-width="2"
 						/>
 					{/if}
 					{#if solar_system.spawn_type === 'preferred'}
@@ -625,6 +630,42 @@
 							stroke="var(--color-surface-950)"
 							stroke-width="1"
 						/>
+					{:else if solar_system.spawn_type.startsWith('reserved')}
+						{@const outer_r = 7}
+						{@const outer_dx = outer_r * Math.cos(Math.PI / 6)}
+						{@const outer_dy = outer_r * Math.sin(Math.PI / 6)}
+						{@const inner_r = 4}
+						{@const inner_dx = inner_r * Math.sin(Math.PI / 6)}
+						{@const inner_dy = inner_r * Math.cos(Math.PI / 6)}
+						<path
+							d="
+							M {solar_system.coordinate.x} {solar_system.coordinate.y - outer_r}
+							L {solar_system.coordinate.x - inner_dx} {solar_system.coordinate.y - inner_dy}
+							L {solar_system.coordinate.x - outer_dx} {solar_system.coordinate.y - outer_dy}
+							L {solar_system.coordinate.x - inner_r} {solar_system.coordinate.y}
+							L {solar_system.coordinate.x - outer_dx} {solar_system.coordinate.y + outer_dy}
+							L {solar_system.coordinate.x - inner_dx} {solar_system.coordinate.y + inner_dy}
+							L {solar_system.coordinate.x} {solar_system.coordinate.y + outer_r}
+							L {solar_system.coordinate.x + inner_dx} {solar_system.coordinate.y + inner_dy}
+							L {solar_system.coordinate.x + outer_dx} {solar_system.coordinate.y + outer_dy}
+							L {solar_system.coordinate.x + inner_r} {solar_system.coordinate.y}
+							L {solar_system.coordinate.x + outer_dx} {solar_system.coordinate.y - outer_dy}
+							L {solar_system.coordinate.x + inner_dx} {solar_system.coordinate.y - inner_dy}
+							Z"
+							fill="var(--color-secondary-500)"
+							stroke="var(--color-surface-950)"
+							stroke-width="1"
+						/>
+						<text
+							x={solar_system.coordinate.x}
+							y={solar_system.coordinate.y + 0.5}
+							class="fill-secondary-950 font-bold"
+							dominant-baseline="middle"
+							text-anchor="middle"
+							font-size={7}
+						>
+							{solar_system.spawn_type.at(-1)?.toUpperCase()}
+						</text>
 					{:else}
 						<circle
 							cx={solar_system.coordinate.x}

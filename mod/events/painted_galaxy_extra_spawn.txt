@@ -1,0 +1,28 @@
+namespace = painted_galaxy_extra_spawn
+
+# delete empires that spawned without a spawn_weight system
+# ie too many empires were created
+# checks if the starting system is missing the empire_home_system flag
+# extra spawns
+planet_event = {
+	id = painted_galaxy_extra_spawn.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		is_maybe_painted_galaxy = yes
+		solar_system = { NOT = { has_star_flag = empire_home_system } }
+		owner = { is_country_type = default }
+	}
+	immediate = {
+		owner = {
+			log = "Painted Galaxy: Deleting extra empire spawn [This.GetName]"
+			every_controlled_fleet = { delete_fleet = this }
+			every_owned_planet = {
+				every_owned_pop_group = { kill_all_pop = yes }
+				remove_all_buildings = yes
+				destroy_colony = yes
+			}
+			destroy_country = yes
+		}
+	}
+}
