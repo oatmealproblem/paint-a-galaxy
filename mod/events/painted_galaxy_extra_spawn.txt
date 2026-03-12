@@ -4,17 +4,19 @@ namespace = painted_galaxy_extra_spawn
 # ie too many empires were created
 # checks if the starting system is missing the empire_home_system flag
 # extra spawns
-planet_event = {
+event = {
 	id = painted_galaxy_extra_spawn.1
 	is_triggered_only = yes
 	hide_window = yes
 	trigger = {
 		is_maybe_painted_galaxy = yes
-		solar_system = { NOT = { has_star_flag = empire_home_system } }
-		owner = { is_country_type = default }
 	}
 	immediate = {
-		owner = {
+		every_country = {
+			limit = {
+				is_country_type = default
+				capital_scope.solar_system = { NOT = { has_star_flag = empire_home_system } }
+			}
 			log = "Painted Galaxy: Deleting extra empire spawn [This.GetName]"
 			every_controlled_fleet = { delete_fleet = this }
 			every_owned_planet = {

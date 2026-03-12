@@ -8,6 +8,8 @@ planet_event = {
 	hide_window = yes
 	trigger = {
 		is_maybe_painted_galaxy = yes
+		# don't fix homeworlds for extra spawns
+		solar_system = { has_star_flag = empire_home_system }
 	}
 	immediate = {
 		if = { # resource consolidation, ie machine world start

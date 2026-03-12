@@ -10,32 +10,32 @@ event = {
 	}
 	immediate = {
 		every_galaxy_species = {
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_a } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_a } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_b } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_b } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_c } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_c } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_d } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_d } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_e } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_e } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_f } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_f } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_g } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_g } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_h } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_h } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_i } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_i } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_j } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_j } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_k } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_k } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_l } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_l } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_m } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_m } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_n } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_n } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_o } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_o } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_p } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_p } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_q } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_q } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_r } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_r } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_s } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_s } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_t } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_t } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_u } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_u } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_v } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_v } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_w } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_w } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_x } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_x } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_y } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_y } }
-			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_z } modify_species = { species = this remove_trait = trait_painted_galaxy_reserved_spawn_z } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_a } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_a } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_b } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_b } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_c } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_c } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_d } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_d } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_e } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_e } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_f } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_f } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_g } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_g } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_h } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_h } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_i } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_i } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_j } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_j } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_k } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_k } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_l } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_l } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_m } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_m } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_n } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_n } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_o } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_o } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_p } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_p } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_q } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_q } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_r } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_r } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_s } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_s } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_t } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_t } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_u } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_u } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_v } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_v } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_w } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_w } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_x } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_x } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_y } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_y } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_z } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_z } }
 		}
 	}
 }
