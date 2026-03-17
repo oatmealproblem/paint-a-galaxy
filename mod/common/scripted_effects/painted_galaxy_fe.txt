@@ -52,6 +52,7 @@ painted_galaxy_spawn_fe_system = {
 	}
 }
 
+# copied from vanilla common/fallen_empires/00_fallen_empire.txt
 painted_galaxy_create_materialist_fe = {
 	create_species = {
 		name = random
@@ -65,14 +66,9 @@ painted_galaxy_create_materialist_fe = {
 		modify_species = {
 			species = this
 			add_trait = trait_cybernetic
-		}
-	}
-	if = {
-		limit = {
-			has_machine_age_dlc = yes
-		}
-		last_created_species = {
-			set_random_cybernetic_portrait_effect = yes
+			effect = {
+				set_species_flag = organic_fallen_empire_pop
+			}
 		}
 	}
 	create_country = {
@@ -130,6 +126,9 @@ painted_galaxy_create_spiritualist_fe = {
 	last_created_species = {
 		add_psionic_trait = yes
 	}
+	last_created_species = { # To avoid having to update the psionic effect above
+		set_species_flag = organic_fallen_empire_pop
+	}
 	create_country = {
 		name = random
 		type = fallen_empire
@@ -181,6 +180,9 @@ painted_galaxy_create_xenophile_fe = {
 		traits = random
 		extra_trait_points = 5
 		allow_negative_traits = no
+		effect = {
+			set_species_flag = organic_fallen_empire_pop
+		}
 	}
 	create_country = {
 		name = random
@@ -233,7 +235,10 @@ painted_galaxy_create_xenophobe_fe = {
 		traits = random
 		extra_trait_points = 5
 		allow_negative_traits = no
-		effect = { save_global_event_target_as = fallen_4_species }
+		effect = {
+			save_global_event_target_as = fallen_4_species
+			set_species_flag = organic_fallen_empire_pop
+		}
 	}
 	create_country = {
 		name = random
@@ -351,6 +356,7 @@ painted_galaxy_create_hive_fe = {
 		allow_negative_traits = no
 		effect = {
 			save_global_event_target_as = hive_fe_species
+			set_species_flag = organic_fallen_empire_pop
 		}
 	}
 	random_list = { #Future proofing if we want multiple personalities

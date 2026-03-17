@@ -1,7 +1,7 @@
-version="1.3.1"
+version="1.3.2"
 tags={
 	"Galaxy Generation"
 }
 name="Paint a Galaxy"
-supported_version="v4.2.*"
+supported_version="v4.3.*"
 remote_file_id="3532904115"
