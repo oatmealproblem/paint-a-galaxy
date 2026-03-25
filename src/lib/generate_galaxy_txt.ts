@@ -352,6 +352,9 @@ const WEIGHTED_MISC_SYSTEM_INITIALIZERS = pipe(
 	Iterable.appendAll(Iterable.replicate('binary_init_02', 4)),
 	Iterable.appendAll(Iterable.replicate('trinary_init_01', 3)),
 	Iterable.appendAll(Iterable.replicate('trinary_init_02', 3)),
+	Iterable.appendAll(Iterable.replicate('special_init_01', 2)), // black hole
+	Iterable.appendAll(Iterable.replicate('special_init_08', 2)), // neutron star
+	Iterable.appendAll(Iterable.replicate('special_init_09', 2)), // pulsar
 	Array.fromIterable,
 );
 function get_random_system_basic_system_initializer() {
