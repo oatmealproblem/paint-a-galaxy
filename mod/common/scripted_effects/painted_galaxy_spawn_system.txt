@@ -1,11 +1,12 @@
 painted_galaxy_spawn_connected_system = {
-	# set max_distance (for spawning systems) to 30
+	# set max_distance (for spawning systems) to 60 (halved later on)
 	set_variable = {
 		which = painted_galaxy_max_distance
-		value = 30
+		value = 60
 	}
 	# if any system neighbor is closer, decrease the max_distance
 	every_system = {
+		limit = { NOT = { is_same_value = prev } }
 		export_trigger_value_to_variable = {
 			variable = painted_galaxy_distance_to_origin
 			trigger = distance
@@ -30,6 +31,9 @@ painted_galaxy_spawn_connected_system = {
 		}
 		clear_variable = painted_galaxy_distance_to_origin
 	}
+
+	# halve, so the new system does not end up super close to a neighbor either
+	divide_variable = { which = painted_galaxy_max_distance value = 2 }
 
 	# spawn the systems
 	# max_distance doesn't work with variables, so we need to check the variable outside of the spawn_system effect then pass it in
@@ -91,13 +95,15 @@ painted_galaxy_spawn_connected_system = {
 	}
 
 	# cleanup
-	clear_variable = painted_galaxy_marauder_max_distance
+	clear_variable = painted_galaxy_max_distance
 }
 
 painted_galaxy_spawn_system_at_distance = {
 	spawn_system = {
 		initializer = $INITIALIZER$
 		max_distance = $DISTANCE$
+		min_distance = $DISTANCE$
+		hyperlane = yes
 		effect = {
 			# connect to origin
 			if = {

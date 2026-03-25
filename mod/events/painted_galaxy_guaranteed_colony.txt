@@ -44,24 +44,30 @@ event = {
 			}
 			save_event_target_as = painted_galaxy_current_country
 			capital_scope.solar_system = {
-				painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t1_first_colony }
-				last_created_system = {
-					random_system_planet = {
-						limit = { has_planet_flag = prescripted_ideal }
-						change_pc = event_target:painted_galaxy_current_country
-						reroll_planet = yes
+				random_neighbor_system = {
+					limit = { NOT = { is_same_value = last_created_system } }
+					painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t1_first_colony }
+					last_created_system = {
+						random_system_planet = {
+							limit = { has_planet_flag = prescripted_ideal }
+							change_pc = event_target:painted_galaxy_current_country
+							reroll_planet = yes
+						}
 					}
 				}
 				if = {
 					limit = { num_guaranteed_colonies >= 2 }
+					reroll_random = yes
 					random_neighbor_system = {
-						limit = { NOT = { is_same_value = last_created_system } }
-						painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t2_second_colony }
-						last_created_system = {
-							random_system_planet = {
-								limit = { has_planet_flag = prescripted_ideal }
-								change_pc = event_target:painted_galaxy_current_country
-								reroll_planet = yes
+						random_neighbor_system = {
+							limit = { NOT = { is_same_value = last_created_system } }
+							painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t2_second_colony }
+							last_created_system = {
+								random_system_planet = {
+									limit = { has_planet_flag = prescripted_ideal }
+									change_pc = event_target:painted_galaxy_current_country
+									reroll_planet = yes
+								}
 							}
 						}
 					}
