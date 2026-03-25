@@ -136,8 +136,8 @@ export function generate_stellaris_galaxy(project: Project): string {
 			const to_is_spawn = potential_home_stars.some(
 				(solar_system) => solar_system.id === connection.b,
 			);
-			if (from_is_spawn && !to_is_spawn) return [connection.a];
-			if (to_is_spawn && !from_is_spawn) return [connection.b];
+			if (from_is_spawn && !to_is_spawn) return [connection.b];
+			if (to_is_spawn && !from_is_spawn) return [connection.a];
 			return [];
 		}),
 	);
@@ -152,9 +152,9 @@ export function generate_stellaris_galaxy(project: Project): string {
 			const from_is_adjacent = systems_1_jump_from_spawn.has(connection.a);
 			const to_is_adjacent = systems_1_jump_from_spawn.has(connection.b);
 			if (from_is_adjacent && !to_is_adjacent && !to_is_spawn)
-				return [connection.a];
-			if (to_is_adjacent && !from_is_adjacent && !from_is_spawn)
 				return [connection.b];
+			if (to_is_adjacent && !from_is_adjacent && !from_is_spawn)
+				return [connection.a];
 			return [];
 		}),
 	);
