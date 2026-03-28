@@ -4,7 +4,7 @@ export const CANVAS_HEIGHT = 1000;
 export const CANVAS_BACKGROUND = '#000000';
 
 export const DETAILS_DEFAULT_WIDTH = 320;
-export const DETAILS_DEFAULT_HEIGHT = 320;
+export const DETAILS_DEFAULT_HEIGHT = 350;
 
 // size of each "arm" of the plus sign marking the center of the canvas
 export const CENTER_MARK_SIZE = 10;

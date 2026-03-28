@@ -197,53 +197,65 @@ country_event = {
 					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
 					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
 				}
-				random_system = {
-					limit = {
-						has_owner = no
-						distance = {
-							source = prev
-							type = euclidean
-							min_distance >= 30
-							max_distance <= 100
+				if = {
+					limit = { NOT = { any_system = { has_star_flag = holy_system_1 } } }
+					random_system = {
+						limit = {
+							has_owner = no
+							distance = {
+								source = prev
+								type = euclidean
+								min_distance >= 30
+								max_distance <= 100
+							}
 						}
+						spawn_system = { initializer = fallen_holy_01 }
 					}
-					spawn_system = { initializer = fallen_holy_01 }
 				}
-				random_system = {
-					limit = {
-						has_owner = no
-						distance = {
-							source = prev
-							type = euclidean
-							min_distance >= 50
-							max_distance <= 150
+				if = {
+					limit = { NOT = { any_system = { has_star_flag = holy_system_2 } } }
+					random_system = {
+						limit = {
+							has_owner = no
+							distance = {
+								source = prev
+								type = euclidean
+								min_distance >= 50
+								max_distance <= 150
+							}
 						}
+						spawn_system = { initializer = fallen_holy_02 }
 					}
-					spawn_system = { initializer = fallen_holy_02 }
 				}
-				random_system = {
-					limit = {
-						has_owner = no
-						distance = {
-							source = prev
-							type = euclidean
-							min_distance >= 80
-							max_distance <= 200
+				if = {
+					limit = { NOT = { any_system = { has_star_flag = holy_system_3 } } }
+					random_system = {
+						limit = {
+							has_owner = no
+							distance = {
+								source = prev
+								type = euclidean
+								min_distance >= 80
+								max_distance <= 200
+							}
 						}
+						spawn_system = { initializer = fallen_holy_03 }
 					}
-					spawn_system = { initializer = fallen_holy_03 }
 				}
-				random_system = {
-					limit = {
-						has_owner = no
-						distance = {
-							source = prev
-							type = euclidean
-							min_distance >= 120
-							max_distance <= 250
+				if = {
+					limit = { NOT = { any_system = { has_star_flag = holy_system_4 } } }
+					random_system = {
+						limit = {
+							has_owner = no
+							distance = {
+								source = prev
+								type = euclidean
+								min_distance >= 120
+								max_distance <= 250
+							}
 						}
+						spawn_system = { initializer = fallen_holy_04 }
 					}
-					spawn_system = { initializer = fallen_holy_04 }
 				}
 				random = {
 					chance = 25

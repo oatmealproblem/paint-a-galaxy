@@ -1,5 +1,9 @@
 import { Option, Schema } from 'effect';
 import { Coordinate } from './coordinate';
+import {
+	initializer_metadata,
+	type InitializerMetadata,
+} from '$lib/data/initializer_metadata';
 
 export const SolarSystemId = Schema.Int.pipe(Schema.brand('SolaySystemId'));
 export type SolarSystemId = typeof SolarSystemId.Type;
@@ -45,4 +49,30 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 		Schema.optional,
 		Schema.withDefaults({ constructor: Option.none, decoding: Option.none }),
 	),
-}) {}
+	initializer: Schema.OptionFromNullishOr(Schema.String, null).pipe(
+		Schema.optional,
+		Schema.withDefaults({ constructor: Option.none, decoding: Option.none }),
+	),
+}) {
+	get_initializer(): Option.Option<string> {
+		return this.spawn_type === 'disabled' ? this.initializer : Option.none();
+	}
+	get_name(): Option.Option<string> {
+		return this.get_initializer().pipe(
+			Option.flatMap((initializer) =>
+				Option.fromNullable(
+					(
+						initializer_metadata as Record<
+							string,
+							InitializerMetadata | null | undefined
+						>
+					)[initializer],
+				),
+			),
+			Option.match({
+				onNone: () => this.name,
+				onSome: (metadata) => Option.fromNullable(metadata.name),
+			}),
+		);
+	}
+}

@@ -1,4 +1,4 @@
-import { Array, Iterable, Option, pipe } from 'effect';
+import { Array, Iterable, Option, Order, pipe } from 'effect';
 
 import {
 	FALLEN_EMPIRE_SPAWN_RADIUS,
@@ -9,6 +9,10 @@ import type { Project } from './models/project';
 import type { SolarSystem } from './models/solar_system';
 import { Coordinate } from './models/coordinate';
 import type { Nebula } from './models/nebula';
+import {
+	initializer_metadata,
+	type InitializerKey,
+} from './data/initializer_metadata';
 
 const COMMON = `
 	priority = 10
@@ -159,8 +163,28 @@ export function generate_stellaris_galaxy(project: Project): string {
 		}),
 	);
 
-	const systems_entries = project.solar_systems
-		.map((solar_system, i) => {
+	const systems_entries = pipe(
+		project.solar_systems,
+		// sort systems with initializers to the top, otherwise random systems might use unique initializers first
+		Array.sortBy(
+			Order.mapInput(Order.number, (solar_system) =>
+				Option.match(solar_system.get_initializer(), {
+					onSome: (initializer) => {
+						if (
+							initializer in initializer_metadata &&
+							initializer_metadata[initializer as InitializerKey]?.after != null
+						) {
+							// this initializer must be spawned after some other initializer, so sort after others that don't have this constraint
+							return 0;
+						} else {
+							return -1;
+						}
+					},
+					onNone: () => 1,
+				}),
+			),
+		),
+		Iterable.map((solar_system, i) => {
 			const basics = `id = "${solar_system.id}" position = { x = ${solar_system.coordinate.to_stellaris_coordinate().x} y = ${solar_system.coordinate.to_stellaris_coordinate().y} }`;
 
 			const name = solar_system.name.pipe(
@@ -181,6 +205,8 @@ export function generate_stellaris_galaxy(project: Project): string {
 						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
+			} else if (Option.isSome(solar_system.initializer)) {
+				initializer = `initializer = ${solar_system.initializer.pipe(Option.getOrThrow)}`;
 			} else if (systems_1_jump_from_spawn.has(solar_system.id)) {
 				// all systems with 1 of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
@@ -188,7 +214,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 			} else if (systems_2_jumps_from_spawn.has(solar_system.id)) {
 				// in a random galaxy, all systems within 2 of a spawn also get the "empire_cluster" effect
 				// however, not all spawn points will actually be used, so we don't want to overly restrict system spawns, so a random chance is used
-				// the chance is based on the number systems within 2 jumps of a spawn point, so it scaled inversely with the connectedness and number of spawns
+				// the chance is based on the total number systems within 2 jumps of a spawn point, so it scaled inversely with the connectedness and number of spawns
 				// eg on a low connectivity map, systems within 2 are more likely to get a basic init; this helps empires not get boxed in by hostile creatures etc
 				const num_basic_systems =
 					potential_home_stars.length +
@@ -221,8 +247,9 @@ export function generate_stellaris_galaxy(project: Project): string {
 			const effect =
 				effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
 			return `\tsystem = { ${basics} ${name} ${initializer} ${spawn_weight} ${effect} }`;
-		})
-		.join('\n');
+		}),
+		Array.join('\n'),
+	);
 
 	const hyperlanes_entries = project.hyperlanes
 		.map(

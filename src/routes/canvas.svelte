@@ -600,6 +600,16 @@
 				{/if}
 
 				{#each solar_systems as solar_system (solar_system.id)}
+					{#if editor().warned_solar_system_ids.includes(solar_system.id)}
+						<circle
+							cx={solar_system.coordinate.x}
+							cy={solar_system.coordinate.y}
+							r={7}
+							fill="none"
+							class="fill-warning-500/25 stroke-warning-500"
+							stroke-width="2"
+						/>
+					{/if}
 					{#if Option.match( context_menu_data, { onNone: () => Option.match( active_tool, { onNone: () => Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)) }, ), onSome: (value) => Option.contains(value.solar_system, solar_system) }, )}
 						<circle
 							cx={solar_system.coordinate.x}
@@ -666,14 +676,25 @@
 						>
 							{solar_system.spawn_type.at(-1)?.toUpperCase()}
 						</text>
+					{:else if Option.isSome(solar_system.get_initializer()) || Option.isSome(solar_system.get_name())}
+						{@const size = 6}
+						<rect
+							x={solar_system.coordinate.x - size / 2}
+							y={solar_system.coordinate.y - size / 2}
+							width={size}
+							height={size}
+							fill="var(--color-secondary-100)"
+							stroke="var(--color-surface-950)"
+							stroke-width="1"
+						/>
 					{:else}
 						<circle
 							cx={solar_system.coordinate.x}
 							cy={solar_system.coordinate.y}
-							r={2.5}
-							fill={solar_system.spawn_type === 'disabled' ?
-								'var(--color-surface-50)'
-							:	'var(--color-secondary-500)'}
+							r={solar_system.spawn_type !== 'disabled' ? 3.5 : 2.5}
+							fill={solar_system.spawn_type !== 'disabled' ?
+								'var(--color-secondary-500)'
+							:	'var(--color-surface-50)'}
 							stroke="var(--color-surface-950)"
 							stroke-width="1"
 						/>
@@ -713,8 +734,10 @@
 					snapped_solar_system.value.coordinate.to_stellaris_coordinate()}
 				<div>
 					closest system
-					{#if Option.isSome(snapped_solar_system.value.name)}
-						<em>{snapped_solar_system.value.name.value}</em>
+					{#if Option.isSome(snapped_solar_system.value.get_name())}
+						<em>
+							{snapped_solar_system.value.get_name().pipe(Option.getOrThrow)}
+						</em>
 					{/if}
 					{stellaris_coordinate.x}, {stellaris_coordinate.y}
 				</div>

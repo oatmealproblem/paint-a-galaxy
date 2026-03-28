@@ -3,12 +3,15 @@
 	import { Icons } from './icons';
 	import type { Snippet } from 'svelte';
 
-	const { children }: { children: Snippet } = $props();
+	const {
+		children,
+		class: class_ = 'text-secondary-800-200',
+	}: { children: Snippet; class?: string } = $props();
 </script>
 
 <Tooltip positioning={{ placement: 'top' }}>
-	<Tooltip.Trigger class="cursor-help">
-		<Icons.Info class="text-secondary-800-200" size={16} />
+	<Tooltip.Trigger class={['cursor-help', class_]}>
+		<Icons.Info size={16} />
 	</Tooltip.Trigger>
 	<Portal>
 		<Tooltip.Positioner class="z-100!">

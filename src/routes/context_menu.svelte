@@ -102,8 +102,10 @@
 						<Menu.ItemGroup>
 							<Menu.ItemGroupLabel class="text-surface-800-200">
 								Solar system at {stellaris_coordinate.x}, {stellaris_coordinate.y}
-								{#if Option.isSome(solar_system.name)}
-									<em class="block">{solar_system.name.value}</em>
+								{#if Option.isSome(solar_system.get_name())}
+									<em class="block">
+										{solar_system.get_name().pipe(Option.getOrThrow)}
+									</em>
 								{/if}
 							</Menu.ItemGroupLabel>
 							<Menu.Item value="open_solar_system_details|{solar_system.id}">

@@ -17,6 +17,7 @@ import { ViewSettings } from './models/view_settings';
 import { View } from './services/view';
 import { GeneratorSettings } from './models/generator_settings';
 import { Generator } from './services/generator';
+import { SolarSystemId } from './models/solar_system';
 
 type EditorLayer = Layer.Layer<Actions | Generator | Projects | Tools | View>;
 
@@ -57,6 +58,7 @@ export class Editor {
 	#undone_stack: Action[][] = $state([]);
 	readonly can_undo = $derived(this.#done_stack.length > 0);
 	readonly can_redo = $derived(this.#undone_stack.length > 0);
+	warned_solar_system_ids = $state.raw<SolarSystemId[]>([]);
 
 	constructor(
 		projects: readonly ProjectListing[],

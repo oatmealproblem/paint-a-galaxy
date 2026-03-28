@@ -7,7 +7,12 @@
 
 	import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 	import { FloatingPanel, Portal } from '@skeletonlabs/skeleton-svelte';
-	import { Option } from 'effect';
+	import { Option, pipe } from 'effect';
+	import InitializerCombobox from './initializer_combobox.svelte';
+	import {
+		initializer_metadata,
+		type InitializerKey,
+	} from '$lib/data/initializer_metadata';
 
 	type Props = {
 		position: { x: number; y: number };
@@ -33,6 +38,19 @@
 	$effect(() => {
 		if (Option.isNone(solar_system)) on_close_requested();
 	});
+
+	const initializer_name = $derived(
+		pipe(
+			solar_system,
+			Option.flatMap((value) => value.initializer),
+			Option.flatMapNullable((value) =>
+				value in initializer_metadata ?
+					initializer_metadata[value as InitializerKey]
+				:	null,
+			),
+			Option.flatMapNullable((value) => value.name),
+		),
+	);
 </script>
 
 <FloatingPanel
@@ -96,8 +114,12 @@
 							<input
 								class="input ring-surface-300-700 bg-surface-200-800"
 								placeholder="Random"
+								disabled={Option.isSome(initializer_name)}
 								{@attach debounced_value(
-									() => Option.getOrElse(solar_system.value.name, () => ''),
+									() =>
+										solar_system.value
+											.get_name()
+											.pipe(Option.getOrElse(() => '')),
 									(value) => {
 										const name: Option.Option<string> =
 											value == '' ? Option.none() : Option.some(value);
@@ -198,6 +220,7 @@
 								<option value="reserved_z">Reserved Z</option>
 							</select>
 						</label>
+						<InitializerCombobox solar_system={solar_system.value} />
 					{/if}
 				</FloatingPanel.Body>
 				<FloatingPanel.ResizeTrigger axis="se" />
