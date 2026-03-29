@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/ethos/spiritualist/bug_branch_$BUG_BRANCH$

@@ -1,0 +1,7 @@
+ethos = {
+	ethic = ethic_gestalt_consciousness
+	ethic = ethic_form_convergent
+	ethic = ethic_form_impassive
+	ethic = ethic_form_introspective
+	ethic = ethic_foci_convalescence
+}

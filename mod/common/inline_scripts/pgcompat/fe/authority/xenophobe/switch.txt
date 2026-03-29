@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/authority/xenophobe/acot_$ACOT$_bug_branch_$BUG_BRANCH$

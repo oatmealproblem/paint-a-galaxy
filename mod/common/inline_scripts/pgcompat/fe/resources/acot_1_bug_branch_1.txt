@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/resources/acot_1_bug_branch_0

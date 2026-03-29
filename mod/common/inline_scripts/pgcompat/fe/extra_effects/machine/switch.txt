@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/extra_effects/machine/acot_$ACOT$

@@ -1,0 +1,6 @@
+add_resource = {
+	minerals = 10000
+	energy = 10000
+	food = 1000
+	influence = 500
+}

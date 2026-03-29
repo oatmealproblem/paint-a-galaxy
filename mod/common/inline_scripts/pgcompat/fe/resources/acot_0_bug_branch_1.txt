@@ -1,0 +1,8 @@
+add_resource = {
+	minerals = 1000000
+	energy = 1000000
+	food = 100000
+	influence = 1000
+	alloys = 10000
+	sr_dark_matter = 10000
+}

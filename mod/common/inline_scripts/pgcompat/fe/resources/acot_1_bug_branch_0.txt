@@ -1,0 +1,16 @@
+add_resource = {
+	minerals = 1000000
+	energy = 1000000
+	food = 100000
+	unity = 100000
+	volatile_motes = 100000
+	exotic_gases = 100000
+	rare_crystals = 100000
+	sr_living_metal = 10000
+	nanites = 10000
+	influence = 1000
+	alloys = 10000
+	acot_sr_dark_energy = 10000
+	sr_dark_matter = 10000
+	trade = 50000
+}

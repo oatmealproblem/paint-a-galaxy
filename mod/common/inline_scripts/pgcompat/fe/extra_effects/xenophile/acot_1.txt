@@ -1,0 +1,15 @@
+acot_random_fe_phile_flag = yes
+add_modifier = {
+	modifier = acot_fe_early_sensor_debuff
+	days = 950
+}
+add_global_ship_design = "NAME_Explorer"
+add_global_ship_design = "NAME_ACOT_FALLEN_PHILE_PAC"
+add_global_ship_design = "NAME_ACOT_FALLEN_PHILE_HYPERION"
+add_global_ship_design = "NAME_ACOT_FALLEN_STARBASE"
+add_global_ship_design = "NAME_ACOT_FALLEN_OUTPOST"
+add_global_ship_design = "NAME_ACOT_FALLEN_ORBITAL_RING"
+set_country_flag = tier_dm_start
+set_country_flag = custom_start_screen
+set_country_flag = acot_finished_delta
+give_technology = { tech = tech_mine_dark_matter message = no }

@@ -1,0 +1,3 @@
+add_global_ship_design = "NAME_ACOT_FALLEN_STARBASE"
+add_global_ship_design = "NAME_ACOT_FALLEN_OUTPOST"
+add_global_ship_design = "NAME_ACOT_FALLEN_ORBITAL_RING"

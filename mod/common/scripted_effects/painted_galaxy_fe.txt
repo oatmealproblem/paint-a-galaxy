@@ -59,7 +59,11 @@ painted_galaxy_create_materialist_fe = {
 		class = random_non_machine
 		portrait = random
 		traits = random
-		extra_trait_points = 3
+		inline_script = {
+			script = pgcompat/fe/trait_points/materialist/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		allow_negative_traits = no
 	}
 	last_created_species = {
@@ -75,24 +79,28 @@ painted_galaxy_create_materialist_fe = {
 		name = random
 		type = fallen_empire
 		ignore_initial_colony_error = yes
-		authority = auth_imperial
+		inline_script = {
+			script = pgcompat/fe/authority/materialist/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		civics = {
 			civic = civic_lethargic_leadership
 			civic = civic_empire_in_decline
 		}
 		species = last_created_species
-		ethos = {
-			ethic = ethic_fanatic_materialist
+		inline_script = {
+			script = pgcompat/fe/ethos/materialist/switch
+			BUG_BRANCH = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
 		effect = {
 			set_country_flag = fallen_empire_1
-			add_resource = {
-				minerals = 10000
-				energy = 10000
-				food = 1000
-				influence = 500
+			inline_script = {
+				script = pgcompat/fe/resources/switch
+				ACOT = @has_ancient_caches
+				BUG_BRANCH = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Enforcer"
@@ -109,6 +117,10 @@ painted_galaxy_create_materialist_fe = {
 			ruler = {
 				add_skill = 9
 			}
+			inline_script = {
+				script = pgcompat/fe/extra_effects/materialist/switch
+				ACOT = @has_ancient_caches
+			}
 		}
 	}
 }
@@ -120,7 +132,11 @@ painted_galaxy_create_spiritualist_fe = {
 		class = random_non_machine
 		portrait = random
 		traits = random
-		extra_trait_points = 3
+		inline_script = {
+			script = pgcompat/fe/trait_points/spiritualist/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		allow_negative_traits = no
 	}
 	last_created_species = {
@@ -133,24 +149,24 @@ painted_galaxy_create_spiritualist_fe = {
 		name = random
 		type = fallen_empire
 		ignore_initial_colony_error = yes
-		authority = auth_imperial
+		authority = auth_imperial # no compat needed
 		civics = {
 			civic = civic_lethargic_leadership
 			civic = civic_empire_in_decline
 		}
 		species = last_created_species
-		ethos = {
-			ethic = ethic_fanatic_spiritualist
+		inline_script = {
+			script = pgcompat/fe/ethos/spiritualist/switch
+			BUG_BRANCH = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
 		effect = {
 			set_country_flag = fallen_empire_2
-			add_resource = {
-				minerals = 10000
-				energy = 10000
-				food = 1000
-				influence = 500
+			inline_script = {
+				script = pgcompat/fe/resources/switch
+				ACOT = @has_ancient_caches
+				BUG_BRANCH = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Cleanser"
@@ -167,6 +183,10 @@ painted_galaxy_create_spiritualist_fe = {
 			ruler = {
 				add_skill = 9
 			}
+			inline_script = {
+				script = pgcompat/fe/extra_effects/spiritualist/switch
+				ACOT = @has_ancient_caches
+			}
 		}
 	}
 }
@@ -178,7 +198,11 @@ painted_galaxy_create_xenophile_fe = {
 		class = random_non_machine
 		portrait = random
 		traits = random
-		extra_trait_points = 5
+		inline_script = {
+			script = pgcompat/fe/trait_points/xenophile/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		allow_negative_traits = no
 		effect = {
 			set_species_flag = organic_fallen_empire_pop
@@ -188,24 +212,28 @@ painted_galaxy_create_xenophile_fe = {
 		name = random
 		type = fallen_empire
 		ignore_initial_colony_error = yes
-		authority = auth_imperial
+		inline_script = {
+			script = pgcompat/fe/authority/xenophile/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		civics = {
 			civic = civic_lethargic_leadership
 			civic = civic_empire_in_decline
 		}
 		species = last_created_species
-		ethos = {
-			ethic = ethic_fanatic_xenophile
+		inline_script = {
+			script = pgcompat/fe/ethos/xenophile/switch
+			BUG_BRANCH = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
 		effect = {
 			set_country_flag = fallen_empire_3
-			add_resource = {
-				minerals = 10000
-				energy = 10000
-				food = 1000
-				influence = 500
+			inline_script = {
+				script = pgcompat/fe/resources/switch
+				ACOT = @has_ancient_caches
+				BUG_BRANCH = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Adjuster"
@@ -222,6 +250,10 @@ painted_galaxy_create_xenophile_fe = {
 			ruler = {
 				add_skill = 9
 			}
+			inline_script = {
+				script = pgcompat/fe/extra_effects/xenophile/switch
+				ACOT = @has_ancient_caches
+			}
 		}
 	}
 }
@@ -233,7 +265,11 @@ painted_galaxy_create_xenophobe_fe = {
 		class = random_non_machine
 		portrait = random
 		traits = random
-		extra_trait_points = 5
+		inline_script = {
+			script = pgcompat/fe/trait_points/xenophobe/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		allow_negative_traits = no
 		effect = {
 			save_global_event_target_as = fallen_4_species
@@ -244,24 +280,28 @@ painted_galaxy_create_xenophobe_fe = {
 		name = random
 		type = fallen_empire
 		ignore_initial_colony_error = yes
-		authority = auth_imperial
+		inline_script = {
+			script = pgcompat/fe/authority/xenophobe/switch
+			ACOT = @has_ancient_caches
+			BUG_BRANCH = @has_bug_branch
+		}
 		civics = {
 			civic = civic_lethargic_leadership
 			civic = civic_empire_in_decline
 		}
 		species = last_created_species
-		ethos = {
-			ethic = ethic_fanatic_xenophobe
+		inline_script = {
+			script = pgcompat/fe/ethos/xenophobe/switch
+			BUG_BRANCH = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
 		effect = {
 			set_country_flag = fallen_empire_4
-			add_resource = {
-				minerals = 10000
-				energy = 10000
-				food = 1000
-				influence = 500
+			inline_script = {
+				script = pgcompat/fe/resources/switch
+				ACOT = @has_ancient_caches
+				BUG_BRANCH = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Reaper"
@@ -277,6 +317,10 @@ painted_galaxy_create_xenophobe_fe = {
 			add_global_ship_design = "NAME_FE_Starbase"
 			ruler = {
 				add_skill = 9
+			}
+			inline_script = {
+				script = pgcompat/fe/extra_effects/xenophobe/switch
+				ACOT = @has_ancient_caches
 			}
 		}
 	}
@@ -294,14 +338,14 @@ painted_galaxy_create_machine_fe = {
 			trait = trait_machine_unit
 			trait = random_traits
 		}
-		extra_trait_points = 3
+		extra_trait_points = 3 # no compat needed
 		allow_negative_traits = no
 	}
 	create_country = {
 		name = random
 		type = fallen_empire
 		ignore_initial_colony_error = yes
-		authority = auth_machine_intelligence
+		authority = auth_machine_intelligence # no compat needed
 		civics = {
 			civic = civic_machine_remnants
 			civic = civic_custodian_directives
@@ -314,11 +358,10 @@ painted_galaxy_create_machine_fe = {
 		origin = "origin_fallen_empire"
 		effect = {
 			set_country_flag = fallen_empire_machine
-			add_resource = {
-				minerals = 10000
-				energy = 10000
-				food = 1000
-				influence = 500
+			inline_script = {
+				script = pgcompat/fe/resources/switch
+				ACOT = @has_ancient_caches
+				BUG_BRANCH = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Omega"
@@ -334,6 +377,10 @@ painted_galaxy_create_machine_fe = {
 			add_global_ship_design = "NAME_FE_Starbase"
 			ruler = {
 				add_skill = 9
+			}
+			inline_script = {
+				script = pgcompat/fe/extra_effects/machine/switch
+				ACOT = @has_ancient_caches
 			}
 		}
 	}
@@ -352,7 +399,7 @@ painted_galaxy_create_hive_fe = {
 			trait = trait_hive_mind
 			trait = random_traits
 		}
-		extra_trait_points = 3
+		extra_trait_points = 3 # no compat needed
 		allow_negative_traits = no
 		effect = {
 			save_global_event_target_as = hive_fe_species
@@ -373,5 +420,9 @@ painted_galaxy_create_hive_fe = {
 	last_created_country = {
 		set_country_flag = first_hive_fe_fragment
 		country_event = { id = bio.3010 days = 1 }
+		inline_script = {
+			script = pgcompat/fe/extra_effects/hive/switch
+			ACOT = @has_ancient_caches
+		}
 	}
 }

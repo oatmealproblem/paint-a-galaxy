@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/ethos/materialist/bug_branch_$BUG_BRANCH$

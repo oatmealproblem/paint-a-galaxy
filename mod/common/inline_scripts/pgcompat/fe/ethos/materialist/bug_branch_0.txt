@@ -1,0 +1,3 @@
+ethos = {
+	ethic = ethic_fanatic_materialist
+}

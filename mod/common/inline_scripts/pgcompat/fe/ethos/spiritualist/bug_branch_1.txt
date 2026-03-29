@@ -1,0 +1,4 @@
+ethos = {
+	ethic = ethic_fanatic_spiritualist
+	ethic = ethic_focused
+}
