@@ -1,4 +1,5 @@
 import {
+	CAP_STYLE,
 	tools,
 	ToolSettingId,
 	ToolSettings,
@@ -25,7 +26,7 @@ import {
 import { Action } from '$lib/models/action';
 import { KeyVal } from './key_val';
 import getStroke from 'perfect-freehand';
-import type { Coordinate } from '$lib/models/coordinate';
+import { Coordinate } from '$lib/models/coordinate';
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from '$lib/constants';
 import { draw_stroke } from '$lib/canvas';
 import { Connection } from '$lib/models/connection';
@@ -72,7 +73,7 @@ export class Tools extends Context.Tag('Tools')<
 		Effect.gen(function* () {
 			const keyval = yield* KeyVal;
 
-			const null_settings = { blur: 0, opacity: 0, size: 0 };
+			const null_settings = { blur: 0, opacity: 0, size: 0, cap_style: 0 };
 			const load_settings: (typeof Tools)['Service']['load_settings'] = (
 				tool_id,
 				default_settings,
@@ -197,6 +198,57 @@ export class Tools extends Context.Tag('Tools')<
 							return `M ${center.x - radius} ${center.y} a ${radius} ${radius} 0 0 0 ${radius * 2} 0 a ${radius} ${radius} 0 0 0 ${-radius * 2} 0 Z`;
 						},
 					),
+					Match.when(Match.is('ellipse_draw', 'ellipse_erase'), () => {
+						const [a, b] = get_double_payload(payload);
+						const r2 = settings.size / 2;
+						const r1 = Math.hypot(a.x - b.x, a.y - b.y) / 2;
+						const angle = Math.atan2(b.y - a.y, b.x - a.x);
+						return `M ${a.x} ${a.y} A ${r1} ${r2} ${(angle / Math.PI) * 180} 0 0 ${b.x} ${b.y} A ${r1} ${r2} ${(angle / Math.PI) * 180} 0 0 ${a.x} ${a.y} Z`;
+					}),
+					Match.when(Match.is('rectangle_draw', 'rectangle_erase'), () => {
+						const [a, b] = get_double_payload(payload);
+						const x_min = Math.min(a.x, b.x);
+						const x_max = Math.max(a.x, b.x);
+						const y_min = Math.min(a.y, b.y);
+						const y_max = Math.max(a.y, b.y);
+						return `M ${x_min} ${y_min} L ${x_max} ${y_min} L ${x_max} ${y_max} L ${x_min} ${y_max} Z`;
+					}),
+					Match.when(Match.is('line_draw', 'line_erase'), () => {
+						const [a, b] = get_double_payload(payload);
+						const angle = Math.atan2(b.y - a.y, b.x - a.x);
+						const radius = settings.size / 2;
+						const p1 = new Coordinate({
+							x: a.x + Math.sin(angle) * radius,
+							y: a.y - Math.cos(angle) * radius,
+						});
+						const p2 = new Coordinate({
+							x: a.x - Math.sin(angle) * radius,
+							y: a.y + Math.cos(angle) * radius,
+						});
+						const p3 = new Coordinate({
+							x: b.x - Math.sin(angle) * radius,
+							y: b.y + Math.cos(angle) * radius,
+						});
+						const p4 = new Coordinate({
+							x: b.x + Math.sin(angle) * radius,
+							y: b.y - Math.cos(angle) * radius,
+						});
+						const bevel1 = new Coordinate({
+							x: a.x - Math.cos(angle) * radius,
+							y: a.y - Math.sin(angle) * radius,
+						});
+						const bevel2 = new Coordinate({
+							x: b.x + Math.cos(angle) * radius,
+							y: b.y + Math.sin(angle) * radius,
+						});
+						if (settings.cap_style === CAP_STYLE.round) {
+							return `M ${p1.x} ${p1.y} A ${radius} ${radius} 0 0 0 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${radius} ${radius} 0 0 0 ${p4.x} ${p4.y} Z`;
+						} else if (settings.cap_style === CAP_STYLE.bevel) {
+							return `M ${p1.x} ${p1.y} L ${bevel1.x} ${bevel1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${bevel2.x} ${bevel2.y} L ${p4.x} ${p4.y} Z`;
+						} else {
+							return `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${p4.x} ${p4.y} Z`;
+						}
+					}),
 					Match.when(
 						Match.is(
 							'hyperlane_toggle',
@@ -226,6 +278,12 @@ export class Tools extends Context.Tag('Tools')<
 							'freehand_erase',
 							'circle_draw',
 							'circle_erase',
+							'ellipse_draw',
+							'ellipse_erase',
+							'rectangle_draw',
+							'rectangle_erase',
+							'line_draw',
+							'line_erase',
 						),
 						(value) =>
 							Effect.promise(async () => {
@@ -234,8 +292,15 @@ export class Tools extends Context.Tag('Tools')<
 									Match.when(Match.is('circle_draw', 'circle_erase'), () => {
 										const [center, edge] = get_double_payload(payload);
 										const radius = center.distance_to(edge);
-										return radius;
+										return radius * 2;
 									}),
+									Match.when(
+										Match.is('rectangle_draw', 'rectangle_erase'),
+										() => {
+											const [a, b] = get_double_payload(payload);
+											return Math.min(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+										},
+									),
 									Match.orElse(() => settings.size),
 								);
 								draw_stroke(ctx, path, {

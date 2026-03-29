@@ -10,6 +10,12 @@ export const ToolId = Schema.Literal(
 	'freehand_erase',
 	'circle_draw',
 	'circle_erase',
+	'ellipse_draw',
+	'ellipse_erase',
+	'rectangle_draw',
+	'rectangle_erase',
+	'line_draw',
+	'line_erase',
 	// tweak
 	'hyperlane_toggle',
 	'nebula_create',
@@ -22,8 +28,19 @@ export const ToolId = Schema.Literal(
 );
 export type ToolId = typeof ToolId.Type;
 
-export const ToolSettingId = Schema.Literal('size', 'blur', 'opacity');
+export const ToolSettingId = Schema.Literal(
+	'size',
+	'blur',
+	'opacity',
+	'cap_style',
+);
 export type ToolSettingId = typeof ToolSettingId.Type;
+
+export const CAP_STYLE = {
+	butt: 0,
+	bevel: 1,
+	round: 2,
+};
 
 export const ToolSettings = Schema.Record({
 	key: ToolSettingId,
@@ -39,6 +56,7 @@ interface _Tool<
 	id: Id;
 	name: string;
 	description?: string;
+	size_label?: string;
 	step: Step;
 	action_type: ActionType;
 	default_settings: Settings;
@@ -64,7 +82,7 @@ const freehand_draw: _Tool<
 		color: 'white',
 	},
 	default_settings: {
-		size: 25,
+		size: 50,
 		blur: 0,
 		opacity: 0.5,
 	},
@@ -85,9 +103,9 @@ const freehand_erase: _Tool<
 		color: CANVAS_BACKGROUND,
 	},
 	default_settings: {
-		size: 25,
+		size: 50,
 		blur: 0,
-		opacity: 0.5,
+		opacity: 1,
 	},
 };
 
@@ -127,7 +145,135 @@ const circle_erase: _Tool<
 	},
 	default_settings: {
 		blur: 0,
+		opacity: 1,
+	},
+};
+
+const ellipse_draw: _Tool<
+	'ellipse_draw',
+	'double_point',
+	{ blur: number; opacity: number; size: number }
+> = {
+	id: 'ellipse_draw',
+	name: 'Draw Ellipse',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: 'white',
+	},
+	default_settings: {
+		blur: 0,
 		opacity: 0.5,
+		size: 100,
+	},
+	size_label: 'Width',
+};
+
+const ellipse_erase: _Tool<
+	'ellipse_erase',
+	'double_point',
+	{ blur: number; opacity: number; size: number }
+> = {
+	id: 'ellipse_erase',
+	name: 'Erase Ellipse',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: CANVAS_BACKGROUND,
+	},
+	default_settings: {
+		blur: 0,
+		opacity: 1,
+		size: 100,
+	},
+	size_label: 'Width',
+};
+
+const rectangle_draw: _Tool<
+	'rectangle_draw',
+	'double_point',
+	{ blur: number; opacity: number }
+> = {
+	id: 'rectangle_draw',
+	name: 'Draw Rectangle',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: 'white',
+	},
+	default_settings: {
+		blur: 0,
+		opacity: 0.5,
+	},
+};
+
+const rectangle_erase: _Tool<
+	'rectangle_erase',
+	'double_point',
+	{ blur: number; opacity: number }
+> = {
+	id: 'rectangle_erase',
+	name: 'Erase Rectangle',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: CANVAS_BACKGROUND,
+	},
+	default_settings: {
+		blur: 0,
+		opacity: 1,
+	},
+};
+
+const line_draw: _Tool<
+	'line_draw',
+	'double_point',
+	{ blur: number; opacity: number; size: number; cap_style: number }
+> = {
+	id: 'line_draw',
+	name: 'Draw Line',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: 'white',
+	},
+	default_settings: {
+		size: 50,
+		blur: 0,
+		opacity: 0.5,
+		cap_style: CAP_STYLE.butt,
+	},
+};
+
+const line_erase: _Tool<
+	'line_erase',
+	'double_point',
+	{ blur: number; opacity: number; size: number; cap_style: number }
+> = {
+	id: 'line_erase',
+	name: 'Erase Line',
+	step: 'paint',
+	action_type: 'double_point',
+	snap_to_solar_system: false,
+	render: {
+		type: 'stroke',
+		color: CANVAS_BACKGROUND,
+	},
+	default_settings: {
+		size: 50,
+		blur: 0,
+		opacity: 1,
+		cap_style: CAP_STYLE.butt,
 	},
 };
 
@@ -293,6 +439,12 @@ export const tools = {
 	freehand_erase,
 	circle_draw,
 	circle_erase,
+	ellipse_draw,
+	ellipse_erase,
+	rectangle_draw,
+	rectangle_erase,
+	line_draw,
+	line_erase,
 	solar_system_create,
 	solar_system_delete,
 	spawn_toggle,
@@ -337,6 +489,30 @@ export const tool_pairs: ToolPair[] = [
 		primary: tools.circle_draw,
 		secondary: tools.circle_erase,
 		icon: 'Circle',
+	},
+	{
+		id: 'ellipse',
+		name: 'Ellipse',
+		step: 'paint',
+		primary: tools.ellipse_draw,
+		secondary: tools.ellipse_erase,
+		icon: 'Ellipse',
+	},
+	{
+		id: 'rectangle',
+		name: 'Rectangle',
+		step: 'paint',
+		primary: tools.rectangle_draw,
+		secondary: tools.rectangle_erase,
+		icon: 'RectangleHorizontal',
+	},
+	{
+		id: 'line',
+		name: 'Line',
+		step: 'paint',
+		primary: tools.line_draw,
+		secondary: tools.line_erase,
+		icon: 'Minus',
 	},
 	{
 		id: 'solar-system',

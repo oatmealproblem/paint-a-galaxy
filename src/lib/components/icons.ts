@@ -5,12 +5,14 @@ import ChevronDown from '@lucide/svelte/icons/chevron-down';
 import Circle from '@lucide/svelte/icons/circle';
 import Cloud from '@lucide/svelte/icons/cloud';
 import Download from '@lucide/svelte/icons/download';
+import Ellipse from '@lucide/svelte/icons/ellipse';
 import FileImage from '@lucide/svelte/icons/file-image';
 import GripVertical from '@lucide/svelte/icons/grip-vertical';
 import Info from '@lucide/svelte/icons/info';
 import LineSquiggle from '@lucide/svelte/icons/line-squiggle';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import Minus from '@lucide/svelte/icons/minus';
+import RectangleHorizontal from '@lucide/svelte/icons/rectangle-horizontal';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 import Sparkle from '@lucide/svelte/icons/sparkle';
 import Square from '@lucide/svelte/icons/square';
@@ -25,12 +27,14 @@ export const Icons = {
 	Circle,
 	Cloud,
 	Download,
+	Ellipse,
 	FileImage,
 	GripVertical,
 	Info,
 	LineSquiggle,
 	MapPin,
 	Minus,
+	RectangleHorizontal,
 	RotateCcw,
 	Sparkle,
 	Square,

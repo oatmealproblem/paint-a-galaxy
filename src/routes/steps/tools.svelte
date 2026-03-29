@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Step } from '$lib/models/step';
 	import {
+		CAP_STYLE,
 		tool_pairs,
 		ToolId,
 		ToolSettingId,
@@ -152,15 +153,34 @@
 		<p class="text-sm text-surface-900-100">{tool.description}</p>
 	{/if}
 
+	{#if 'cap_style' in tool.default_settings}
+		<label>
+			<span class="label-text">Cap Style</span>
+			<select
+				class="select ring-surface-300-700 bg-surface-100-900"
+				value={editor().tool_settings[tool.id].cap_style}
+				onchange={(e) =>
+					on_value_change(
+						tool.id,
+						'cap_style',
+					)(Number.parseInt(e.currentTarget.value))}
+			>
+				<option value={CAP_STYLE.butt}>Butt</option>
+				<option value={CAP_STYLE.bevel}>Bevel</option>
+				<option value={CAP_STYLE.round}>Round</option>
+			</select>
+		</label>
+	{/if}
+
 	{#if 'size' in tool.default_settings}
 		<Slider
 			min={0}
-			max={100}
+			max={500}
 			step={1}
 			value={editor().tool_settings[tool.id].size}
 			on_value_change={on_value_change(tool.id, 'size')}
 		>
-			{#snippet label()}Size{/snippet}
+			{#snippet label()}{tool.size_label ?? 'Size'}{/snippet}
 		</Slider>
 	{/if}
 
