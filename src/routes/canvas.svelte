@@ -29,7 +29,13 @@
 	const hyperlanes = $derived(project.hyperlanes);
 	const wormholes = $derived(project.wormholes);
 	const nebulas = $derived(project.nebulas);
+
 	let is_shift_pressed = $state(false);
+	let is_left_pressed = $state(false);
+	let is_right_pressed = $state(false);
+	let is_up_pressed = $state(false);
+	let is_down_pressed = $state(false);
+
 	const current_tool = $derived.by(() => {
 		if (is_shift_pressed) {
 			if (editor().secondary_tool.step === editor().step) {
@@ -122,6 +128,40 @@
 		});
 	$effect(() => {
 		if (svg) select(svg).call(zoom_behavior);
+	});
+	// pan with wasd / arrows
+	$effect(() => {
+		const TRANSLATE_SPEED = 1000; // canvas px per second
+		let canceled = false;
+		let dx = 0;
+		let dy = 0;
+		if (is_up_pressed) dy += TRANSLATE_SPEED / transform.k;
+		if (is_down_pressed) dy -= TRANSLATE_SPEED / transform.k;
+		if (is_left_pressed) dx += TRANSLATE_SPEED / transform.k;
+		if (is_right_pressed) dx -= TRANSLATE_SPEED / transform.k;
+		if (svg != null && (dx != 0 || dy !== 0)) {
+			const selection = select(svg);
+			let last_time = performance.now();
+			function on_animation_frame() {
+				if (!canceled) {
+					const new_time = performance.now();
+					const dt = new_time - last_time;
+					last_time = new_time;
+					zoom_behavior.translateBy(
+						selection,
+						(dx * dt) / 1000,
+						(dy * dt) / 1000,
+					);
+					requestAnimationFrame(on_animation_frame);
+				}
+			}
+			requestAnimationFrame(on_animation_frame);
+			return () => {
+				canceled = true;
+			};
+		} else {
+			return;
+		}
 	});
 
 	function get_mouse_coordinates(event: { clientX: number; clientY: number }) {
@@ -232,13 +272,44 @@
 		}
 	}}
 	onkeydown={(e) => {
+		const active_element = document.activeElement;
+		const is_editing_text =
+			active_element != null &&
+			'selectionStart' in active_element &&
+			active_element.selectionStart != null;
+		if (is_editing_text) return;
+
 		if (e.key === 'Shift') {
 			is_shift_pressed = true;
+		}
+		if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+			is_left_pressed = true;
+		}
+		if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+			is_right_pressed = true;
+		}
+		if (e.code === 'KeyS' || e.code === 'ArrowDown') {
+			is_down_pressed = true;
+		}
+		if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+			is_up_pressed = true;
 		}
 	}}
 	onkeyup={(e) => {
 		if (e.key === 'Shift') {
 			is_shift_pressed = false;
+		}
+		if (e.code === 'KeyA' || e.code === 'ArrowLeft') {
+			is_left_pressed = false;
+		}
+		if (e.code === 'KeyD' || e.code === 'ArrowRight') {
+			is_right_pressed = false;
+		}
+		if (e.code === 'KeyS' || e.code === 'ArrowDown') {
+			is_down_pressed = false;
+		}
+		if (e.code === 'KeyW' || e.code === 'ArrowUp') {
+			is_up_pressed = false;
 		}
 	}}
 />
