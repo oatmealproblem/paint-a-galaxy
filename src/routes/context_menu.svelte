@@ -151,7 +151,7 @@
 			</Menu.Content>
 		</Menu.Positioner>
 	</Portal>
-	<Menu.ContextTrigger class="contents">
+	<Menu.ContextTrigger class="contents" style="cursor: inherit;">
 		{@render children()}
 	</Menu.ContextTrigger>
 </Menu>

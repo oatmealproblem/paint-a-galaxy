@@ -7,7 +7,6 @@
 	import Paint from './steps/paint.svelte';
 	import Tweak from './steps/tweak.svelte';
 	import { get_editor } from '$lib/editor.svelte';
-	import { tool_pairs } from '$lib/models/tool';
 	import { generate_stellaris_galaxy } from '$lib/generate_galaxy_txt';
 
 	const steps: {
@@ -74,14 +73,6 @@
 			const step = steps[details.step]?.id;
 			if (step) {
 				editor().set_step(step);
-				// select first tool for step
-				const tool_pair = Object.values(tool_pairs).find(
-					(pair) => pair.step === step,
-				);
-				if (tool_pair) {
-					editor().primary_tool_id = tool_pair.primary.id;
-					editor().secondary_tool_id = tool_pair.secondary.id;
-				}
 			}
 		}}
 	>

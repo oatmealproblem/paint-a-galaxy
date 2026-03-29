@@ -1,6 +1,7 @@
 import { createContext } from 'svelte';
 import type { Step } from './models/step';
 import {
+	tool_pairs,
 	tools,
 	type ToolActionTypePayload,
 	type ToolId,
@@ -75,12 +76,22 @@ export class Editor {
 		this.#layer = layer;
 		this.#tool_settings = tool_settings;
 		this.#view_settings = view_settings;
+		this.#select_tool_pair_for_step();
 
 		$effect.root(() => {
 			$effect(() => {
 				this.#save_project();
 			});
 		});
+	}
+
+	#select_tool_pair_for_step() {
+		this.primary_tool_id =
+			tool_pairs.find((pair) => pair.step === this.step)?.primary.id ??
+			'freehand_draw';
+		this.secondary_tool_id =
+			tool_pairs.find((pair) => pair.step === this.step)?.secondary.id ??
+			'freehand_erase';
 	}
 
 	get view_settings(): ViewSettings {
@@ -108,6 +119,7 @@ export class Editor {
 
 	set_step(step: Step) {
 		this.project = new Project({ ...this.project, step });
+		this.#select_tool_pair_for_step();
 		this.#save_project();
 	}
 
@@ -151,7 +163,21 @@ export class Editor {
 			const view_service = yield* View;
 			const view_settings = yield* view_service.load_settings();
 
-			return new Editor(list, project, layer, tool_settings, view_settings);
+			const editor = new Editor(
+				list,
+				project,
+				layer,
+				tool_settings,
+				view_settings,
+			);
+			console.log(
+				'loaded',
+				editor.step,
+				editor.primary_tool_id,
+				editor.secondary_tool_id,
+				editor,
+			);
+			return editor;
 		});
 		return Effect.runPromise(Effect.provide(effect, layer));
 	}
@@ -364,6 +390,7 @@ export class Editor {
 			([updated_project, updated_list]) => {
 				this.projects = updated_list;
 				this.project = updated_project;
+				this.#select_tool_pair_for_step();
 				this.#done_stack = [];
 				this.#undone_stack = [];
 			},
@@ -401,6 +428,7 @@ export class Editor {
 			([project, projects]) => {
 				this.project = project;
 				this.projects = projects;
+				this.#select_tool_pair_for_step();
 				this.#done_stack = [];
 				this.#undone_stack = [];
 			},
