@@ -17,6 +17,7 @@
 	import { Icons } from '$lib/components/icons';
 	import SectionHeader from '$lib/components/section_header.svelte';
 	import { Record } from 'effect';
+	import { is_canvas_filter_supported } from '$lib/canvas';
 
 	type Props = {
 		step: Step;
@@ -197,7 +198,7 @@
 		</Slider>
 	{/if}
 
-	{#if 'blur' in tool.default_settings}
+	{#if 'blur' in tool.default_settings && is_canvas_filter_supported()}
 		<Slider
 			min={0}
 			max={2}

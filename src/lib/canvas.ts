@@ -66,3 +66,12 @@ export async function convert_blob_to_image_data(blob: Blob) {
 	);
 	return ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 }
+
+let canvas_filter_supported: boolean | null = null;
+export function is_canvas_filter_supported(): boolean {
+	if (canvas_filter_supported != null) return canvas_filter_supported;
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d');
+	canvas_filter_supported = ctx != null && 'filter' in ctx;
+	return canvas_filter_supported;
+}
