@@ -38,6 +38,7 @@ export class Editor {
 				blur: 0,
 				opacity: 0,
 				size: 0,
+				cap_style: 0,
 			})),
 		),
 	);
@@ -354,7 +355,7 @@ export class Editor {
 			const updated_project =
 				first ?
 					yield* projects.get(first)
-				:	yield* projects.get_legacy_localstorage();
+				:	yield* Effect.promise(() => Project.make_empty('Painted Galaxy'));
 			list =
 				first ? list : [ProjectListing.from_project(updated_project), ...list];
 			return [updated_project, list] as const;
