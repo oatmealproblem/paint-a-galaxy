@@ -25,6 +25,13 @@ export class ProjectListing extends Schema.Class<ProjectListing>(
 
 export class Project extends Schema.Class<Project>('Project')({
 	name: Schema.NonEmptyString,
+	step: Schema.Literal('paint', 'generate', 'tweak').pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 'paint',
+			decoding: () => 'paint',
+		}),
+	),
 	canvas: Schema.instanceOf(Blob),
 	solar_systems: Schema.Array(SolarSystem),
 	nebulas: Schema.Array(Nebula),
@@ -54,6 +61,7 @@ export class Project extends Schema.Class<Project>('Project')({
 
 		return Project.make({
 			name,
+			step: 'paint',
 			canvas,
 			solar_systems: [],
 			nebulas: [],

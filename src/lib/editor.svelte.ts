@@ -22,7 +22,9 @@ import { SolarSystemId } from './models/solar_system';
 type EditorLayer = Layer.Layer<Actions | Generator | Projects | Tools | View>;
 
 export class Editor {
-	step = $state<Step>('paint');
+	project = $state.raw<Project>()!;
+	projects = $state.raw<readonly ProjectListing[]>()!;
+	readonly step = $derived(this.project?.step ?? 'paint');
 	primary_tool_id = $state<ToolId>('freehand_draw');
 	readonly primary_tool = $derived(tools[this.primary_tool_id]);
 	secondary_tool_id = $state<ToolId>('freehand_erase');
@@ -51,8 +53,6 @@ export class Editor {
 			Match.exhaustive,
 		),
 	);
-	project = $state.raw<Project>()!;
-	projects = $state.raw<readonly ProjectListing[]>()!;
 	#layer: EditorLayer;
 	#done_stack: Action[][] = $state([]);
 	#undone_stack: Action[][] = $state([]);
@@ -103,6 +103,11 @@ export class Editor {
 			yield* tools_service.save_settings(tool_id, settings);
 		});
 		return Effect.runPromise(Effect.provide(effect, this.#layer));
+	}
+
+	set_step(step: Step) {
+		this.project = new Project({ ...this.project, step });
+		this.#save_project();
 	}
 
 	#save_project() {

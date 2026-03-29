@@ -24,8 +24,7 @@
 		if (editor().projects.some((project) => project.name === trimmed)) return;
 
 		editor().create_project(trimmed);
-		// reset step and camera
-		editor().step = 'paint';
+		// reset camera
 		const event = new Event('command') as Event & { command: string };
 		event.command = CUSTOM_COMMAND.reset_zoom;
 		document.getElementById(ID.canvas)?.dispatchEvent(event);

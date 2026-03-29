@@ -73,7 +73,7 @@
 		onStepChange={(details) => {
 			const step = steps[details.step]?.id;
 			if (step) {
-				editor().step = step;
+				editor().set_step(step);
 				// select first tool for step
 				const tool_pair = Object.values(tool_pairs).find(
 					(pair) => pair.step === step,
