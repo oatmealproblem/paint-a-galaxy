@@ -15,13 +15,19 @@ planet_event = {
 		if = { # resource consolidation, ie machine world start
 			limit = { owner = { has_origin = origin_machine } }
 			change_pc = pc_machine
+			# change_pc causes building_colony_shelter (or equivalent) to be created
+			remove_all_buildings = yes
 			reset_planet = yes
 		} else_if = { # remnants, ie relic world start
 			limit = { owner = { has_origin = origin_remnants } }
+			# change_pc causes building_colony_shelter (or equivalent) to be created
+			remove_all_buildings = yes
 			change_pc = pc_relic
 		} else_if = { # post-apocalyptic, ie tomb world start
 			limit = { owner = { OR = { has_origin = origin_post_apocalyptic has_origin = origin_post_apocalyptic_machines } } }
 			change_pc = pc_nuked
+			# change_pc causes building_colony_shelter (or equivalent) to be created
+			remove_all_buildings = yes
 			reset_planet = yes
 		} else_if = { # generic
 			limit = {
@@ -32,6 +38,8 @@ planet_event = {
 				is_ideal_planet_class = { who = from status = no }
 			}
 			change_pc = from
+			# change_pc causes building_colony_shelter (or equivalent) to be created
+			remove_all_buildings = yes
 			reset_planet = yes
 		}
 	}
