@@ -71,7 +71,8 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 			),
 			Option.match({
 				onNone: () => this.name,
-				onSome: (metadata) => Option.fromNullable(metadata.name),
+				onSome: (metadata) =>
+					metadata.name === null ? this.name : Option.some(metadata.name),
 			}),
 		);
 	}
