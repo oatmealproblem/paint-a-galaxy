@@ -84,6 +84,7 @@
 			],
 			itemToString: (item) => item.key,
 			itemToValue: (item) => item.key,
+			isItemDisabled: (item) => contains_whitespace(item.key),
 			groupBy: (item) => item.type,
 		}),
 	);
@@ -107,6 +108,10 @@
 		);
 		items = filtered;
 	};
+
+	function contains_whitespace(s: string) {
+		return /\s/.test(s.trim());
+	}
 </script>
 
 <Combobox
@@ -172,7 +177,11 @@
 							<Combobox.Item {item} class="">
 								<Combobox.ItemText class="text-xs">
 									<div class="font-mono">{item.key}</div>
-									<div>{item.label}</div>
+									<div>
+										{contains_whitespace(item.key) ?
+											'Invalid (contains whitespace)'
+										:	item.label}
+									</div>
 									{#if item.dlc.length > 0}
 										<div class="flex gap-1">
 											{#each item.dlc as dlc (dlc)}
