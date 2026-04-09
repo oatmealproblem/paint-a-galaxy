@@ -42,7 +42,7 @@
 	const initializer_name = $derived(
 		pipe(
 			solar_system,
-			Option.flatMap((value) => value.initializer),
+			Option.flatMap((value) => value.get_initializer()),
 			Option.flatMapNullable((value) =>
 				value in initializer_metadata ?
 					initializer_metadata[value as InitializerKey]
@@ -122,7 +122,7 @@
 											.pipe(Option.getOrElse(() => '')),
 									(value) => {
 										const name: Option.Option<string> =
-											value == '' ? Option.none() : Option.some(value);
+											value === '' ? Option.none() : Option.some(value);
 										editor().apply_actions([
 											new Action.UpdateSolarSystemAction({
 												old_value: solar_system.value,
