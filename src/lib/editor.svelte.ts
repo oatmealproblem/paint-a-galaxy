@@ -170,13 +170,6 @@ export class Editor {
 				tool_settings,
 				view_settings,
 			);
-			console.log(
-				'loaded',
-				editor.step,
-				editor.primary_tool_id,
-				editor.secondary_tool_id,
-				editor,
-			);
 			return editor;
 		});
 		return Effect.runPromise(Effect.provide(effect, layer));
