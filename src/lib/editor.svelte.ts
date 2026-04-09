@@ -410,6 +410,24 @@ export class Editor {
 		);
 	}
 
+	async clone_project(name: string): Promise<void> {
+		const cloned_project = new Project({
+			...this.project,
+			name,
+		});
+		const effect = Effect.gen(function* () {
+			const projects = yield* Projects;
+			yield* projects.save(cloned_project);
+			return yield* projects.list();
+		});
+		return Effect.runPromise(Effect.provide(effect, this.#layer)).then(
+			(updated_list) => {
+				this.projects = updated_list;
+				this.project = cloned_project;
+			},
+		);
+	}
+
 	async open_project(project_listing: ProjectListing): Promise<void> {
 		const effect = Effect.gen(function* () {
 			const projects = yield* Projects;

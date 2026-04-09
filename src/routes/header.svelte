@@ -149,6 +149,12 @@
 							{editor().project.name}
 						</Menu.ItemGroupLabel>
 						{@render menu_item_command(
+							'clone',
+							'Clone...',
+							'show-modal',
+							ID.clone_project_dialog,
+						)}
+						{@render menu_item_command(
 							'rename',
 							'Rename...',
 							'show-modal',

@@ -7,6 +7,7 @@
 	import DeleteProjectDialog from './dialogs/delete_project_dialog.svelte';
 	import RenameProjectDialog from './dialogs/rename_project_dialog.svelte';
 	import UploadImageDialog from './dialogs/upload_image_dialog.svelte';
+	import CloneProjectDialog from './dialogs/clone_project_dialog.svelte';
 
 	let { children } = $props();
 
@@ -28,6 +29,7 @@
 			<NewProjectDialog />
 			<DeleteProjectDialog />
 			<RenameProjectDialog />
+			<CloneProjectDialog />
 			<UploadImageDialog />
 			{@render children()}
 		</EditorProvider>
