@@ -68,7 +68,13 @@
 		useListCollection({
 			items: [
 				...items,
-				...(input && !(input in initializer_metadata) ?
+				...((
+					input &&
+					!(
+						input in initializer_metadata &&
+						initializer_metadata[input as InitializerKey] != null
+					)
+				) ?
 					[
 						{
 							key: input,
