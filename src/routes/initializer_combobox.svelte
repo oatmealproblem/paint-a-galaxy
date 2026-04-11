@@ -31,7 +31,14 @@
 
 	const editor = get_editor();
 
-	let input = $state('');
+	let input = $derived(
+		pipe(
+			solar_system,
+			Option.fromNullable,
+			Option.flatMap((solar_system) => solar_system.get_initializer()),
+			Option.getOrElse(() => ''),
+		),
+	);
 
 	const metadata = $derived(
 		pipe(
@@ -123,6 +130,7 @@
 	placeholder="Search..."
 	{collection}
 	onOpenChange={on_open_change}
+	inputValue={input}
 	onInputValueChange={on_input_value_change}
 	inputBehavior="autohighlight"
 	positioning={{ placement: 'bottom-start' }}
