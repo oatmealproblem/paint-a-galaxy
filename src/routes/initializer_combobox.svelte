@@ -100,11 +100,9 @@
 	) => {
 		input = event.inputValue;
 		const filtered = data.filter((item) =>
-			[
-				item.key.toLowerCase(),
-				(item.key ?? '').toLowerCase(),
-				item.description.toLowerCase(),
-			].some((text) => text.includes(event.inputValue.toLowerCase())),
+			[item.key.toLowerCase(), item.label.toLowerCase()].some((text) =>
+				text.includes(event.inputValue.toLowerCase()),
+			),
 		);
 		items = filtered;
 	};
