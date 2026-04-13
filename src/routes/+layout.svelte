@@ -8,6 +8,7 @@
 	import RenameProjectDialog from './dialogs/rename_project_dialog.svelte';
 	import UploadImageDialog from './dialogs/upload_image_dialog.svelte';
 	import CloneProjectDialog from './dialogs/clone_project_dialog.svelte';
+	import ConfigureGridDialog from './dialogs/configure_grid_dialog.svelte';
 
 	let { children } = $props();
 
@@ -31,6 +32,7 @@
 			<RenameProjectDialog />
 			<CloneProjectDialog />
 			<UploadImageDialog />
+			<ConfigureGridDialog />
 			{@render children()}
 		</EditorProvider>
 	</svelte:boundary>

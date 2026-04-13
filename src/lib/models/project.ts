@@ -4,6 +4,7 @@ import { Nebula } from './nebula';
 import { SolarSystem, SolarSystemId } from './solar_system';
 import { GeneratorSettings } from './generator_settings';
 import { make_blank_image } from '$lib/canvas';
+import { GridConfig } from './grid_config';
 
 export class ProjectListing extends Schema.Class<ProjectListing>(
 	'ProjectListing',
@@ -42,6 +43,13 @@ export class Project extends Schema.Class<Project>('Project')({
 		Schema.withDefaults({
 			constructor: () => GeneratorSettings.default(),
 			decoding: () => GeneratorSettings.default(),
+		}),
+	),
+	grid_config: GridConfig.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => GridConfig.default(),
+			decoding: () => GridConfig.default(),
 		}),
 	),
 }) {

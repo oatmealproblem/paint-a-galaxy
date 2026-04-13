@@ -120,7 +120,6 @@ export class Editor {
 	set_step(step: Step) {
 		this.project = new Project({ ...this.project, step });
 		this.#select_tool_pair_for_step();
-		this.#save_project();
 	}
 
 	#save_project() {

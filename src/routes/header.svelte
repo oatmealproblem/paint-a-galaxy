@@ -7,6 +7,8 @@
 	import { CUSTOM_COMMAND, ID } from '$lib/constants';
 	import { make_blank_image } from '$lib/canvas';
 	import { Action } from '$lib/models/action';
+	import { Project } from '$lib/models/project';
+	import { GridConfig } from '$lib/models/grid_config';
 
 	type RecordUnknown = Record<string, unknown>;
 	type Command =
@@ -176,11 +178,19 @@
 		<Portal>
 			<Menu.Positioner class="z-10!">
 				<Menu.Content class="bg-surface-100-900 border-surface-300-700">
-					<Menu.Item value="undo" disabled={!editor().can_undo}>
+					<Menu.Item
+						value="undo"
+						closeOnSelect={false}
+						disabled={!editor().can_undo}
+					>
 						<Menu.ItemText>Undo</Menu.ItemText>
 						<kbd class="bg-surface-200-800 rounded-base p-1">ctrl+z</kbd>
 					</Menu.Item>
-					<Menu.Item value="redo" disabled={!editor().can_redo}>
+					<Menu.Item
+						value="redo"
+						closeOnSelect={false}
+						disabled={!editor().can_redo}
+					>
 						<Menu.ItemText>Redo</Menu.ItemText>
 						<kbd class="bg-surface-200-800 rounded-base p-1">ctrl+y</kbd>
 					</Menu.Item>
@@ -194,6 +204,33 @@
 					<Menu.Item value="clear">
 						<Menu.ItemText>Clear Canvas</Menu.ItemText>
 					</Menu.Item>
+					<Menu.Separator class="border-surface-300-700" />
+					<Menu.OptionItem
+						type="checkbox"
+						value="snap_to_grid"
+						closeOnSelect={false}
+						checked={editor().project.grid_config.snap}
+						onCheckedChange={(checked) => {
+							editor().project = new Project({
+								...editor().project,
+								grid_config: new GridConfig({
+									...editor().project.grid_config,
+									snap: checked,
+								}),
+							});
+						}}
+					>
+						<Menu.ItemText>Snap to Grid</Menu.ItemText>
+						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
+							<CheckIcon class="size-4" />
+						</Menu.ItemIndicator>
+					</Menu.OptionItem>
+					{@render menu_item_command(
+						'configure_grid',
+						'Configure Grid...',
+						'show-modal',
+						ID.configure_grid_dialog,
+					)}
 				</Menu.Content>
 			</Menu.Positioner>
 		</Portal>
@@ -301,6 +338,7 @@
 					<Menu.OptionItem
 						type="checkbox"
 						value="show_center_mark"
+						closeOnSelect={false}
 						checked={editor().view_settings.show_center_mark}
 						onCheckedChange={(checked) => {
 							editor().update_view_settings({ show_center_mark: checked });
@@ -314,6 +352,7 @@
 					<Menu.OptionItem
 						type="checkbox"
 						value="show_map_limit"
+						closeOnSelect={false}
 						checked={editor().view_settings.show_map_limit}
 						onCheckedChange={(checked) => {
 							editor().update_view_settings({ show_map_limit: checked });
@@ -324,15 +363,10 @@
 							<CheckIcon class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
-					<!-- <Menu.OptionItem type="checkbox" checked={false} value="core">
-						<Menu.ItemText>Show Core</Menu.ItemText>
-						<Menu.ItemIndicator class="hidden data-[state=checked]:block">
-							<CheckIcon class="size-4" />
-						</Menu.ItemIndicator>
-					</Menu.OptionItem> -->
 					<Menu.OptionItem
 						type="checkbox"
 						value="show_l_cluster"
+						closeOnSelect={false}
 						checked={editor().view_settings.show_l_cluster}
 						onCheckedChange={(checked) => {
 							editor().update_view_settings({ show_l_cluster: checked });
@@ -351,6 +385,7 @@
 						<Menu.OptionItem
 							type="checkbox"
 							value="show_giga_core"
+							closeOnSelect={false}
 							checked={editor().view_settings.show_giga_core}
 							onCheckedChange={(checked) => {
 								editor().update_view_settings({ show_giga_core: checked });
@@ -366,6 +401,7 @@
 						<Menu.OptionItem
 							type="checkbox"
 							value="show_giga_aeternum"
+							closeOnSelect={false}
 							checked={editor().view_settings.show_giga_aeternum}
 							onCheckedChange={(checked) => {
 								editor().update_view_settings({ show_giga_aeternum: checked });
@@ -379,16 +415,6 @@
 							</Menu.ItemIndicator>
 						</Menu.OptionItem>
 					</Menu.ItemGroup>
-					<!-- <Menu.Separator /> -->
-					<!-- <Menu.OptionItem type="checkbox" checked={false} value="grid">
-						<Menu.ItemText>Show Grid</Menu.ItemText>
-						<Menu.ItemIndicator class="hidden data-[state=checked]:block">
-							<CheckIcon class="size-4" />
-						</Menu.ItemIndicator>
-					</Menu.OptionItem> -->
-					<!-- <Menu.Item value="configure-grid">
-						<Menu.ItemText>Configure Grid...</Menu.ItemText>
-					</Menu.Item> -->
 				</Menu.Content>
 			</Menu.Positioner>
 		</Portal>

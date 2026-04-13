@@ -22,6 +22,7 @@
 	import type { Project } from '$lib/models/project';
 	import SolarSystemDetails from './solar_system_details.svelte';
 	import ContextMenu from './context_menu.svelte';
+	import { generate_grid_path, generate_grid_points } from '$lib/grid';
 
 	const editor = get_editor();
 	const project = $derived(editor().project);
@@ -52,12 +53,29 @@
 		}
 	});
 
+	const grid_config = $derived(editor().project.grid_config);
+	const grid_points = $derived(
+		generate_grid_points(
+			grid_config.type,
+			grid_config.size,
+			grid_config.rotate,
+			grid_config.x_offset,
+			grid_config.y_offset,
+		),
+	);
+	const grid_delaunay = $derived(
+		new Delaunay(
+			grid_points.flatMap((grid_point) => [grid_point.x, grid_point.y]),
+		),
+	);
+
 	let mouse_coordinates = $state.raw<
 		Option.Option<{
 			container: Coordinate;
 			viewbox: Coordinate;
 			canvas: Coordinate;
 			stellaris: Coordinate;
+			grid: Coordinate;
 		}>
 	>(Option.none());
 
@@ -79,7 +97,7 @@
 		:	'',
 	);
 
-	const delaunay = $derived(
+	const solar_system_delaunay = $derived(
 		solar_systems.length > 0 ?
 			new Delaunay(
 				solar_systems.flatMap((system) => [
@@ -164,7 +182,11 @@
 		}
 	});
 
-	function get_mouse_coordinates(event: { clientX: number; clientY: number }) {
+	function get_mouse_coordinates(
+		event: { clientX: number; clientY: number },
+		grid_points: Coordinate[],
+		grid_delaunay: Delaunay<unknown>,
+	) {
 		if (container == null) throw new Error('null canvas container');
 		const bbox = container.getBoundingClientRect();
 		const container_coordinate = Coordinate.make({
@@ -194,12 +216,20 @@
 			x: Math.round((viewbox_coordinate.x - transform.x) / transform.k),
 			y: Math.round((viewbox_coordinate.y - transform.y) / transform.k),
 		});
+
+		const snapped_grid_point_index = grid_delaunay.find(
+			canvas_coordinate.x,
+			canvas_coordinate.y,
+		);
+		const grid_coordinate = grid_points[snapped_grid_point_index]!;
+
 		return {
 			container: container_coordinate,
 			viewbox: viewbox_coordinate,
 			canvas: canvas_coordinate,
 			canvas_rounded: canvas_coordinate.to_rounded(),
 			stellaris: canvas_coordinate.to_stellaris_coordinate(),
+			grid: grid_coordinate,
 		};
 	}
 
@@ -222,8 +252,11 @@
 				Equal.equals(solar_system.coordinate, coordinate.to_rounded()),
 		);
 		let solar_system: Option.Option<SolarSystem> = Option.none();
-		if (delaunay) {
-			const solar_system_index = delaunay.find(coordinate.x, coordinate.y);
+		if (solar_system_delaunay) {
+			const solar_system_index = solar_system_delaunay.find(
+				coordinate.x,
+				coordinate.y,
+			);
 			solar_system = Option.fromNullable(
 				project.solar_systems[solar_system_index],
 			);
@@ -384,7 +417,12 @@
 				Boolean.match({
 					onTrue: () =>
 						Option.map(snapped_solar_system, (system) => system.coordinate),
-					onFalse: () => Option.some(get_mouse_coordinates(e).canvas),
+					onFalse: () =>
+						Option.some(
+							get_mouse_coordinates(e, grid_points, grid_delaunay)[
+								grid_config.snap ? 'grid' : 'canvas'
+							],
+						),
 				}),
 				Option.match({
 					onSome(value) {
@@ -397,7 +435,7 @@
 		}
 	}}
 	onmousemove={(e) => {
-		const coordinates = get_mouse_coordinates(e);
+		const coordinates = get_mouse_coordinates(e, grid_points, grid_delaunay);
 		mouse_coordinates = Option.some(coordinates);
 		const snap_to_solar_system = pipe(
 			active_tool,
@@ -405,8 +443,8 @@
 			Option.map((value) => value.snap_to_solar_system),
 			Option.getOrElse(() => false),
 		);
-		if (delaunay) {
-			const solar_system_index = delaunay.find(
+		if (solar_system_delaunay) {
+			const solar_system_index = solar_system_delaunay.find(
 				coordinates.canvas.x,
 				coordinates.canvas.y,
 			);
@@ -419,7 +457,8 @@
 					snapped_solar_system,
 					(solar_system) => solar_system.coordinate,
 				)
-			:	Option.some(coordinates.canvas);
+			: grid_config.snap ? Option.some(coordinates.grid)
+			: Option.some(coordinates.canvas);
 		if (Option.isSome(active_tool) && Option.isSome(point)) {
 			Match.value(active_tool.value.action_type).pipe(
 				Match.when('single_point', () => {
@@ -433,7 +472,9 @@
 					}
 				}),
 				Match.when('multi_point', () => {
-					tool_points.push(point.value);
+					if (!Equal.equals(tool_points.at(-1), point.value)) {
+						tool_points.push(point.value);
+					}
 				}),
 				Match.exhaustive,
 			);
@@ -656,10 +697,14 @@
 				<!-- connecting line from details box to solar system -->
 				{#if Option.isSome(details_opened_solar_system)}
 					{@const solar_system = details_opened_solar_system.value}
-					{@const details_coordinate = get_mouse_coordinates({
-						clientX: details_position.x + details_size.width / 2,
-						clientY: details_position.y + details_size.height / 2,
-					}).canvas}
+					{@const details_coordinate = get_mouse_coordinates(
+						{
+							clientX: details_position.x + details_size.width / 2,
+							clientY: details_position.y + details_size.height / 2,
+						},
+						grid_points,
+						grid_delaunay,
+					).canvas}
 					<line
 						class="stroke-primary-500"
 						stroke-width={3 / transform.k}
@@ -780,6 +825,46 @@
 						stroke={active_tool.value.render.color}
 					/>
 				{/if}
+				{#if editor().project.grid_config.snap}
+					{@const grid_config = editor().project.grid_config}
+					<clipPath id="grid-clip">
+						<rect
+							x={0}
+							y={0}
+							width={CANVAS_WIDTH}
+							height={CANVAS_HEIGHT}
+							transform="rotate({-grid_config.rotate}) translate({-grid_config.x_offset}, {-grid_config.y_offset})"
+							transform-origin="center"
+						/>
+					</clipPath>
+					<path
+						clip-path="url(#grid-clip)"
+						d={generate_grid_path(grid_config.type, grid_config.size)}
+						class="fill-none stroke-secondary-500/25"
+						transform="translate({grid_config.x_offset}, {grid_config.y_offset}) rotate({grid_config.rotate}) "
+						transform-origin="center"
+					/>
+					<!-- <g>
+						{#each generate_grid_points(grid_config.type, grid_config.size, grid_config.rotate, grid_config.x_offset, grid_config.y_offset) as point (point.key)}
+							<circle fill="magenta" cx={point.x} cy={point.y} r={1} />
+						{/each}
+					</g> -->
+					{#if Option.isSome(mouse_coordinates)}
+						{@const coordinate = mouse_coordinates.value.grid}
+						<g
+							transform="translate({coordinate.x},{coordinate.y}) scale({1 /
+								transform.k})"
+							transform-origin="{coordinate.x},${coordinate.y}"
+						>
+							<g class="stroke-primary-500" stroke-width="2">
+								<line x1="10" x2="4" y1="0" y2="0" />
+								<line x1="-4" x2="-10" y1="0" y2="0" />
+								<line x1="0" x2="0" y1="-4" y2="-10" />
+								<line x1="0" x2="0" y1="10" y2="4" />
+							</g>
+						</g>
+					{/if}
+				{/if}
 			</g>
 		</svg>
 	</ContextMenu>
@@ -792,13 +877,23 @@
 				{
 					'right-0':
 						coordinates.container.x < 240 &&
-						coordinates.container.y > container_height - 36,
+						coordinates.container.y > container_height - 60,
 				},
 			]}
 		>
 			{Math.round(coordinates.stellaris.x)}, {Math.round(
 				coordinates.stellaris.y,
 			)}
+
+			{#if grid_config.snap}
+				{@const stellaris_coordinate = coordinates.grid
+					.to_stellaris_coordinate()
+					.to_rounded()}
+				<div>
+					snapped to
+					{stellaris_coordinate.x}, {stellaris_coordinate.y}
+				</div>
+			{/if}
 
 			{#if Option.isSome(snapped_solar_system)}
 				{@const stellaris_coordinate =

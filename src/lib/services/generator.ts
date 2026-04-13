@@ -18,6 +18,7 @@ import kruskal from 'ngraph.kruskal';
 import { Delaunay } from 'd3-delaunay';
 import { Connection } from '$lib/models/connection';
 import { Nebula } from '$lib/models/nebula';
+import { generate_grid_points } from '$lib/grid';
 
 export class Generator extends Context.Tag('Generator')<
 	Generator,
@@ -65,6 +66,9 @@ export class Generator extends Context.Tag('Generator')<
 					convert_blob_to_image_data(project.canvas),
 				);
 				function get_weight(x: number, y: number) {
+					if (x < 0 || y < 0 || x >= CANVAS_WIDTH || y >= CANVAS_HEIGHT) {
+						return 0;
+					}
 					const index = y * CANVAS_HEIGHT * 4 + x * 4;
 					// images should be grayscale, but take average of rgb just in case
 					const r = image_data.data[index]! / 255;
@@ -74,6 +78,21 @@ export class Generator extends Context.Tag('Generator')<
 					return Math.round(((r + g + b) / 3) * a * 100);
 				}
 
+				const { grid_config } = project;
+				const grid_points =
+					grid_config.snap ?
+						generate_grid_points(
+							grid_config.type,
+							grid_config.size,
+							grid_config.rotate,
+							grid_config.x_offset,
+							grid_config.y_offset,
+						)
+					:	[];
+				const grid_point_keys = new Set(
+					grid_points.map((point) => point.to_rounded().key),
+				);
+
 				// count image and row alpha totals, to use for random weighted
 				let total = 0;
 				const rows: { total: number; values: number[] }[] = [];
@@ -81,10 +100,28 @@ export class Generator extends Context.Tag('Generator')<
 					const row = { total: 0, values: [] as number[] };
 					rows.push(row);
 					for (let x = 0; x < CANVAS_WIDTH; x++) {
-						const value = get_weight(x, y);
-						total += value;
-						row.total += value;
-						row.values.push(value);
+						if (!grid_config.snap || grid_point_keys.has(`${x},${y}`)) {
+							const value =
+								grid_config.snap ?
+									// when snapped to grid, collect weight from adjacent pixels
+									// this fixes literal edge cases where you'd expect solar systems to generate, but they don't
+									get_weight(x - 1, y - 1) +
+									get_weight(x - 1, y) +
+									get_weight(x - 1, y + 1) +
+									get_weight(x, y - 1) +
+									get_weight(x, y) +
+									get_weight(x, y + 1) +
+									get_weight(x + 1, y - 1) +
+									get_weight(x + 1, y) +
+									get_weight(x + 1, y + 1)
+								:	get_weight(x, y); // no snap to grid, just get the one pixel
+
+							total += value;
+							row.total += value;
+							row.values.push(value);
+						} else {
+							row.values.push(0);
+						}
 					}
 				}
 
