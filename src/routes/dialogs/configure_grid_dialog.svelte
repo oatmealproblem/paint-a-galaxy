@@ -4,7 +4,7 @@
 	import { get_editor } from '$lib/editor.svelte';
 	import { GridConfig } from '$lib/models/grid_config';
 	import { Project } from '$lib/models/project';
-	import type { EventHandler, FormEventHandler } from 'svelte/elements';
+	import type { EventHandler } from 'svelte/elements';
 
 	const editor = get_editor();
 	const id = ID.configure_grid_dialog;
@@ -59,6 +59,7 @@
 				onblur={() => {
 					if (size <= 0) size = 1;
 				}}
+				step="any"
 			/>
 		</label>
 		<label>
@@ -70,6 +71,7 @@
 				onblur={() => {
 					rotate = rotate % 360;
 				}}
+				step="any"
 			/>
 		</label>
 		<label>
@@ -82,6 +84,7 @@
 					if (x_offset > 500) x_offset = 500;
 					if (x_offset < -500) x_offset = -500;
 				}}
+				step="any"
 			/>
 		</label>
 		<label>
@@ -94,6 +97,7 @@
 					if (y_offset > 500) y_offset = 500;
 					if (y_offset < -500) y_offset = -500;
 				}}
+				step="any"
 			/>
 		</label>
 		<div class="flex justify-end gap-2">
