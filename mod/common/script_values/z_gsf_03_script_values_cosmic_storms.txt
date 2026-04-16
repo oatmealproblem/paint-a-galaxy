@@ -1,0 +1,91 @@
+# overwrites to replace named galaxy_size checks with count_system
+
+storm_size_multiplier = {
+	# vanilla 0.6 tiny to 1.4 huge
+	# ie 0.4 + count_system / 1000
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 100
+	round = yes
+	divide = 10
+	add = 1
+}
+
+storm_range_min = {
+	# vanilla 6 tiny to 10 huge
+	# ie 5 + count_system / 200
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 200
+	round = yes
+	add = 5
+}
+
+storm_range_max = {
+	# vanilla 12 tiny to 16 huge
+	# ie 11 + count_system / 200
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 200
+	round = yes
+	add = 11
+}
+
+storm_area_placing_reticle_radius_multiplier = {
+	# vanilla 0.3 tiny to 1.2 huge
+	# approximately count_system / 800
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 80
+	round = yes
+	divide = 10
+	min = 0.1
+}
+
+storm_area_placing_max_range_multiplier = {
+	# vanilla (before empire size modifiers) 0.2 tiny to 0.6 huge
+	# ie 0.1 + count_system / 2000
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 200
+	round = yes
+	divide = 10
+	add = 0.1
+
+	# non galaxy_size modifiers from vanilla
+	modifier = {
+		mult = 0.25
+		empire_size < 100
+	}
+	modifier = {
+		mult = 0.5
+		empire_size < 300
+	}
+	modifier = {
+		mult = 0.75
+		AND = {
+			empire_size > 300
+			empire_size < 500
+		}
+	}
+}
