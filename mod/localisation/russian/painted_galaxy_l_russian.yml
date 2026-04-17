@@ -52,3 +52,6 @@
   trait_painted_galaxy_reserved_spawn_y_desc: "$trait_painted_galaxy_reserved_spawn_desc$"
   trait_painted_galaxy_reserved_spawn_z: "Reserved Spawn Z"
   trait_painted_galaxy_reserved_spawn_z_desc: "$trait_painted_galaxy_reserved_spawn_desc$"
+
+  painted_galaxy_extra_spawn.2.name: "Paint a Galaxy: §RInvalid Spawns§!"
+  painted_galaxy_extra_spawn.2.desc: "Some empires spawned in systems without the §Hempire_home_system§! flag. There are 2 likely causes to this:\n\n1.) You are using a modded home system that does not properly set the §Hempire_home_system§! flag. You should report this issue to that mod's author (it can cause issues with some vanilla content too).\n\n2.) You are playing multiplayer or using Reserved Spawns, and you set the AI Empires slider too high. Either restart with fewer AI empires, or choose the §H$BURN$§! to clean up the extra spawns."
