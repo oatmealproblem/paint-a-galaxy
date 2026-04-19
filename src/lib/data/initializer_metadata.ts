@@ -422,8 +422,8 @@ export const initializer_metadata: Record<
 	astral_scar_system: {
 		unique: true,
 		name: null,
-		description: 'Astral Scar Trinary',
-		dlc: ['Astral Planes'],
+		description: 'Astral Scar (Non-DLC Anomaly)',
+		dlc: [],
 	},
 
 	// biogenesis_initializers.txt
