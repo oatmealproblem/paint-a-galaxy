@@ -195,6 +195,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 				}),
 			);
 			let initializer = '';
+			let initializer_effect = '';
 			let spawn_weight = '';
 			if (potential_home_stars.includes(solar_system)) {
 				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
@@ -207,6 +208,13 @@ export function generate_stellaris_galaxy(project: Project): string {
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
 			} else if (Option.isSome(solar_system.initializer)) {
 				initializer = `initializer = ${solar_system.initializer.pipe(Option.getOrThrow)}`;
+				const metadata =
+					initializer_metadata[
+						solar_system.initializer.pipe(Option.getOrThrow) as InitializerKey
+					];
+				if (metadata?.init_effect) {
+					initializer_effect = metadata.init_effect;
+				}
 			} else if (systems_1_jump_from_spawn.has(solar_system.id)) {
 				// all systems with 1 of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
@@ -243,7 +251,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 					`set_star_flag = painted_galaxy_wormhole_${wormhole_index}`
 				:	'';
 
-			const effects = [fe_spawn_effect, wormhole_effect];
+			const effects = [fe_spawn_effect, wormhole_effect, initializer_effect];
 			const effect =
 				effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
 			return `\tsystem = { ${basics} ${name} ${initializer} ${spawn_weight} ${effect} }`;

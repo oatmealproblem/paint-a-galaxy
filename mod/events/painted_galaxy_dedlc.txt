@@ -1,0 +1,451 @@
+namespace = painted_galaxy_dedlc
+
+# reset missing-dlc systems
+event = {
+	id = painted_galaxy_dedlc.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		is_maybe_painted_galaxy = yes
+	}
+	immediate = {
+		every_system = {
+			limit = {
+				OR = {
+					AND = {
+						has_ancrel = no
+						OR = {
+							has_star_flag = relic_system_1
+							has_star_flag = relic_system_4
+							has_star_flag = mechanocalibrator_system
+						}
+					}
+					AND = {
+						has_distar = no
+						OR = {
+							has_star_flag = star_lifting_system
+							has_star_flag = big_rip_system
+							has_star_flag = time_loop_world_system
+							has_star_flag = toxic_moon_system
+							has_star_flag = shattered_world_system
+							has_star_flag = asteroid_system
+							has_star_flag = painted_galaxy_distar_drone_system
+							has_star_flag = amoeba_4_system
+							has_star_flag = void3_system
+							has_star_flag = ice_system
+							has_star_flag = high_energy_system
+							has_star_flag = guardians_hatchling_system
+							has_star_flag = primitive_robot_system
+							has_star_flag = superflare_system
+							has_star_flag = collapse_system
+							has_star_flag = old_foes_system
+							has_star_flag = scavenger_bot_system
+							has_star_flag = living_planet_system
+							has_star_flag = elderly_tiyanki_system
+							has_star_flag = ratling_system
+							has_star_flag = crystal_system
+							has_star_flag = escape_pod_system
+							has_star_flag = phaseshift_system
+							has_star_flag = lgate
+						}
+					}
+					AND = {
+						has_federations_dlc = no
+						OR = {
+							has_star_flag = ruined_mega_shipyard_system
+							has_star_flag = star_mall
+						}
+					}
+					AND = {
+						has_first_contact_dlc = no
+						OR = {
+							has_star_flag = MSI_home_system
+							has_star_flag = solarpunk_system_01
+						}
+					}
+					AND = {
+						has_grand_archive_dlc = no
+						has_star_flag = voidworms_system
+					}
+					AND = {
+						has_infernals = no
+						OR = {
+							has_star_flag = painted_galaxy_oasis_system
+							has_star_flag = painted_galaxy_infernal_pre_ftl_system
+						}
+					}
+					AND = {
+						has_leviathans = no
+						OR = {
+							has_star_flag = guardians_artists_system
+							has_star_flag = guardians_traders_system
+							has_star_flag = guardians_stellarite_system
+							has_star_flag = guardians_dragon_system
+							has_star_flag = guardians_horror_system
+							has_star_flag = guardians_dreadnought_system
+							has_star_flag = guardians_hive_system
+							has_star_flag = guardians_technosphere_system
+							has_star_flag = guardians_fortress_system
+							has_star_flag = guardians_wraith_system
+						}
+					}
+					AND = {
+						has_machine_age_dlc = no
+						has_star_flag = ruined_arc_furnace_system
+					}
+					AND = {
+						has_apocalypse_dlc = no
+						has_star_flag = marauder_system
+					}
+					AND = {
+						has_megacorp = no
+						OR = {
+							has_star_flag = caravaneer_home
+							has_star_flag = ruined_matter_decompressor_system
+							has_star_flag = ruined_strategic_coordination_center_system
+							has_star_flag = ruined_mega_art_installation_system
+							has_star_flag = ruined_interstellar_assembly_system
+						}
+					}
+					AND = {
+						has_shroud_dlc = no
+						has_star_flag = mindwarden_enclave_system
+					}
+					AND = {
+						has_overlord_dlc = no
+						OR = {
+							has_star_flag = salvager_enclave_system
+							has_star_flag = ruined_catapult_system
+							has_star_flag = ruined_orbital_ring_system
+						}
+					}
+					AND = {
+						has_paragon_dlc = no
+						OR = {
+							has_star_flag = legendary_leader_spawn_system
+							has_star_flag = legendary_leader_1st_system
+							has_star_flag = legendary_leader_2nd_system
+							has_star_flag = legendary_leader_3rd_system
+						}
+					}
+					AND = {
+						has_cosmic_storms_dlc = no
+						OR = {
+							has_star_flag = painted_galaxy_metal_planet_system
+							has_star_flag = painted_galaxy_previously_terraformed_planet_system
+							has_star_flag = painted_galaxy_collided_planet_system
+							has_star_flag = painted_galaxy_wooden_planet_system
+						}
+					}
+					AND = {
+						NOR = {
+							has_federations_dlc = yes
+							has_first_contact_dlc = yes
+						}
+						has_star_flag = painted_galaxy_pre_ftl_shattered_ring_system
+					}
+					AND = {
+						NOR = {
+							has_overlord_dlc = yes
+							has_shroud_dlc = yes
+						}
+						OR = {
+							has_star_flag = shroudwalker_enclave_system
+							has_star_flag = broken_shroudwalker_enclave
+						}
+					}
+					AND = {
+						NOR = {
+							has_distar = yes
+							has_grand_archive_dlc = yes
+							has_leviathans = yes
+						}
+						has_star_flag = guardians_curators_system
+					}
+				}
+			}
+			log = "resetting DLC system '[This.GetName]'"
+
+			#remove special flags
+			# generic
+			remove_star_flag = empire_home_system
+			remove_star_flag = enclave
+			remove_star_flag = guardian
+			remove_star_flag = hostile_system
+			remove_star_flag = primitive_system
+			remove_star_flag = unique_system
+			# ancient relics
+			remove_star_flag = relic_system_1
+			remove_star_flag = relic_system_4
+			remove_star_flag = mechanocalibrator_system
+			# distant stars
+			remove_star_flag = star_lifting_system
+			remove_star_flag = big_rip_system
+			remove_star_flag = time_loop_world_system
+			remove_star_flag = toxic_moon_system
+			remove_star_flag = shattered_world_system
+			remove_star_flag = asteroid_system
+			remove_star_flag = painted_galaxy_distar_drone_system
+			remove_star_flag = amoeba_4_system
+			remove_star_flag = void3_system
+			remove_star_flag = ice_system
+			remove_star_flag = high_energy_system
+			remove_star_flag = guardians_hatchling_system
+			remove_star_flag = primitive_robot_system
+			remove_star_flag = superflare_system
+			remove_star_flag = collapse_system
+			remove_star_flag = old_foes_system
+			remove_star_flag = scavenger_bot_system
+			remove_star_flag = living_planet_system
+			remove_star_flag = elderly_tiyanki_system
+			remove_star_flag = ratling_system
+			remove_star_flag = ratling_home_system
+			remove_star_flag = ruined_empire
+			remove_star_flag = crystal_system
+			remove_star_flag = escape_pod_system
+			remove_star_flag = phaseshift_system
+			remove_star_flag = lgate
+			remove_star_flag = lgate_guaranteed
+			# federations
+			remove_star_flag = ruined_mega_shipyard_system
+			remove_star_flag = star_mall
+			# first contact
+			remove_star_flag = MSI_home_system
+			remove_star_flag = solarpunk_system_01
+			# grand archive
+			remove_star_flag = voidworms_system
+			# infernals
+			remove_star_flag = painted_galaxy_oasis_system
+			remove_star_flag = painted_galaxy_infernal_pre_ftl_system
+			# leviathans
+			remove_star_flag = guardians_artists_system
+			remove_star_flag = guardians_traders_system
+			remove_star_flag = guardians_stellarite_system
+			remove_star_flag = guardians_dragon_system
+			remove_star_flag = guardians_horror_system
+			remove_star_flag = guardians_dreadnought_system
+			remove_star_flag = guardians_hive_system
+			remove_star_flag = guardians_technosphere_system
+			remove_star_flag = guardians_fortress_system
+			remove_star_flag = enigmatic_system
+			remove_star_flag = guardians_wraith_system
+			# machine age
+			remove_star_flag = ruined_arc_furnace_system
+			# apocalypse
+			remove_star_flag = marauder_system
+			remove_star_flag = marauder_capital_1
+			remove_star_flag = marauder_capital_2
+			remove_star_flag = marauder_capital_3
+			# megacorp
+			remove_star_flag = caravaneer_home
+			remove_star_flag = ruined_matter_decompressor_system
+			remove_star_flag = ruined_strategic_coordination_center_system
+			remove_star_flag = ruined_mega_art_installation_system
+			remove_star_flag = ruined_interstellar_assembly_system
+			# secrets of the shroud
+			remove_star_flag = mindwarden_enclave_system
+			# overlord
+			remove_star_flag = salvager_enclave_system
+			remove_star_flag = ruined_catapult_system
+			remove_star_flag = ruined_orbital_ring_system
+			# galactic paragons
+			remove_star_flag = legendary_leader_spawn_system
+			remove_star_flag = legendary_leader_1st_system
+			remove_star_flag = legendary_leader_2nd_system
+			remove_star_flag = legendary_leader_3rd_system
+			# cosmic storms
+			remove_star_flag = painted_galaxy_metal_planet_system
+			remove_star_flag = painted_galaxy_previously_terraformed_planet_system
+			remove_star_flag = painted_galaxy_collided_planet_system
+			remove_star_flag = painted_galaxy_wooden_planet_system
+			# federations or first contact
+			remove_star_flag = painted_galaxy_pre_ftl_shattered_ring_system
+			remove_star_flag = ring_world_built
+			remove_star_flag = shattered_ring_system
+			# overlord or secrets of the shroud
+			remove_star_flag = shroudwalker_enclave_system
+			remove_star_flag = broken_shroudwalker_enclave
+			# distant stars or grand archive or leviathans
+			remove_star_flag = guardians_curators_system
+
+			# remember black holes so they're reset as black hole (avoids weird names)
+			if = {
+				limit = { is_star_class = sc_black_hole }
+				set_star_flag = painted_galaxy_is_black_hole
+			}
+
+			# delete everything
+			set_asteroid_belt = { radius = 0 }
+			every_fleet_in_system = { delete_fleet = this }
+			every_system_megastructure = { delete_megastructure = this }
+			every_system_ambient_object = { destroy_ambient_object = this }
+			every_system_planet = {
+				every_archaeological_site = { destroy_archaeological_site = this }
+				every_owned_pop_group = { kill_all_pop = yes }
+				if = { limit = { is_colony = yes } destroy_colony = yes }
+				set_ring = no
+				remove_all_buildings = yes
+				clear_deposits = yes
+				remove_planet = yes
+			}
+
+			# create random basic system (planets aren't deleted immediately, so delay by 2 days)
+			system_event = {
+				id = painted_galaxy_dedlc.2
+				days = 2
+			}
+		}
+	}
+}
+
+# randomize star
+system_event = {
+	id = painted_galaxy_dedlc.2
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		if = {
+			# if an astral scar was spawned here, remove and "reschedule"
+			limit = { has_planet_class = pc_astral_scar }
+			every_system_planet = { remove_planet = yes }
+			system_event = { id = painted_galaxy_dedlc.2 days = 2 }
+		} else_if = {
+			# recreate black hole
+			limit = { has_star_flag = painted_galaxy_is_black_hole }
+			remove_star_flag = painted_galaxy_is_black_hole
+			spawn_planet = {
+				class = pc_black_hole
+				orbit_angle = 0
+				orbit_distance = 0
+			}
+		} else = {
+			# generate planets before stars, otherwise they'll start their names with "$name$ II"
+			random_list = {
+				1 = {
+					spawn_planet = {
+						class = pc_molten
+						orbit_distance = 50
+						generate_random_name = yes
+					}
+				}
+				1 = {
+					spawn_planet = {
+						class = pc_barren
+						orbit_distance = 50
+						generate_random_name = yes
+					}
+				}
+				1 = {
+					# do nothing
+				}
+			}
+			random_list = {
+				1 = {
+					spawn_planet = {
+						class = pc_toxic
+						orbit_distance = 100
+						generate_random_name = yes
+					}
+				}
+				1 = {
+					spawn_planet = {
+						class = pc_gas_giant
+						orbit_distance = 100
+						generate_random_name = yes
+					}
+				}
+				1 = {
+					# do nothing
+				}
+			}
+			random_list = {
+				10 = {
+					# sc_b
+					spawn_planet = {
+						class = pc_b_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_b
+				}
+				10 = {
+					# sc_a
+					spawn_planet = {
+						class = pc_a_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_a
+				}
+				15 = {
+					# sc_f
+					spawn_planet = {
+						class = pc_f_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_f
+				}
+				30 = {
+					# sc_g
+					spawn_planet = {
+						class = pc_g_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_g
+				}
+				20 = {
+					# sc_k
+					spawn_planet = {
+						class = pc_k_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_k
+				}
+				20 = {
+					# sc_m
+					spawn_planet = {
+						class = pc_m_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_m
+				}
+				20 = {
+					# sc_m_giant
+					spawn_planet = {
+						class = pc_m_giant_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_m_giant
+				}
+				10 = {
+					# sc_t
+					spawn_planet = {
+						class = pc_t_star
+						orbit_angle = 0
+						orbit_distance = 0
+					}
+					set_star_class = sc_t
+				}
+			}
+		}
+		# reroll_planet needs to be delayed for some reason
+		system_event = { id = painted_galaxy_dedlc.3 days = 1 }
+	}
+}
+
+system_event = {
+	id = painted_galaxy_dedlc.3
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		every_system_planet = {
+			if = { limit = { is_star = yes } set_name = solar_system }
+			reroll_planet = yes
+		}
+	}
+}

@@ -24,6 +24,7 @@ export interface InitializerMetadata {
 		| 'Shadows of the Shroud'
 		| 'Utopia'
 	)[];
+	init_effect?: string;
 }
 
 export type InitializerKey =
@@ -518,6 +519,7 @@ export const initializer_metadata: Record<
 		name: null,
 		description: 'Mining Drones Large Fleet',
 		dlc: ['Distant Stars'],
+		init_effect: 'set_star_flag = painted_galaxy_distar_drone_system',
 	},
 	hostile_init_amoeba: {
 		unique: false, // max 2
@@ -978,6 +980,7 @@ export const initializer_metadata: Record<
 		name: 'Kira',
 		description: 'Infernal Oasis / Hellish Oasis / Vermilion',
 		dlc: ['Infernals'],
+		init_effect: 'set_star_flag = painted_galaxy_oasis_system',
 	},
 
 	// leviathans_system_initializers.txt
@@ -1375,12 +1378,14 @@ export const initializer_metadata: Record<
 		name: null,
 		description: 'Pre-FTL Shattered Ringworld',
 		dlc: ['Federations', 'First Contact'],
+		init_effect: 'set_star_flag = painted_galaxy_pre_ftl_shattered_ring_system',
 	},
 	pre_ftl_inf_init_01: {
 		unique: false,
 		name: null,
 		description: 'Pre-FTL Infernals',
 		dlc: ['Infernals'],
+		init_effect: 'set_star_flag = painted_galaxy_infernal_pre_ftl_system',
 	},
 	pre_ftl_inf_hive_init_01: {
 		unique: false,
@@ -1389,6 +1394,7 @@ export const initializer_metadata: Record<
 		// technically this should (Infernals && Biogensis) || (Infernals && Utopia)
 		// but Utopia will soon be folded into the base game, so this can be pre-simplified to just Infernals
 		dlc: ['Infernals'],
+		init_effect: 'set_star_flag = painted_galaxy_infernal_pre_ftl_system',
 	},
 
 	// prescripted_species_systems.txt
@@ -1547,24 +1553,29 @@ export const initializer_metadata: Record<
 		name: null,
 		description: 'Metal Planet',
 		dlc: ['Cosmic Storms'],
+		init_effect: 'set_star_flag = painted_galaxy_metal_planet_system',
 	},
 	previously_terraformed_planet_system_initializer: {
 		unique: true,
 		name: null,
 		description: 'Previously Terraformed Planet',
 		dlc: ['Cosmic Storms'],
+		init_effect:
+			'set_star_flag = painted_galaxy_previously_terraformed_planet_system',
 	},
 	collided_planet_system_initializer: {
 		unique: true,
 		name: null,
 		description: 'Collided Planet',
 		dlc: ['Cosmic Storms'],
+		init_effect: 'set_star_flag = painted_galaxy_collided_planet_system',
 	},
 	wooden_planet_system_initializer: {
 		unique: true,
 		name: null,
 		description: 'Arboreal World / Wooden Planet',
 		dlc: ['Cosmic Storms'],
+		init_effect: 'set_star_flag = painted_galaxy_wooden_planet_system',
 	},
 
 	// test_initializers.txt

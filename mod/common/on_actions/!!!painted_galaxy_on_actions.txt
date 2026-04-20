@@ -2,6 +2,7 @@
 
 on_game_start = {
 	events = {
+		painted_galaxy_dedlc.1 # reset custom-placed dlc system if missing required dlc
 		painted_galaxy_extra_spawn.1 # delete empires that spawned in a system without spawn_weight
 		painted_galaxy_fe.1 # spawn fallen empires
 		painted_galaxy_ratling.1 # spawn missing ratling systems

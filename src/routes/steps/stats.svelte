@@ -7,7 +7,7 @@
 	} from '$lib/data/initializer_metadata';
 	import { get_editor } from '$lib/editor.svelte';
 	import type { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
-	import { Array, Iterable, Option, Order, pipe, Record } from 'effect';
+	import { Array, Iterable, Option, pipe, Record } from 'effect';
 
 	const editor = get_editor();
 
@@ -52,24 +52,11 @@
 		pipe(
 			systems_by_initializer,
 			Record.keys,
-			Iterable.filterMap((initializer) =>
-				Option.fromNullable(
-					initializer_metadata[initializer as InitializerKey]?.dlc,
-				),
+			Iterable.flatMap(
+				(initializer) =>
+					initializer_metadata[initializer as InitializerKey]?.dlc ?? [],
 			),
-			Iterable.filter(Array.isNonEmptyArray),
-			Array.sortWith((array) => array.length, Order.number),
-			Array.reduce(new Set<string>(), (acc, cur) => {
-				if (cur.length === 1) {
-					acc.add(cur[0]);
-				} else if (cur.some((dlc) => acc.has(dlc))) {
-					// do nothing
-					// one of the potential DLCs is already specifically required
-				} else {
-					acc.add(cur.toSorted().join(' OR '));
-				}
-				return acc;
-			}),
+			(dlc) => new Set(dlc),
 		),
 	);
 	const duplicate_unique_systems = $derived(
@@ -235,11 +222,11 @@
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
 					<td class="align-top">
-						Required DLC
+						Recommended DLC
 						<Info class="text-secondary-800-200 relative top-0.5">
-							These DLC are required by the system initializers you've set.
-							These systems will spawn whether you own this DLC or not, which
-							could cause bugs if you do not.
+							These DLC are required by the system initializers you've set. If
+							you are missing the DLC, the system will be reset to a basic
+							random system at the start of the game.
 						</Info>
 					</td>
 					<td class="text-end">
