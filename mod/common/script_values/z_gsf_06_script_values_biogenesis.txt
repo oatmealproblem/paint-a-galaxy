@@ -1,0 +1,24 @@
+starlit_links_count = {
+	# vanilla tiny 2 to huge 10
+	# eg count_system / 100
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 100
+	round = yes
+
+	complex_trigger_modifier = {
+		trigger = count_playable_country
+		parameters = {
+			limit = {
+				has_origin = origin_starlit_citadel
+			}
+		}
+		mode = subtract
+	}
+
+	min = 1
+}
