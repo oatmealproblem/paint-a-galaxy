@@ -1,6 +1,13 @@
 painted_galaxy_create_wormhole_pair = {
+	optimize_memory
 	random_system = {
 		limit = { has_star_flag = painted_galaxy_wormhole_$NUMBER$ }
+		if = {
+			limit = { NOT = { any_neighbor_system = { any_neighbor_system = { starting_system = yes } } } }
+			# no starting system within 2 jumps, not a real empire_cluster, clean it up
+			# this was presumably set by Paint a Galaxy to prevent a random wormhole from spawning here
+			remove_star_flag = empire_cluster
+		}
 		if = {
 			limit = { has_natural_wormhole = no }
 			save_event_target_as = painted_galaxy_wormhole_from
@@ -15,6 +22,12 @@ painted_galaxy_create_wormhole_pair = {
 			limit = {
 				has_star_flag = painted_galaxy_wormhole_$NUMBER$
 				NOT = { is_same_value = prev }
+			}
+			if = {
+				limit = { NOT = { any_neighbor_system = { any_neighbor_system = { starting_system = yes } } } }
+				# no starting system within 2 jumps, not a real empire_cluster, clean it up
+				# this was presumably set by Paint a Galaxy to prevent a random wormhole from spawning here
+				remove_star_flag = empire_cluster
 			}
 			if = {
 				limit = { has_natural_wormhole = no }

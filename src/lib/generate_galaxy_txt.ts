@@ -248,7 +248,8 @@ export function generate_stellaris_galaxy(project: Project): string {
 			);
 			const wormhole_effect =
 				wormhole_index >= 0 ?
-					`set_star_flag = painted_galaxy_wormhole_${wormhole_index}`
+					// the empire_cluster flag prevents random wormholes from spawning there, see game_start.31
+					`set_star_flag = painted_galaxy_wormhole_${wormhole_index} set_star_flag = empire_cluster`
 				:	'';
 
 			const effects = [fe_spawn_effect, wormhole_effect, initializer_effect];
