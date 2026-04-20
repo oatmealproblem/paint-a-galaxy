@@ -13,3 +13,18 @@ gsf_crisis_4550_dark_matter_mult = {
 	add = 7
 	min = 2
 }
+
+gsf_crisis_8049_extra_projects = {
+	# vanilla 0 to 4
+	# ie count_system / 200 - 1
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 200
+	round = yes
+	subtract = 1
+	min = 0
+}

@@ -25,3 +25,38 @@ planet_event = {
 		}
 	}
 }
+
+event = {
+	id = galaxy_size_fix.8049
+	hide_window = yes
+	is_triggered_only = yes
+	fire_only_once = yes
+
+	trigger = {
+		has_global_flag = synth_queen_speech_2_happened
+		NOT = { has_global_flag = synth_queen_side_quests_spawned }
+		# Checks if everyone has finished talking to the Synth Queen
+		count_playable_country = {
+			count = all
+			limit = {
+				has_country_flag = speech_2
+				NOT = { has_country_flag = synth_queen_conversation_ongoing }
+			}
+		}
+	}
+
+	immediate = {
+		# Creates the history sites
+		if = {
+			limit = {
+				check_variable_arithmetic = {
+					which = value:gsf_crisis_8049_extra_projects
+					value = 0
+				}
+			}
+			synth_queen_spawn_history_projects = yes
+		} else = {
+			synth_queen_spawn_history_projects = { NUM_EXTRA_PROJECTS = value:gsf_crisis_8049_extra_projects }
+		}
+	}
+}
