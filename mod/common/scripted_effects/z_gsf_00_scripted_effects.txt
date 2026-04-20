@@ -1,0 +1,86 @@
+central_crystal_spawn_effect = {
+	if = {
+		limit = {
+			# galaxy_size = tiny
+			count_system = { count < 300 }
+		}
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 40
+				max_distance <= 40
+				min_orientation_angle = 90
+				max_orientation_angle = 90
+				initializer = $INITIALIZER$
+				hyperlane = no
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			# galaxy_size = small
+			count_system = { count < 500 }
+		}
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 60
+				max_distance <= 60
+				min_orientation_angle = 90
+				max_orientation_angle = 90
+				initializer = $INITIALIZER$
+				hyperlane = no
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			# galaxy_size = medium
+			count_system = { count < 700 }
+		}
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 80
+				max_distance <= 80
+				min_orientation_angle = 90
+				max_orientation_angle = 90
+				initializer = $INITIALIZER$
+				hyperlane = no
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			# galaxy_size = large
+			count_system = { count < 900 }
+		}
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 90
+				max_distance <= 90
+				min_orientation_angle = 90
+				max_orientation_angle = 90
+				initializer = $INITIALIZER$
+				hyperlane = no
+			}
+		}
+	}
+	else = {
+		# limit = {
+		#	galaxy_size = huge
+		# }
+		no_scope = {
+			# makes system positions originate from galactic core
+			spawn_system = {
+				min_distance >= 95
+				max_distance <= 95
+				min_orientation_angle = 90
+				max_orientation_angle = 90
+				initializer = $INITIALIZER$
+				hyperlane = no
+			}
+		}
+	}
+}
