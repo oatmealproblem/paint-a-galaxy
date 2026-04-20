@@ -1,0 +1,49 @@
+voidworms_small_spawn_chance = {
+	add = 90000
+	modifier = {
+		factor = 0
+		# vanilla galaxy_size = tiny
+		count_system = { count < 300 }
+	}
+}
+
+voidworms_medium_spawn_chance = {
+	add = 90000
+	modifier = {
+		factor = 0
+		# vanilla galaxy_size = tiny or small
+		count_system = { count < 500 }
+	}
+}
+
+voidworms_large_spawn_chance = {
+	base = 0
+	modifier = {
+		add = 90000
+		# vanilla galaxy_size = large or huge
+		count_system = { count > 700 }
+	}
+}
+
+voidworms_huge_spawn_chance = {
+	base = 0
+	modifier = {
+		add = 90000
+		# vanilla galaxy_size = huge
+		count_system = { count > 900 }
+	}
+}
+
+voidworm_nest_spawn_minimum = {
+	# vanilla tiny 16 to huge 80
+	# ie count_system / 12.5
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 12.5
+	mult = trigger:voidworms_scaling
+	round = yes
+}
