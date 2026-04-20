@@ -1,0 +1,26 @@
+eotc_lvl1_end = {
+	# vanilla tiny to huge 1000, 500, 350, 250, 200
+	# ie 200,000 / count_system rounded to nearest 50
+	base = 200000
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = divide
+	}
+	divide = 50
+	ceiling = yes
+	multiply = 50
+}
+
+eotc_lvl2_end = {
+	base = value:eotc_lvl1_end
+	multiply = 2
+}
+
+eotc_lvl3_end = {
+	base = value:eotc_lvl1_end
+	multiply = 2.5
+	divide = 25
+	ceiling = yes
+	multiply = 25
+}
