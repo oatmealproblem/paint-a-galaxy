@@ -1,0 +1,27 @@
+name_space = galaxy_size_fix
+
+planet_event = {
+	id = galaxy_size_fix.4550 # crisis.4550
+	hide_window = yes
+
+	is_triggered_only = yes
+
+	trigger = {
+		# don't run this event for vanilla sizes -- crisis.4550 works fine for them
+		NOR = {
+			galaxy_size = tiny
+			galaxy_size = small
+			galaxy_size = medium
+			galaxy_size = large
+			galaxy_size = huge
+		}
+	}
+
+	immediate = {
+		from = {
+			owner = {
+				add_resource = { sr_dark_matter = 500 mult = value:gsf_crisis_4550_dark_matter_mult }
+			}
+		}
+	}
+}

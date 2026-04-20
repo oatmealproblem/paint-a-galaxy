@@ -1,0 +1,15 @@
+gsf_crisis_4550_dark_matter_mult = {
+	# vanilla 6 to 2 (mult on base of 500, for 1000 - 3000)
+	# ie 7 - count_system / 200
+	base = 0
+	complex_trigger_modifier = {
+		trigger = count_system
+		parameters = { limit = { always = yes } }
+		mode = add
+	}
+	divide = 200
+	round = yes
+	multiply = -1
+	add = 7
+	min = 2
+}

@@ -1,0 +1,5 @@
+on_destroy_planet_with_PLANET_KILLER_STAR_CRACKER = {
+	events = {
+		galaxy_size_fix.4550 # crisis.4550, give dark matter for star cracking
+	}
+}
