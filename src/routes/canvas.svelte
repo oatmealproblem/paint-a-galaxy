@@ -792,6 +792,15 @@
 						>
 							{solar_system.spawn_type.at(-1)?.toUpperCase()}
 						</text>
+					{:else if solar_system.spawn_type !== 'disabled'}
+						<circle
+							cx={solar_system.coordinate.x}
+							cy={solar_system.coordinate.y}
+							r={3.5}
+							fill="var(--color-secondary-500)"
+							stroke="var(--color-surface-950)"
+							stroke-width="1"
+						/>
 					{:else if Option.isSome(solar_system.get_initializer()) || Option.isSome(solar_system.get_name())}
 						{@const size = 6}
 						<rect
@@ -807,10 +816,8 @@
 						<circle
 							cx={solar_system.coordinate.x}
 							cy={solar_system.coordinate.y}
-							r={solar_system.spawn_type !== 'disabled' ? 3.5 : 2.5}
-							fill={solar_system.spawn_type !== 'disabled' ?
-								'var(--color-secondary-500)'
-							:	'var(--color-surface-50)'}
+							r={2.5}
+							fill="var(--color-surface-50)"
 							stroke="var(--color-surface-950)"
 							stroke-width="1"
 						/>

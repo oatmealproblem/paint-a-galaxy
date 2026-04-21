@@ -42,7 +42,7 @@
 
 	const metadata = $derived(
 		pipe(
-			solar_system.initializer,
+			solar_system.get_initializer(),
 			Option.flatMapNullable((value) =>
 				value in initializer_metadata ?
 					initializer_metadata[value as InitializerKey]
@@ -64,6 +64,7 @@
 		})),
 		Array.fromIterable,
 		Array.sortBy(
+			Order.mapInput(Order.boolean, (item) => !item.is_starting_system),
 			Order.mapInput(Order.boolean, (item) => item.unique),
 			Order.mapInput(Order.string, (item) => item.label),
 		),
@@ -91,13 +92,17 @@
 							description: 'Custom Value / Modded Initializer',
 							unique: false,
 							dlc: [],
+							is_starting_system: true,
 						},
 					]
 				:	[]),
 			],
 			itemToString: (item) => item.key,
 			itemToValue: (item) => item.key,
-			isItemDisabled: (item) => contains_whitespace(item.key),
+			isItemDisabled: (item) =>
+				contains_whitespace(item.key) ||
+				(solar_system.spawn_type !== 'disabled' &&
+					!(item.is_starting_system ?? false)),
 			groupBy: (item) => item.type,
 		}),
 	);
@@ -135,7 +140,6 @@
 	inputBehavior="autohighlight"
 	positioning={{ placement: 'bottom-start' }}
 	value={[Option.getOrElse(solar_system.get_initializer(), () => '')]}
-	disabled={solar_system.spawn_type !== 'disabled'}
 	onValueChange={(details) => {
 		editor().apply_actions([
 			new Action.UpdateSolarSystemAction({
@@ -215,11 +219,7 @@
 		</Combobox.Positioner>
 	</Portal>
 	<div class="mt-1">
-		{#if solar_system.spawn_type !== 'disabled'}
-			<span class="text-surface-800-200 text-sm">
-				Cannot set initializer on spawns.
-			</span>
-		{:else if Option.isSome(metadata)}
+		{#if Option.isSome(metadata)}
 			{metadata.value.description}
 			{#if metadata.value.dlc.length > 0}
 				<div class="flex gap-1">
@@ -232,7 +232,7 @@
 					{/each}
 				</div>
 			{/if}
-		{:else if Option.isSome(solar_system.initializer)}
+		{:else if Option.isSome(solar_system.get_initializer())}
 			Custom Value / Modded Initializer
 		{:else}
 			Random

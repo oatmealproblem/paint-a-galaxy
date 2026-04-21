@@ -25,6 +25,7 @@ export interface InitializerMetadata {
 		| 'Utopia'
 	)[];
 	init_effect?: string;
+	is_starting_system?: boolean;
 }
 
 export type InitializerKey =
@@ -468,12 +469,48 @@ export const initializer_metadata: Record<
 	sentinel_system: null, // event
 
 	// custom_starting_initializers.txt
-	custom_starting_init_01: null, // starting
-	custom_starting_init_02: null, // starting
-	custom_starting_init_03: null, // starting
-	custom_starting_init_04: null, // starting
-	custom_starting_init_05: null, // starting
-	custom_starting_init_06: null, // starting
+	custom_starting_init_01: {
+		unique: false,
+		name: null,
+		description: 'Starting System 1 / Trinary / Multiple Planetary Systems',
+		dlc: [],
+		is_starting_system: true,
+	},
+	custom_starting_init_02: {
+		unique: false,
+		name: null,
+		description: 'Starting System 2 / Trinary / Single Planetary System',
+		dlc: [],
+		is_starting_system: true,
+	},
+	custom_starting_init_03: {
+		unique: false,
+		name: null,
+		description: 'Starting System 3 / Binary / Multiple Planetary Systems',
+		dlc: [],
+		is_starting_system: true,
+	},
+	custom_starting_init_04: {
+		unique: false,
+		name: null,
+		description: 'Starting System 4 / Binary / Single Planetary System',
+		dlc: [],
+		is_starting_system: true,
+	},
+	custom_starting_init_05: {
+		unique: false,
+		name: null,
+		description: 'Starting System 5 / Unary',
+		dlc: [],
+		is_starting_system: true,
+	},
+	custom_starting_init_06: {
+		unique: false,
+		name: null,
+		description: 'Starting System 6 / Unary / Gas Giant Moon',
+		dlc: [],
+		is_starting_system: true,
+	},
 	titawin_init: null, // "Titawin" starting
 
 	// distant_stars_initializers.txt

@@ -198,7 +198,10 @@ export function generate_stellaris_galaxy(project: Project): string {
 			let initializer_effect = '';
 			let spawn_weight = '';
 			if (potential_home_stars.includes(solar_system)) {
-				initializer = `initializer = random_empire_init_0${(i % 6) + 1}`;
+				const initializer_key = solar_system
+					.get_initializer()
+					.pipe(Option.getOrElse(() => `random_empire_init_0${(i % 6) + 1}`));
+				initializer = `initializer = ${initializer_key}`;
 				const params =
 					solar_system.spawn_type.startsWith('reserved') ?
 						`|RESERVED|${solar_system.spawn_type.at(-1)}|RANDOM_MODULO|3|RANDOM_VALUE|${i % 3}|`
@@ -206,11 +209,13 @@ export function generate_stellaris_galaxy(project: Project): string {
 						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
-			} else if (Option.isSome(solar_system.initializer)) {
-				initializer = `initializer = ${solar_system.initializer.pipe(Option.getOrThrow)}`;
+			} else if (Option.isSome(solar_system.get_initializer())) {
+				initializer = `initializer = ${solar_system.get_initializer().pipe(Option.getOrThrow)}`;
 				const metadata =
 					initializer_metadata[
-						solar_system.initializer.pipe(Option.getOrThrow) as InitializerKey
+						solar_system
+							.get_initializer()
+							.pipe(Option.getOrThrow) as InitializerKey
 					];
 				if (metadata?.init_effect) {
 					initializer_effect = metadata.init_effect;

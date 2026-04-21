@@ -2,6 +2,7 @@ import { Option, Schema } from 'effect';
 import { Coordinate } from './coordinate';
 import {
 	initializer_metadata,
+	type InitializerKey,
 	type InitializerMetadata,
 } from '$lib/data/initializer_metadata';
 
@@ -55,8 +56,27 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 	),
 }) {
 	get_initializer(): Option.Option<string> {
-		return this.spawn_type === 'disabled' ? this.initializer : Option.none();
+		return (
+				this.spawn_type === 'disabled' ||
+					this.#get_initializer_metadata().pipe(
+						Option.match({
+							onNone: () => true, // assume custom values ok
+							onSome: (metadata) => metadata.is_starting_system,
+						}),
+					)
+			) ?
+				this.initializer
+			:	Option.none();
 	}
+
+	#get_initializer_metadata(): Option.Option<InitializerMetadata> {
+		return this.initializer.pipe(
+			Option.flatMapNullable(
+				(key) => initializer_metadata[key as InitializerKey],
+			),
+		);
+	}
+
 	get_name(): Option.Option<string> {
 		return this.get_initializer().pipe(
 			Option.flatMap((initializer) =>
