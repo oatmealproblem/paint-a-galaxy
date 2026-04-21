@@ -13,12 +13,14 @@ eotc_lvl1_end = {
 }
 
 eotc_lvl2_end = {
-	base = value:eotc_lvl1_end
+	base = 0
+	add = value:eotc_lvl1_end
 	multiply = 2
 }
 
 eotc_lvl3_end = {
-	base = value:eotc_lvl1_end
+	base = 0
+	add = value:eotc_lvl1_end
 	multiply = 2.5
 	divide = 25
 	ceiling = yes

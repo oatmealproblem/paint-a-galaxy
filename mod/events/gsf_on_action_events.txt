@@ -1,4 +1,4 @@
-name_space = galaxy_size_fix
+namespace = galaxy_size_fix
 
 planet_event = {
 	id = galaxy_size_fix.4550 # crisis.4550
@@ -42,6 +42,15 @@ event = {
 				has_country_flag = speech_2
 				NOT = { has_country_flag = synth_queen_conversation_ongoing }
 			}
+		}
+
+		# don't run this event for vanilla sizes -- crisis.8049 works fine for them
+		NOR = {
+			galaxy_size = tiny
+			galaxy_size = small
+			galaxy_size = medium
+			galaxy_size = large
+			galaxy_size = huge
 		}
 	}
 
