@@ -18,7 +18,7 @@ class SetCanvasAction extends Schema.TaggedClass<SetCanvasAction>()(
 	}
 }
 
-class CreateSolarSystemAction extends Schema.TaggedClass<CreateSolarSystemAction>()(
+export class CreateSolarSystemAction extends Schema.TaggedClass<CreateSolarSystemAction>()(
 	'CreateSolarSystemAction',
 	{
 		solar_system: SolarSystem,
@@ -31,7 +31,7 @@ class CreateSolarSystemAction extends Schema.TaggedClass<CreateSolarSystemAction
 	}
 }
 
-class DeleteSolarSystemAction extends Schema.TaggedClass<DeleteSolarSystemAction>()(
+export class DeleteSolarSystemAction extends Schema.TaggedClass<DeleteSolarSystemAction>()(
 	'DeleteSolarSystemAction',
 	{
 		solar_system: SolarSystem,
@@ -59,7 +59,7 @@ class UpdateSolarSystemAction extends Schema.TaggedClass<UpdateSolarSystemAction
 	}
 }
 
-class CreateHyperlaneAction extends Schema.TaggedClass<CreateHyperlaneAction>()(
+export class CreateHyperlaneAction extends Schema.TaggedClass<CreateHyperlaneAction>()(
 	'CreateHyperlaneAction',
 	{
 		connection: Connection,
@@ -72,7 +72,7 @@ class CreateHyperlaneAction extends Schema.TaggedClass<CreateHyperlaneAction>()(
 	}
 }
 
-class DeleteHyperlaneAction extends Schema.TaggedClass<DeleteHyperlaneAction>()(
+export class DeleteHyperlaneAction extends Schema.TaggedClass<DeleteHyperlaneAction>()(
 	'DeleteHyperlaneAction',
 	{
 		connection: Connection,

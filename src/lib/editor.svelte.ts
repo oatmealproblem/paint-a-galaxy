@@ -192,6 +192,8 @@ export class Editor {
 		spawns = false,
 		nebulas = false,
 	}) {
+		console.log('Generating...');
+		const start = performance.now();
 		let project = this.project;
 		const all_generator_actions: Action[] = [];
 
@@ -271,6 +273,7 @@ export class Editor {
 		this.project = project;
 		this.#done_stack.push(all_generator_actions);
 		this.#undone_stack = [];
+		console.log('Done:', performance.now() - start);
 	}
 
 	apply_tool(

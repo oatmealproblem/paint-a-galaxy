@@ -1,6 +1,21 @@
-import type { Action } from '$lib/models/action';
+import type {
+	Action,
+	CreateHyperlaneAction,
+	CreateSolarSystemAction,
+	DeleteHyperlaneAction,
+	DeleteSolarSystemAction,
+} from '$lib/models/action';
 import { Project } from '$lib/models/project';
-import { Context, Effect, Equal, Layer, Match } from 'effect';
+import {
+	Context,
+	Effect,
+	Equal,
+	HashSet,
+	Iterable,
+	Layer,
+	Match,
+	pipe,
+} from 'effect';
 
 export class Actions extends Context.Tag('Actions')<
 	Actions,
@@ -15,10 +30,23 @@ export class Actions extends Context.Tag('Actions')<
 			apply_actions(project, actions) {
 				// TODO simplify actions
 				// TODO validate action
-				// TODO bulk apply actions
 				let updated_project = project;
-				for (const action of actions) {
-					Match.value(action).pipe(
+				const BULKABLE_ACTIONS: Set<Action['_tag']> = new Set([
+					'CreateSolarSystemAction',
+					'DeleteSolarSystemAction',
+					'CreateHyperlaneAction',
+					'DeleteHyperlaneAction',
+				]);
+				const action_groups = pipe(
+					actions,
+					Iterable.groupWith(
+						(a, b) => a._tag === b._tag && BULKABLE_ACTIONS.has(a._tag),
+					),
+				);
+				// each action group is a non-empty array of the same action type
+				// actions types not in BULKABLE_ACTIONS will always be in a single-item array
+				for (const action_group of action_groups) {
+					Match.value(action_group[0]).pipe(
 						Match.tagsExhaustive({
 							SetCanvasAction: (action) => {
 								updated_project = new Project({
@@ -26,20 +54,27 @@ export class Actions extends Context.Tag('Actions')<
 									canvas: action.new_value,
 								});
 							},
-							CreateSolarSystemAction: (action) => {
+							CreateSolarSystemAction: () => {
 								updated_project = new Project({
 									...updated_project,
-									solar_systems: updated_project.solar_systems.concat([
-										action.solar_system,
-									]),
+									solar_systems: updated_project.solar_systems.concat(
+										(action_group as CreateSolarSystemAction[]).map(
+											(action) => action.solar_system,
+										),
+									),
 								});
 							},
-							DeleteSolarSystemAction: (action) => {
+							DeleteSolarSystemAction: () => {
+								const deleted_solar_system_ids = new Set(
+									(action_group as DeleteSolarSystemAction[]).map(
+										(action) => action.solar_system.id,
+									),
+								);
 								updated_project = new Project({
 									...updated_project,
 									solar_systems: updated_project.solar_systems.filter(
 										(solar_system) =>
-											solar_system.id !== action.solar_system.id,
+											!deleted_solar_system_ids.has(solar_system.id),
 									),
 								});
 							},
@@ -54,20 +89,27 @@ export class Actions extends Context.Tag('Actions')<
 									),
 								});
 							},
-							CreateHyperlaneAction: (action) => {
+							CreateHyperlaneAction: () => {
 								updated_project = new Project({
 									...updated_project,
-									hyperlanes: updated_project.hyperlanes.concat([
-										action.connection,
-									]),
+									hyperlanes: updated_project.hyperlanes.concat(
+										(action_group as CreateHyperlaneAction[]).map(
+											(action) => action.connection,
+										),
+									),
 								});
 							},
-							DeleteHyperlaneAction: (action) => {
+							DeleteHyperlaneAction: () => {
+								const deleted_connections = HashSet.fromIterable(
+									(action_group as DeleteHyperlaneAction[]).map(
+										(action) => action.connection,
+									),
+								);
 								updated_project = new Project({
 									...updated_project,
 									hyperlanes: updated_project.hyperlanes.filter(
 										(connection) =>
-											!Equal.equals(connection, action.connection),
+											!HashSet.has(deleted_connections, connection),
 									),
 								});
 							},
