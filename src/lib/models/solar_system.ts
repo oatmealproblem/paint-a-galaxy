@@ -69,6 +69,14 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 			:	Option.none();
 	}
 
+	get_initializer_metadata(): Option.Option<InitializerMetadata> {
+		return this.get_initializer().pipe(
+			Option.flatMapNullable(
+				(key) => initializer_metadata[key as InitializerKey],
+			),
+		);
+	}
+
 	#get_initializer_metadata(): Option.Option<InitializerMetadata> {
 		return this.initializer.pipe(
 			Option.flatMapNullable(

@@ -6,7 +6,7 @@ import {
 	CANVAS_WIDTH,
 } from './constants';
 import type { Project } from './models/project';
-import type { SolarSystem } from './models/solar_system';
+import { SolarSystem } from './models/solar_system';
 import { Coordinate } from './models/coordinate';
 import type { Nebula } from './models/nebula';
 import {
@@ -309,18 +309,52 @@ export function generate_stellaris_galaxy(project: Project): string {
 		)
 		.join('\n');
 
+	// stats
+	const num_solar_systems = project.solar_systems.length;
+	const num_spawns = project.solar_systems.filter(
+		(system) => system.spawn_type !== 'disabled',
+	).length;
+	const num_reserved_spawns = project.solar_systems.filter((system) =>
+		system.spawn_type.startsWith('reserved'),
+	).length;
+	const max_safe_ai_spawns = Math.max(0, num_spawns - num_reserved_spawns - 1);
+	const num_wormholes = project.wormholes.length;
+	const recommended_dlc = pipe(
+		project.solar_systems,
+		Iterable.filterMap((solar_system) =>
+			solar_system.get_initializer_metadata(),
+		),
+		Iterable.flatMap((metadata) => metadata.dlc),
+		Array.sort(Order.string),
+		Array.dedupeAdjacent,
+		Array.join(', '),
+		(s) => (s === '' ? 'None' : s),
+	);
+
 	return [
 		'# README for what to do with this file, read the Steam Workshop page https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115',
+		'',
+		'# Stats:',
+		`# Solar Systems: ${num_solar_systems}`,
+		`# Total Spawns: ${num_spawns}`,
+		`# Reserved Spawns: ${num_reserved_spawns}`,
+		`# Maximum Safe AI Spawns: ${max_safe_ai_spawns} (do not spawn more AI empires than this, unless you are force-spawning custom designs that use reserved spawns)`,
+		`# Wormholes: ${num_wormholes} (in addition to random wormholes)`,
+		`# Recommended DLC: ${recommended_dlc}`,
+		'',
 		`static_galaxy_scenario = {`,
 		`\tname="${project.name}"`,
 		COMMON,
 		ai_empire_settings,
 		size_based_settings,
+		'',
 		systems_entries,
+		'',
 		hyperlanes_entries,
+		'',
 		nebula_entries,
 		'}',
-	].join('\n\n');
+	].join('\n');
 }
 
 function get_fallen_empire_origin(

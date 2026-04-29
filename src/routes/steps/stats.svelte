@@ -19,11 +19,14 @@
 		).length,
 	);
 	const num_safe_ai_spawns = $derived(
-		solar_systems.filter(
-			(solar_system) =>
-				solar_system.spawn_type === 'enabled' ||
-				solar_system.spawn_type === 'preferred',
-		).length - 1,
+		Math.max(
+			0,
+			solar_systems.filter(
+				(solar_system) =>
+					solar_system.spawn_type === 'enabled' ||
+					solar_system.spawn_type === 'preferred',
+			).length - 1,
+		),
 	);
 	const systems_by_initializer = $derived(
 		pipe(
@@ -48,7 +51,7 @@
 			Array.fromIterable,
 		),
 	);
-	const required_dlc = $derived(
+	const recommended_dlc = $derived(
 		pipe(
 			systems_by_initializer,
 			Record.keys,
@@ -214,7 +217,7 @@
 				</td>
 				<td class="text-end">{num_safe_ai_spawns}</td>
 			</tr>
-			{#if required_dlc.size > 0}
+			{#if recommended_dlc.size > 0}
 				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
 				<tr
 					onmouseover={() =>
@@ -230,7 +233,7 @@
 						</Info>
 					</td>
 					<td class="text-end">
-						{#each required_dlc as dlc (dlc)}
+						{#each recommended_dlc as dlc (dlc)}
 							<div>{dlc}</div>
 						{/each}
 					</td>
