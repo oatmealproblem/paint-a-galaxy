@@ -47,7 +47,12 @@
 		<label>
 			<span class="label-text">Name</span>
 			<!-- svelte-ignore a11y_autofocus -->
-			<input class="input bg-surface-200-800" name="name" {oninput} autofocus />
+			<input
+				class="input ring-surface-500 bg-surface-200-800"
+				name="name"
+				{oninput}
+				autofocus
+			/>
 			{#if is_duplicate_name}
 				<small class="text-warning-500">
 					Name already used by another project.

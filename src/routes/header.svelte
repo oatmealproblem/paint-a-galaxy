@@ -9,6 +9,7 @@
 	import { Action } from '$lib/models/action';
 	import { Project } from '$lib/models/project';
 	import { GridConfig } from '$lib/models/grid_config';
+	import { download_blob } from '$lib/blob';
 
 	type RecordUnknown = Record<string, unknown>;
 	type Command =
@@ -103,7 +104,15 @@
 {/snippet}
 
 <header class="bg-surface-200-800 flex">
-	<Menu>
+	<Menu
+		onSelect={async (details) => {
+			if (details.value === 'export_json') {
+				const json = JSON.stringify(await editor().project.to_json());
+				const blob = new Blob([json], { type: 'application/json' });
+				download_blob(blob, `${editor().project.name}.json`);
+			}
+		}}
+	>
 		<Menu.Trigger class="btn">Project</Menu.Trigger>
 		<Portal>
 			<Menu.Positioner class="z-10!">
@@ -145,6 +154,16 @@
 							</Portal>
 						</Menu.TriggerItem>
 					</Menu>
+					<Menu.Separator class="border-surface-300-700" />
+					{@render menu_item_command(
+						'import',
+						'Import...',
+						'show-modal',
+						ID.import_project_dialog,
+					)}
+					<Menu.Item value="export_json">
+						<Menu.ItemText>Export JSON</Menu.ItemText>
+					</Menu.Item>
 					<Menu.Separator class="border-surface-300-700" />
 					<Menu.ItemGroup>
 						<Menu.ItemGroupLabel class="text-surface-800-200">

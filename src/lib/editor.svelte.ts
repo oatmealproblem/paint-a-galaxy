@@ -349,8 +349,11 @@ export class Editor {
 		this.apply_actions(actions, { is_redo: true });
 	}
 
-	async create_project(name: string): Promise<void> {
-		const project = await Project.make_empty(name);
+	async create_project(name: string, defaults?: Project): Promise<void> {
+		const project =
+			defaults == null ?
+				await Project.make_empty(name)
+			:	new Project({ ...defaults, name });
 		const effect = Effect.gen(function* () {
 			const projects = yield* Projects;
 			yield* projects.save(project);

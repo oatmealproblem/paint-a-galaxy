@@ -6,8 +6,10 @@
 		id: string;
 		title: string;
 		children: Snippet;
+		on_open?: () => void;
+		on_close?: () => void;
 	};
-	const { id, title, children }: Props = $props();
+	const { id, title, children, on_open, on_close }: Props = $props();
 
 	let dialog: HTMLDialogElement;
 
@@ -20,6 +22,12 @@
 	{id}
 	class="card bg-surface-100-900 w-full max-w-md p-4 space-y-4 shadow-xl mx-auto mt-12 backdrop:backdrop-blur-sm"
 	bind:this={dialog}
+	{...{
+		oncommand: (e: { command: string }) => {
+			if (e.command === 'show-modal') on_open?.();
+			if (e.command === 'close') on_close?.();
+		},
+	}}
 >
 	<header class="flex justify-between items-center">
 		<h2 class="text-lg font-bold">{title}</h2>

@@ -8,6 +8,7 @@
 	import Tweak from './steps/tweak.svelte';
 	import { get_editor } from '$lib/editor.svelte';
 	import { generate_stellaris_galaxy } from '$lib/generate_galaxy_txt';
+	import { download_blob } from '$lib/blob';
 
 	const steps: {
 		id: Step;
@@ -42,12 +43,7 @@
 	function handle_download() {
 		const galaxy_txt = generate_stellaris_galaxy(editor().project);
 		const blob = new Blob([galaxy_txt], { type: 'text/plain' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `${editor().project.name}.txt`;
-		a.click();
-		URL.revokeObjectURL(url);
+		download_blob(blob, `${editor().project.name}.txt`);
 	}
 </script>
 

@@ -38,7 +38,9 @@
 				files = details.acceptedFiles;
 			}}
 		>
-			<FileUpload.Dropzone>
+			<FileUpload.Dropzone
+				class="bg-surface-200-800 border border-surface-500 border-dashed"
+			>
 				<Icons.FileImage class="size-10" />
 				<span>Select image or drag here.</span>
 				<FileUpload.Trigger>Browse Files</FileUpload.Trigger>
@@ -48,7 +50,10 @@
 				<FileUpload.Context>
 					{#snippet children(fileUpload)}
 						{#each fileUpload().acceptedFiles as file (file.name)}
-							<FileUpload.Item {file}>
+							<FileUpload.Item
+								{file}
+								class=" border border-surface-500 bg-surface-200-800"
+							>
 								<FileUpload.ItemName>{file.name}</FileUpload.ItemName>
 								<FileUpload.ItemSizeText>
 									{file.size} bytes

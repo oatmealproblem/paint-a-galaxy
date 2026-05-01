@@ -42,7 +42,10 @@
 	<form class="flex flex-col gap-4" {onsubmit}>
 		<label>
 			<span class="label-text">Type</span>
-			<select class="select bg-surface-200-800" bind:value={type}>
+			<select
+				class="select ring-surface-500 bg-surface-200-800"
+				bind:value={type}
+			>
 				<option value="square">Square</option>
 				<option value="triangle">Triangle</option>
 				<option value="hex">Hex</option>
@@ -53,7 +56,7 @@
 		<label>
 			<span class="label-text">Size</span>
 			<input
-				class="input bg-surface-200-800"
+				class="input ring-surface-500 bg-surface-200-800"
 				type="number"
 				bind:value={size}
 				onblur={() => {
@@ -65,7 +68,7 @@
 		<label>
 			<span class="label-text">Rotation (degrees)</span>
 			<input
-				class="input bg-surface-200-800"
+				class="input ring-surface-500 bg-surface-200-800"
 				type="number"
 				bind:value={rotate}
 				onblur={() => {
@@ -77,7 +80,7 @@
 		<label>
 			<span class="label-text">X Offset</span>
 			<input
-				class="input bg-surface-200-800"
+				class="input ring-surface-500 bg-surface-200-800"
 				type="number"
 				bind:value={x_offset}
 				onblur={() => {
@@ -90,7 +93,7 @@
 		<label>
 			<span class="label-text">Y Offset</span>
 			<input
-				class="input bg-surface-200-800"
+				class="input ring-surface-500 bg-surface-200-800"
 				type="number"
 				bind:value={y_offset}
 				onblur={() => {

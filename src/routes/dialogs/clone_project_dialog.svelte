@@ -44,7 +44,7 @@
 			<span class="label-text">Name</span>
 			<!-- svelte-ignore a11y_autofocus -->
 			<input
-				class="input bg-surface-200-800"
+				class="input ring-surface-500 bg-surface-200-800"
 				name="name"
 				{oninput}
 				autofocus

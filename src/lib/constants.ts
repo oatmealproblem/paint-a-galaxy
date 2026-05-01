@@ -23,6 +23,7 @@ export const ID = {
 	delete_project_dialog: 'delete_project_dialog',
 	rename_project_dialog: 'rename_project_dialog',
 	clone_project_dialog: 'clone_project_dialog',
+	import_project_dialog: 'import_project_dialog',
 	upload_image_dialog: 'upload_image_dialog',
 	configure_grid_dialog: 'configure_grid_dialog',
 	canvas: 'canvas',

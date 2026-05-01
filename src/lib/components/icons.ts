@@ -7,6 +7,7 @@ import Cloud from '@lucide/svelte/icons/cloud';
 import Download from '@lucide/svelte/icons/download';
 import Ellipse from '@lucide/svelte/icons/ellipse';
 import FileImage from '@lucide/svelte/icons/file-image';
+import FileText from '@lucide/svelte/icons/file-text';
 import GripVertical from '@lucide/svelte/icons/grip-vertical';
 import Info from '@lucide/svelte/icons/info';
 import LineSquiggle from '@lucide/svelte/icons/line-squiggle';
@@ -29,6 +30,7 @@ export const Icons = {
 	Download,
 	Ellipse,
 	FileImage,
+	FileText,
 	GripVertical,
 	Info,
 	LineSquiggle,
