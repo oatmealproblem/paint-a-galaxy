@@ -1,4 +1,15 @@
-import { Array, Context, Effect, Layer, Option, pipe, Record } from 'effect';
+import {
+	Array,
+	Context,
+	Effect,
+	Iterable,
+	Layer,
+	Option,
+	pipe,
+	Record,
+	Struct,
+} from 'effect';
+import * as turf from '@turf/turf';
 import type { Project } from '$lib/models/project';
 import { Action } from '$lib/models/action';
 import { convert_blob_to_image_data } from '$lib/canvas';
@@ -34,21 +45,43 @@ export class Generator extends Context.Tag('Generator')<
 >() {
 	static layer = (() => {
 		function delete_solar_systems(project: Project): Action[] {
-			return project.solar_systems.map((solar_system) =>
-				Action.DeleteSolarSystemAction.make({ solar_system }),
-			);
+			return project.solar_systems
+				.filter((solar_system) => !solar_system.locked)
+				.map((solar_system) =>
+					Action.DeleteSolarSystemAction.make({ solar_system }),
+				);
 		}
 
 		function delete_hyperlanes(project: Project): Action[] {
-			return project.hyperlanes.map((connection) =>
-				Action.DeleteHyperlaneAction.make({ connection }),
-			);
+			return project.hyperlanes
+				.filter(
+					(connection) =>
+						!project.get_solar_system(connection.a).pipe(
+							Option.map(Struct.get('locked')),
+							Option.getOrElse(() => false),
+						) ||
+						!project.get_solar_system(connection.b).pipe(
+							Option.map(Struct.get('locked')),
+							Option.getOrElse(() => false),
+						),
+				)
+				.map((connection) => Action.DeleteHyperlaneAction.make({ connection }));
 		}
 
 		function delete_wormholes(project: Project): Action[] {
-			return project.wormholes.map((connection) =>
-				Action.DeleteWormholeAction.make({ connection }),
-			);
+			return project.wormholes
+				.filter(
+					(connection) =>
+						!project.get_solar_system(connection.a).pipe(
+							Option.map(Struct.get('locked')),
+							Option.getOrElse(() => false),
+						) ||
+						!project.get_solar_system(connection.b).pipe(
+							Option.map(Struct.get('locked')),
+							Option.getOrElse(() => false),
+						),
+				)
+				.map((connection) => Action.DeleteWormholeAction.make({ connection }));
 		}
 
 		function delete_nebulas(project: Project): Action[] {
@@ -135,8 +168,44 @@ export class Generator extends Context.Tag('Generator')<
 					total -= value;
 				}
 
+				function zero_out_weight_at_distance(
+					x: number,
+					y: number,
+					distance: number,
+				) {
+					for (let dx = -distance; dx <= distance; dx++) {
+						for (let dy = -distance; dy <= distance; dy++) {
+							if (Math.hypot(dx, dy) <= distance) {
+								zero_out_weight(x + dx, y + dy);
+							}
+						}
+					}
+				}
+
+				const locked_solar_systems = project.solar_systems.filter(
+					(system) => system.locked,
+				);
+				for (const solar_system of locked_solar_systems) {
+					zero_out_weight_at_distance(
+						solar_system.coordinate.x,
+						solar_system.coordinate.y,
+						min_distance_between_systems,
+					);
+				}
+
+				const used_ids = new Set(project.solar_systems.map(Struct.get('id')));
+				const new_id_iterator = pipe(
+					Iterable.range(0),
+					Iterable.map((id) => SolarSystemId.make(id)),
+					Iterable.filter((id) => !used_ids.has(id)),
+				)[Symbol.iterator]() as Iterator<SolarSystemId, never, SolarSystemId>;
+
 				// find a random weighted pixel
-				for (let i = 0; i < number_of_systems; i++) {
+				for (
+					let i = 0;
+					i < number_of_systems - locked_solar_systems.length;
+					i++
+				) {
 					if (total === 0) {
 						// we've used all pixels with nonzero alpha
 						console.warn(
@@ -156,27 +225,17 @@ export class Generator extends Context.Tag('Generator')<
 										Action.CreateSolarSystemAction.make({
 											solar_system: SolarSystem.make({
 												coordinate: Coordinate.make({ x, y }),
-												id: SolarSystemId.make(i),
+												id: new_id_iterator.next().value,
 												spawn_type: 'disabled',
 											}),
 										}),
 									);
 									// set the random weight to 0 for this coordinate and all coordinates within min_distance_between_systems
-									for (
-										let dx = -min_distance_between_systems;
-										dx <= min_distance_between_systems;
-										dx++
-									) {
-										for (
-											let dy = -min_distance_between_systems;
-											dy <= min_distance_between_systems;
-											dy++
-										) {
-											if (Math.hypot(dx, dy) <= min_distance_between_systems) {
-												zero_out_weight(x + dx, y + dy);
-											}
-										}
-									}
+									zero_out_weight_at_distance(
+										x,
+										y,
+										min_distance_between_systems,
+									);
 									break;
 								} else {
 									current += value;
@@ -199,14 +258,54 @@ export class Generator extends Context.Tag('Generator')<
 		function generate_hyperlanes(project: Project): Effect.Effect<Action[]> {
 			if (project.solar_systems.length < 3) return Effect.succeed([]);
 
+			const locked_hyperlanes_as_line_strings = pipe(
+				project.hyperlanes,
+				Iterable.filterMap((connection) => {
+					const a = project.get_solar_system_unsafe(connection.a);
+					const b = project.get_solar_system_unsafe(connection.b);
+					if (a.locked && b.locked) {
+						return Option.some(
+							turf.lineString([
+								[a.coordinate.x, a.coordinate.y],
+								[b.coordinate.x, b.coordinate.y],
+							]),
+						);
+					} else {
+						return Option.none();
+					}
+				}),
+				Array.fromIterable,
+			);
+			function intersects_with_locked_hyperlane(
+				a: SolarSystem,
+				b: SolarSystem,
+			) {
+				return locked_hyperlanes_as_line_strings.some(
+					(locked) =>
+						turf.lineIntersect(
+							locked,
+							turf.lineString([
+								[a.coordinate.x, a.coordinate.y],
+								[b.coordinate.x, b.coordinate.y],
+							]),
+						).features.length > 0,
+				);
+			}
+
 			const {
 				hyperlane_connectivity,
 				hyperlane_max_distance,
 				allow_disconnected,
 			} = project.generator_settings;
+			type LinkData = {
+				distance: number;
+				is_mst?: boolean;
+				a: SolarSystem;
+				b: SolarSystem;
+			};
 			const g = createGraph<
 				{ coords: [number, number]; d: number },
-				{ distance: number; is_mst?: boolean }
+				LinkData
 			>();
 			// generate triangulation
 			const delaunay = new Delaunay(
@@ -227,15 +326,19 @@ export class Generator extends Context.Tag('Generator')<
 					this.y = y;
 				},
 				lineTo(x: number, y: number) {
-					const id_1 = coordinate_to_solar_system[`${this.x},${this.y}`]?.id;
-					const id_2 = coordinate_to_solar_system[`${x},${y}`]?.id;
-					if (id_1 == null || id_2 == null) return;
+					const a = coordinate_to_solar_system[`${this.x},${this.y}`];
+					const b = coordinate_to_solar_system[`${x},${y}`];
+					if (a == null || b == null) return;
 					const distance = Math.hypot(this.x - x, this.y - y);
-					if (!g.hasNode(id_1))
-						g.addNode(id_1, { coords: [this.x, this.y], d: Infinity });
-					if (!g.hasNode(id_2))
-						g.addNode(id_2, { coords: [x, y], d: Infinity });
-					g.addLink(id_1, id_2, { distance });
+					if (!g.hasNode(a.id))
+						g.addNode(a.id, { coords: [this.x, this.y], d: Infinity });
+					if (!g.hasNode(b.id))
+						g.addNode(b.id, { coords: [x, y], d: Infinity });
+					g.addLink(a.id, b.id, {
+						distance,
+						a,
+						b,
+					});
 
 					this.x = x;
 					this.y = y;
@@ -258,7 +361,9 @@ export class Generator extends Context.Tag('Generator')<
 			// remove links
 			// - greater than maxConnectionLength (MST allowed if allowDisconnected)
 			// - non-MST removed randomly based on connectedness
-			const links: Link<{ distance: number; is_mst?: boolean }>[] = [];
+			// - between locked systems
+			// - crossing locked hyperlanes and not part of MST
+			const links: Link<LinkData>[] = [];
 			g.forEachLink((link) => {
 				links.push(link);
 			});
@@ -266,7 +371,10 @@ export class Generator extends Context.Tag('Generator')<
 				if (
 					(link.data.distance > hyperlane_max_distance &&
 						(!link.data.is_mst || allow_disconnected)) ||
-					(Math.random() > hyperlane_connectivity && !link.data.is_mst)
+					(Math.random() > hyperlane_connectivity && !link.data.is_mst) ||
+					(link.data.a.locked && link.data.b.locked) ||
+					(!link.data.is_mst &&
+						intersects_with_locked_hyperlane(link.data.a, link.data.b))
 				) {
 					g.removeLink(link);
 				}
@@ -277,8 +385,8 @@ export class Generator extends Context.Tag('Generator')<
 			const added = new Set<string>();
 			g.forEachLink((link) => {
 				const connection = Connection.make({
-					a: SolarSystemId.make(link.toId as number),
-					b: SolarSystemId.make(link.fromId as number),
+					a: link.data.a.id,
+					b: link.data.b.id,
 				});
 				if (added.has(connection.key)) return;
 				added.add(connection.key);

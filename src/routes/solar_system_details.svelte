@@ -6,7 +6,7 @@
 	import { Action } from '$lib/models/action';
 
 	import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
-	import { FloatingPanel, Portal } from '@skeletonlabs/skeleton-svelte';
+	import { FloatingPanel, Portal, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { Option, pipe } from 'effect';
 	import InitializerCombobox from './initializer_combobox.svelte';
 	import {
@@ -109,6 +109,31 @@
 								</dd>
 							</div>
 						</dl>
+						<Switch
+							checked={solar_system.value.locked}
+							onCheckedChange={(details) =>
+								editor().apply_actions([
+									new Action.UpdateSolarSystemAction({
+										old_value: solar_system.value,
+										new_value: new SolarSystem({
+											...solar_system.value,
+											locked: details.checked,
+										}),
+									}),
+								])}
+						>
+							<Switch.Control>
+								<Switch.Thumb />
+							</Switch.Control>
+							<Switch.Label class="flex gap-1">
+								{solar_system.value.locked ? 'Locked' : 'Unlocked'}
+								<Info>
+									If locked, this system can't be edited by Tweak tools or
+									randomly generating a map.
+								</Info>
+							</Switch.Label>
+							<Switch.HiddenInput />
+						</Switch>
 						<label>
 							<span class="label-text">Name</span>
 							<input

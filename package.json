@@ -57,5 +57,8 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"@turf/turf": "^7.3.5"
 	}
 }

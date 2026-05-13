@@ -255,6 +255,8 @@ export class Tools extends Context.Tag('Tools')<
 							'nebula_delete',
 							'solar_system_create',
 							'solar_system_delete',
+							'solar_system_lock',
+							'solar_system_unlock',
 							'spawn_preferred_toggle',
 							'spawn_toggle',
 							'wormhole_toggle',
@@ -431,6 +433,46 @@ export class Tools extends Context.Tag('Tools')<
 										new Action.DeleteWormholeAction({ connection }),
 								),
 								new Action.DeleteSolarSystemAction({ solar_system }),
+							]);
+						} else {
+							return Effect.succeed([]);
+						}
+					}),
+					Match.when('solar_system_lock', () => {
+						const coordinate = get_single_payload(payload).to_rounded();
+						const solar_system = project.solar_systems.find((solar_system) =>
+							Equal.equals(solar_system.coordinate, coordinate),
+						);
+						if (solar_system) {
+							const updated_solar_system = new SolarSystem({
+								...solar_system,
+								locked: true,
+							});
+							return Effect.succeed([
+								new Action.UpdateSolarSystemAction({
+									old_value: solar_system,
+									new_value: updated_solar_system,
+								}),
+							]);
+						} else {
+							return Effect.succeed([]);
+						}
+					}),
+					Match.when('solar_system_unlock', () => {
+						const coordinate = get_single_payload(payload).to_rounded();
+						const solar_system = project.solar_systems.find((solar_system) =>
+							Equal.equals(solar_system.coordinate, coordinate),
+						);
+						if (solar_system) {
+							const updated_solar_system = new SolarSystem({
+								...solar_system,
+								locked: false,
+							});
+							return Effect.succeed([
+								new Action.UpdateSolarSystemAction({
+									old_value: solar_system,
+									new_value: updated_solar_system,
+								}),
 							]);
 						} else {
 							return Effect.succeed([]);

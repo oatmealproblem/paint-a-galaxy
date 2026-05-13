@@ -80,8 +80,14 @@
 	>(Option.none());
 
 	let active_tool = $state<Option.Option<Tool>>(Option.none());
-	let snapped_solar_system = $state.raw<Option.Option<SolarSystem>>(
+	let snapped_solar_system_id = $state.raw<Option.Option<SolarSystemId>>(
 		Option.none(),
+	);
+	const snapped_solar_system = $derived(
+		pipe(
+			snapped_solar_system_id,
+			Option.flatMap((id) => project.get_solar_system(id)),
+		),
 	);
 	let tool_points = $state<Coordinate[]>([]);
 	let stroke_path = $derived(
@@ -362,7 +368,16 @@
 	bind:clientHeight={container_height}
 	class="canvas h-full w-full overflow-hidden"
 	style:cursor={Option.match(current_tool, {
-		onSome: () => custom_cursor,
+		onSome: (tool) =>
+			(
+				tool.snap_to_solar_system &&
+				Option.exists(
+					snapped_solar_system,
+					(system) => system.locked !== tool.invert_lock_behavior,
+				)
+			) ?
+				'not-allowed'
+			:	custom_cursor,
 		onNone: () => 'auto',
 	})}
 	style:width={CANVAS_WIDTH}
@@ -416,7 +431,11 @@
 				Option.getOrElse(() => false),
 				Boolean.match({
 					onTrue: () =>
-						Option.map(snapped_solar_system, (system) => system.coordinate),
+						Option.flatMap(snapped_solar_system, (system) =>
+							system.locked !== current_tool.value.invert_lock_behavior ?
+								Option.none()
+							:	Option.some(system.coordinate),
+						),
 					onFalse: () =>
 						Option.some(
 							get_mouse_coordinates(e, grid_points, grid_delaunay)[
@@ -449,13 +468,14 @@
 				coordinates.canvas.y,
 			);
 			const solar_system = solar_systems[solar_system_index];
-			snapped_solar_system = Option.fromNullable(solar_system);
+			snapped_solar_system_id = Option.fromNullable(solar_system?.id);
 		}
 		const point =
 			snap_to_solar_system ?
-				Option.map(
-					snapped_solar_system,
-					(solar_system) => solar_system.coordinate,
+				Option.flatMap(snapped_solar_system, (solar_system) =>
+					solar_system.locked ?
+						Option.none()
+					:	Option.some(solar_system.coordinate),
 				)
 			: grid_config.snap ? Option.some(coordinates.grid)
 			: Option.some(coordinates.canvas);
@@ -482,7 +502,7 @@
 	}}
 	onmouseleave={() => {
 		mouse_coordinates = Option.none();
-		snapped_solar_system = Option.none();
+		snapped_solar_system_id = Option.none();
 	}}
 >
 	<ContextMenu

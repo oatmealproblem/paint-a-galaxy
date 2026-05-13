@@ -22,6 +22,8 @@ export const ToolId = Schema.Literal(
 	'nebula_delete',
 	'solar_system_create',
 	'solar_system_delete',
+	'solar_system_lock',
+	'solar_system_unlock',
 	'spawn_preferred_toggle',
 	'spawn_toggle',
 	'wormhole_toggle',
@@ -61,6 +63,7 @@ interface _Tool<
 	action_type: ActionType;
 	default_settings: Settings;
 	snap_to_solar_system: boolean;
+	invert_lock_behavior: boolean;
 	render: {
 		type: 'line' | 'stroke' | 'none';
 		color: string;
@@ -77,6 +80,7 @@ const freehand_draw: _Tool<
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -98,6 +102,7 @@ const freehand_erase: _Tool<
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -119,6 +124,7 @@ const circle_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -139,6 +145,7 @@ const circle_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -159,6 +166,7 @@ const ellipse_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -181,6 +189,7 @@ const ellipse_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -203,6 +212,7 @@ const rectangle_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -223,6 +233,7 @@ const rectangle_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -243,6 +254,7 @@ const line_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -265,6 +277,7 @@ const line_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -288,6 +301,7 @@ const hyperlane_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
+	invert_lock_behavior: false,
 	render: {
 		type: 'line',
 		color: 'var(--color-primary-500)',
@@ -307,6 +321,7 @@ const nebula_create: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
 		color: 'var(--color-primary-500)',
@@ -326,6 +341,7 @@ const nebula_delete: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -345,6 +361,7 @@ const solar_system_create: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
+	invert_lock_behavior: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -364,6 +381,47 @@ const solar_system_delete: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	invert_lock_behavior: false,
+	render: {
+		type: 'none',
+		color: 'none',
+	},
+	default_settings: {},
+};
+
+const solar_system_lock: _Tool<
+	'solar_system_lock',
+	'single_point',
+	Record<string, never>
+> = {
+	id: 'solar_system_lock',
+	name: 'Lock Solar System',
+	description:
+		"Lock solar system, so it's not changed by other tools or random generation.",
+	step: 'tweak',
+	action_type: 'single_point',
+	snap_to_solar_system: true,
+	invert_lock_behavior: false,
+	render: {
+		type: 'none',
+		color: 'none',
+	},
+	default_settings: {},
+};
+
+const solar_system_unlock: _Tool<
+	'solar_system_unlock',
+	'single_point',
+	Record<string, never>
+> = {
+	id: 'solar_system_unlock',
+	name: 'Unlock Solar System',
+	description:
+		"Unlock solar system, so it's can be changed by other tools and random generation.",
+	step: 'tweak',
+	action_type: 'single_point',
+	snap_to_solar_system: true,
+	invert_lock_behavior: true,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -383,6 +441,7 @@ const spawn_preferred_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	invert_lock_behavior: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -402,6 +461,7 @@ const spawn_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	invert_lock_behavior: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -421,6 +481,7 @@ const wormhole_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
+	invert_lock_behavior: false,
 	render: {
 		type: 'line',
 		color: 'var(--color-primary-500)',
@@ -447,6 +508,8 @@ export const tools = {
 	line_erase,
 	solar_system_create,
 	solar_system_delete,
+	solar_system_lock,
+	solar_system_unlock,
 	spawn_toggle,
 	spawn_preferred_toggle,
 	hyperlane_toggle,
@@ -521,6 +584,14 @@ export const tool_pairs: ToolPair[] = [
 		primary: tools.solar_system_create,
 		secondary: tools.solar_system_delete,
 		icon: 'Sparkle',
+	},
+	{
+		id: 'lock-solar-system',
+		name: 'Lock/Unlock Solar System',
+		step: 'tweak',
+		primary: tools.solar_system_lock,
+		secondary: tools.solar_system_unlock,
+		icon: 'Lock',
 	},
 	{
 		id: 'hyperlane',

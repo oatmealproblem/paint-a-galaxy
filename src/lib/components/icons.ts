@@ -11,6 +11,7 @@ import FileText from '@lucide/svelte/icons/file-text';
 import GripVertical from '@lucide/svelte/icons/grip-vertical';
 import Info from '@lucide/svelte/icons/info';
 import LineSquiggle from '@lucide/svelte/icons/line-squiggle';
+import Lock from '@lucide/svelte/icons/lock';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import Minus from '@lucide/svelte/icons/minus';
 import RectangleHorizontal from '@lucide/svelte/icons/rectangle-horizontal';
@@ -34,6 +35,7 @@ export const Icons = {
 	GripVertical,
 	Info,
 	LineSquiggle,
+	Lock,
 	MapPin,
 	Minus,
 	RectangleHorizontal,

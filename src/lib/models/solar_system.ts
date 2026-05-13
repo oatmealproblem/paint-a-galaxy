@@ -54,6 +54,10 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 		Schema.optional,
 		Schema.withDefaults({ constructor: Option.none, decoding: Option.none }),
 	),
+	locked: Schema.Boolean.pipe(
+		Schema.optional,
+		Schema.withDefaults({ constructor: () => false, decoding: () => false }),
+	),
 }) {
 	get_initializer(): Option.Option<string> {
 		return (
