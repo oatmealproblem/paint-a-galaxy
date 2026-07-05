@@ -69,10 +69,6 @@ event = {
 							factor = 0
 							any_country = { has_country_flag = fallen_empire_machine }
 						}
-						modifier = {
-							factor = 0
-							has_synthetic_dawn = no
-						}
 						country_event = { id = painted_galaxy_fe.50 }
 					}
 					100 = {

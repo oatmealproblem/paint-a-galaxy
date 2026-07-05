@@ -33,14 +33,18 @@ event = {
 					limit = {
 						is_ai = yes
 						is_country_type = default
+						is_nomadic = no # TODO?
 						NOT = { has_country_flag = is_advanced_start_AI }
 						# only allow origins with advanced_start = yes
 						OR = {
 							has_origin = origin_default
+							has_origin = origin_default_nomads
 							has_origin = origin_wilderness
 							has_origin = origin_cybernetic_creed
 							has_origin = origin_arc_welders
 							has_origin = origin_legendary_leader
+							has_origin = origin_legendary_leader_death
+							has_origin = origin_legendary_leader_imperial
 							has_origin = origin_toxic_knights
 							has_origin = origin_progenitor_hive
 							has_origin = origin_subterranean
@@ -51,6 +55,8 @@ event = {
 							has_origin = origin_necrophage
 							has_origin = origin_remnants
 							has_origin = origin_shattered_ring
+							has_origin = origin_void_dwellers
+							has_origin = origin_void_machines
 							has_origin = origin_post_apocalyptic
 							has_origin = origin_post_apocalyptic_machines
 							has_origin = origin_machine
@@ -69,7 +75,7 @@ event = {
 						}
 					}
 					# claim neighboring systems
-					capital_scope.solar_system = {
+					capital_scope.planet.solar_system = {
 						every_neighbor_system = {
 							limit = {
 								NOT = { exists = owner }

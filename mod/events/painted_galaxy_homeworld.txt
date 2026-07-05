@@ -2,45 +2,48 @@ namespace = painted_galaxy_homeworld
 
 # correct homeworld planet class
 # from = founder primary species
-planet_event = {
+colony_event = {
 	id = painted_galaxy_homeworld.1
 	is_triggered_only = yes
 	hide_window = yes
 	trigger = {
 		is_maybe_painted_galaxy = yes
+		carrier_is_type = planet
 		# don't fix homeworlds for extra spawns
 		solar_system = { has_star_flag = empire_home_system }
 	}
 	immediate = {
-		if = { # resource consolidation, ie machine world start
-			limit = { owner = { has_origin = origin_machine } }
-			change_pc = pc_machine
-			# change_pc causes building_colony_shelter (or equivalent) to be created
-			remove_all_buildings = yes
-			reset_planet = yes
-		} else_if = { # remnants, ie relic world start
-			limit = { owner = { has_origin = origin_remnants } }
-			# change_pc causes building_colony_shelter (or equivalent) to be created
-			remove_all_buildings = yes
-			change_pc = pc_relic
-		} else_if = { # post-apocalyptic, ie tomb world start
-			limit = { owner = { OR = { has_origin = origin_post_apocalyptic has_origin = origin_post_apocalyptic_machines } } }
-			change_pc = pc_nuked
-			# change_pc causes building_colony_shelter (or equivalent) to be created
-			remove_all_buildings = yes
-			reset_planet = yes
-		} else_if = { # generic
-			limit = {
-				# don't convert artificial worlds, that's probably an origin
-				is_artificial = no
-				# don't convert already ideal worlds, that might be special initializer
-				# on the other hand, this is perhaps exposing some people to random modifiers/deposits on their planet, more research needed
-				is_ideal_planet_class = { who = from status = no }
+		planet = {
+			if = { # resource consolidation, ie machine world start
+				limit = { owner = { has_origin = origin_machine } }
+				change_pc = pc_machine
+				# change_pc causes building_colony_shelter (or equivalent) to be created
+				remove_all_buildings = yes
+				reset_planet = yes
+			} else_if = { # remnants, ie relic world start
+				limit = { owner = { has_origin = origin_remnants } }
+				# change_pc causes building_colony_shelter (or equivalent) to be created
+				remove_all_buildings = yes
+				change_pc = pc_relic
+			} else_if = { # post-apocalyptic, ie tomb world start
+				limit = { owner = { OR = { has_origin = origin_post_apocalyptic has_origin = origin_post_apocalyptic_machines } } }
+				change_pc = pc_nuked
+				# change_pc causes building_colony_shelter (or equivalent) to be created
+				remove_all_buildings = yes
+				reset_planet = yes
+			} else_if = { # generic
+				limit = {
+					# don't convert artificial worlds, that's probably an origin
+					is_artificial = no
+					# don't convert already ideal worlds, that might be special initializer
+					# on the other hand, this is perhaps exposing some people to random modifiers/deposits on their planet, more research needed
+					is_ideal_planet_class = { who = from status = no }
+				}
+				change_pc = from
+				# change_pc causes building_colony_shelter (or equivalent) to be created
+				remove_all_buildings = yes
+				reset_planet = yes
 			}
-			change_pc = from
-			# change_pc causes building_colony_shelter (or equivalent) to be created
-			remove_all_buildings = yes
-			reset_planet = yes
 		}
 	}
 }

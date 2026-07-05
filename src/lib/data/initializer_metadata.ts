@@ -22,13 +22,18 @@ export interface InitializerMetadata {
 		| 'MegaCorp'
 		| 'Overlord'
 		| 'Shadows of the Shroud'
-		| 'Utopia'
 	)[];
 	init_effect?: string;
 	is_starting_system?: boolean;
 }
 
 export type InitializerKey =
+	| 'black_hole_nomad_init'
+	| 'blue_giant_nomad_init'
+	| 'xray_binary_nomad_init'
+	| 'protoplanetary_nomad_init'
+	| 'neutron_star_nomad_init'
+	| 'twin_blue_star_nomad_init'
 	| 'relic_system_1'
 	| 'Zrocursor_system'
 	| 'relic_system_4'
@@ -290,6 +295,8 @@ export type InitializerKey =
 	| 'deneb_neighbor_t1'
 	| 'deneb_neighbor_t1_first_colony'
 	| 'deneb_neighbor_t2_second_colony'
+	| 'vela_system'
+	| 'une_vela_system'
 	| 'vultaumar_system'
 	| 'yuhtaan_system'
 	| 'fen_habbanis_system'
@@ -330,6 +337,7 @@ export type InitializerKey =
 	| 'special_init_07'
 	| 'special_init_08'
 	| 'special_init_09'
+	| 'chrysanthemum_tomb_system'
 	| 'hyacinth_system'
 	| 'ai_system_1'
 	| 'crystal_manufactory_system'
@@ -385,6 +393,13 @@ export const initializer_metadata: Record<
 	InitializerKey,
 	InitializerMetadata | null
 > = {
+	// 00_nomad_custom_initializers.txt
+	black_hole_nomad_init: null, // nomad
+	blue_giant_nomad_init: null, // nomad
+	xray_binary_nomad_init: null, // nomad
+	protoplanetary_nomad_init: null, // nomad
+	neutron_star_nomad_init: null, // nomad
+	twin_blue_star_nomad_init: null, // nomad
 	// ancient_relics_initializers.txt
 	relic_system_1: {
 		unique: true,
@@ -1407,7 +1422,7 @@ export const initializer_metadata: Record<
 		unique: false,
 		name: null,
 		description: 'Pre-FTL Hive Mind',
-		dlc: ['Biogenesis', 'Utopia'],
+		dlc: [],
 	},
 	pre_ftl_deneb_system: null, // "Deneb" TODO
 	pre_ftl_shattered_ring: {
@@ -1440,6 +1455,8 @@ export const initializer_metadata: Record<
 	deneb_neighbor_t1: null, // guaranteed
 	deneb_neighbor_t1_first_colony: null, // guaranteed
 	deneb_neighbor_t2_second_colony: null, // guaranteed
+	vela_system: null, // "Vela" nomad
+	une_vela_system: null, // "Vela" TODO
 	vultaumar_system: null, // "Vultaumar" event
 	yuhtaan_system: null, // "Yuhtaan" event
 	fen_habbanis_system: null, // "Fen Habbanis" event
@@ -1511,6 +1528,7 @@ export const initializer_metadata: Record<
 		description: 'Pulsar',
 		dlc: [],
 	},
+	chrysanthemum_tomb_system: null, // event
 	hyacinth_system: null, // event
 	ai_system_1: null, // never
 	crystal_manufactory_system: {
@@ -1577,7 +1595,7 @@ export const initializer_metadata: Record<
 		unique: true,
 		name: null,
 		description: 'Star Mall',
-		dlc: ['Federations', 'Utopia'],
+		dlc: [],
 	},
 	breachsealer_system: {
 		unique: true,
@@ -1699,25 +1717,25 @@ export const initializer_metadata: Record<
 		unique: true,
 		name: null,
 		description: 'Ruined Dyson Sphere',
-		dlc: ['Utopia'],
+		dlc: [],
 	},
 	science_nexus_init_01: {
 		unique: true,
 		name: null,
 		description: 'Ruined Science Nexus',
-		dlc: ['Utopia'],
+		dlc: [],
 	},
 	sentry_array_init_01: {
 		unique: true,
 		name: null,
 		description: 'Ruined Sentry Array',
-		dlc: ['Utopia'],
+		dlc: [],
 	},
 	ring_world_init_01: {
 		unique: true,
 		name: null,
 		description: 'Ruined Ringworld / Murky Vats / Clones in Cryostasis',
-		dlc: ['Utopia'],
+		dlc: [],
 	},
 
 	// zroni_legacy_initializers.txt

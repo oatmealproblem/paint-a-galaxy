@@ -11,7 +11,8 @@ event = {
 		is_maybe_painted_galaxy = yes
 		any_country = {
 			is_country_type = default
-			capital_scope.solar_system = {
+			is_nomadic = no # TODO?
+			capital_scope.planet.solar_system = {
 				NOR = {
 					has_star_flag = empire_home_system
 					# exceptions
@@ -45,7 +46,8 @@ country_event = {
 		every_country = {
 			limit = {
 				is_country_type = default
-				capital_scope.solar_system = {
+				is_nomadic = no # TODO?
+				capital_scope.planet.solar_system = {
 					NOR = {
 						has_star_flag = empire_home_system
 						# exceptions
@@ -54,12 +56,12 @@ country_event = {
 					}
 				}
 			}
-			every_controlled_fleet = { delete_fleet = this }
-			every_owned_planet = {
+			every_owned_colony = {
 				every_owned_pop_group = { kill_all_pop = yes }
 				remove_all_buildings = yes
 				destroy_colony = yes
 			}
+			every_controlled_fleet = { delete_fleet = this }
 			destroy_country = yes
 		}
 	}

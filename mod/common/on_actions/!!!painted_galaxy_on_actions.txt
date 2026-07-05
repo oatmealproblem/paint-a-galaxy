@@ -16,7 +16,7 @@ on_game_start = {
 }
 
 # this happens before on_game_start
-empire_init_capital_planet = {
+empire_init_capital_colony = {
 	events = {
 		painted_galaxy_homeworld.1 # correct home planets
 	}
