@@ -1,66 +1,91 @@
-Paint your very own galaxy and play in it!
+Make your own custom maps and scenarios!
 
-[h1]IMPORTANT: read the instructions[/h1]
+[h1]Features[/h1]
+[list]
+  [*] Paint the galaxy in broad strokes, no need to individually place each star and hyperlane
+  [*] Then manually tweak the galaxy to get it [i]just[/i] right
+  [list]
+    [*] Solar systems, hyperlanes, wormholes, and nebulas
+    [*] System names
+    [*] Unique systems
+    [*] Spawn locations
+    [*] Reserved spawns - use a trait to choose where each player / custom AI start
+  [/list]
+  [*] Save and load multiple projects
+[/list]
 
-This mod does [b]nothing[/b] on it's own. You use it alongside [url=https://oatmealproblem.github.io/paint-a-galaxy]the Paint a Galaxy web app[/url].
+[h1]Instructions[/h1]
 
+This mod does [b]nothing[/b] on it's own. You use it alongside a separate map mod ([url=https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115]see this collection[/url]) or create your map with [url=https://oatmealproblem.github.io/paint-a-galaxy]the Paint a Galaxy web app[/url].
 [olist]
   [*] Subscribe to and activate this mod
-  [*] Paint, generate stars and hyperlanes, and download the txt file in [url=https://oatmealproblem.github.io/paint-a-galaxy]the web app[/url]
-  [*] Open this mod's folder
-  [list]
-    [*] Find this mod in your "Mod Library" in the launcher (there's a search at the top)
-    [*] Hover over the mod and click the 3 dots to the right, then click "Show in Folder"
-  [/list]
-  [*] Open the folder "map", and inside "map" open the folder "setup_scenarios" (you should now be in the folder containing a file named "PUT_YOUR_GALAXY_HERE")
-  [*] Copy the txt file you downloaded to the "setup_scenarios" folder
-  [list]
-    [*] Note: if you ever unsubscribe from this mod, your custom galaxies will be deleted, so you might want to keep a copy elsewhere
-    [*] Alternatively, you can create your own mod; see the instructions in the pinned discussion
-  [/list]
-  [*] Run the game, and select "Painted Galaxy" (or whatever name you chose in the app) as your galaxy size when starting a new game
-  [list]
-    [*] I recommend that you do not use Imperial Fiefdom, Broken Shackles, or Payback origins. See known bugs below.
-      [*] I recommend disabling this mod if you're not playing on a painted galaxy (the fixes I make for static galaxies could cause bugs in random galaxies)
-  [/list]
+  [*] Paint, generate a map, and download the txt file in [url=https://oatmealproblem.github.io/paint-a-galaxy]the web app[/url]
+  [*] [url=https://steamcommunity.com/workshop/filedetails/discussion/3532904115/755053102163407797/]Add your map to this mod[/url] (easier) or [url=https://steamcommunity.com/workshop/filedetails/discussion/3532904115/529855118245590523/]create your own mod[/url] (better for sharing)
+  [*] Start a new game, select "Elliptical" as the galaxy shape and "Painted Galaxy" as the [b]size[/b]
 [/olist]
 
 [h1]Known Bugs (will fix)[/h1]
 [list]
-  [*] None! but see caveats and compatibility below, and please report any issues find
+  [*] Only 1 nomadic AI empire spawns
+  [*] Minor issues where vanilla checks for named galaxy sizes
 [/list]
 
 [h1]Caveats (minor issues, won't fix / not fixable)[/h1]
 [list]
-  [*] Large galaxies (roughly 1700+ stars) require a mod that adds more star names (such as [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2907769573]Just Star Names[/url])
+  [*] 1700+ star galaxies require a mod that adds more star names (such as [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2907769573]Just Star Names[/url])
   [*] Sol doesn't get Sol-specific neighbors, eg Alpha Centauri, Barnard's Star
-  [*] The "Advanced Neighbors" galaxy setting has no effect (if advanced AI empires are enabled, they can neighbor the player)
-  [*] All precursors are "on" regardless of galaxy settings (but the mod [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3039370479]Precursor Selection[/url] does work)
-  [*] Some things need to create additional solar systems, so you'll see some in-game that were not in the online map painter (guaranteed worlds, marauders, fallen empires, some events). Some of these are vanilla behavior, some of these are fixes for static galaxies.
-  [*] Force spawning custom empires [b]does[/b] work, but they are not listed in the galaxy setup screen
+  [list]
+    [*] You can use [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3634498401]Local Cluster[/url] for a home system that contains Sol and neighbors
+  [/list]
+  [*] The "Advanced Neighbors" setting has no effect; advanced AI can neighbor the player
+  [*] All precursors are "on" regardless of settings (but [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3039370479]Precursor Selection[/url] does work)
+  [*] Nomads with random home systems do not start in a designed-for-nomads system
+  [*] Some things additional solar systems, so you'll see some in-game that were not in-app (guaranteed worlds, marauders, fallen empires, some events).
 [/list]
 
 [h1]Compatibility[/h1]
 [list]
-  [*] For Stellaris 4.1
-  [list]
-    [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3573084816]3.14 patch available here[/url]
-  [/list]
+  [*] For Stellaris 4.4
   [*] Should be compatible with most mods
-  [*] Modded origins that change homeworld planet class or guaranteed habitable worlds might have minor issues; please report if you encounter anything and I will fix for popular mods
-  [*] If you are using a mod that adds galaxy shapes, you must select a vanilla shape (eg elliptical) for the Painted Galaxy size option to appear
+  [*] Modded starting systems must set the "empire_home_system" flag, or they will not work
+  [*] Modded origins that change planet classes sometimes have minor issues; please report
+  [*] If you are using a modded galaxy shapes, you must select a vanilla shape (eg elliptical).
   [*] Modded precursors are not directly supported, but will work if you use [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3039370479]Precursor Selection[/url]
-  [*] Mods that edit common/fallen_empires have minor incompatibilities (I only know of Ancient Cache of Technologies and Ethics & Civics: Bug Branch; I will coordinate with these authors to fix)
-  [*] Modded event chains that rely on "neighbor_system" initializers will not work. This is generally rare. I have fixed / verified the following mods:
+  [*] Overwrites common/fallen_empires. This is very rare. Built-in compat with:
   [list]
-    [*] Gigastructural Engineering and More
-    [*] More Events Mod
+    [*] Ancient Cache of Technologies
+    [*] Ethics & Civics: Bug Branch
   [/list]
-  [*] If you are using a mod that changes the core (eg Gigastructural Engineering), don't paint stars there
+  [*] Modded event chains that use "neighbor_system" will not work. This is very rare.
+  [*] Don't paint stars in the core if playing with Gigastructural Engineering
+  [list]
+    [*] You can turn on a guide in-app in the "View" menu
+  [/list]
+[/list]
+
+[h1]Companion Tools and Mods[/h1]
+[h2]Tools[/h2]
+[list]
+  [*] [url=https://github.com/Nro001/Nro-Galaxy-Editor]Nro's Galaxy Editor[/url] - edit the geography of in-progress games
+  [*] [url=https://stellarmaps.app]StellarMaps[/url] - create custom, styled maps from your saves
+  [*] [url=https://github.com/KillyBlame/Stellaris_Solarsystem_Editor]Stellaris Solar System Editor[/url] - GUI to create custom solar system mods
+[/list]
+[h2]Mods[/h2]
+[list]
+  [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3476554363]Intuitive Habitables Slider[/url] - makes the Habitable Worlds slider behave like you'd expect
+  [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2907769573]Just Star Names[/url] - needed if you create a map more than 1,700 stars
+  [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3039370479]Precursor Selection[/url] - enables modded precursors in painted maps
+  [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3634498401]Local Cluster[/url] - workaround for no Sol-specific neighbors (all in a single system)
+  [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1584352341]MicroMod - Galaxy is Flat[/url] - all solar sysems are in the same flat plane, like in-app
+[/list]
+
+[h1]Credits[/h1]
+[list]
+  [*] Mudja~ and LeGustaVinho for helping to investigate nomad spawns
 [/list]
 
 [h1]Sharing[/h1]
-Feel free to share and upload the galaxies you create, and feel free to manually edit them further to your liking. You should mark this mod as required, otherwise your subscribers will experience issues with incorrect homeworlds (I prefer you [b]not[/b] simply copy this mods code into your mod, since that could lead to conflicts if release fixes/updates). Credit and linking is appreciated.
+Feel free to share and upload the galaxies you create, and feel free to manually edit them further to your liking. You should mark this mod as required, otherwise your subscribers will experience various issues such as incorrect homeworlds, no marauders, no fallen empires, etc. Credit and linking is appreciated.
 
 [url=https://discord.gg/bHVez2C][img]https://i.imgur.com/4Und3QN.png[/img][/url]
 Come chat in #oatmeal-mods
