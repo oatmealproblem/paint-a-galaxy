@@ -1,0 +1,36 @@
+namespace = painted_galaxy_nomad
+
+# grant missing tech that otherwise prevents creation of starting arkship
+country_event = {
+	id = painted_galaxy_nomad.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		is_maybe_painted_galaxy = yes
+		is_nomadic = yes
+		NAND = {
+			has_technology = tech_fission_power
+			has_technology = tech_thrusters_1
+		}
+	}
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_technology = tech_fission_power }
+			}
+			give_technology = {
+				tech = tech_fission_power
+				message = no
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_technology = tech_thrusters_1 }
+			}
+			give_technology = {
+				tech = tech_thrusters_1
+				message = no
+			}
+		}
+	}
+}

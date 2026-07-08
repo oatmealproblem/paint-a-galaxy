@@ -21,3 +21,9 @@ empire_init_capital_colony = {
 		painted_galaxy_homeworld.1 # correct home planets
 	}
 }
+
+on_ruler_created = {
+	events = {
+		painted_galaxy_nomad.1 # give missing technologies (on_ruler_created fires early enough to prevent error)
+	}
+}

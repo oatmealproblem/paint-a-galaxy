@@ -23,7 +23,6 @@ event = {
 		every_country = {
 			limit = {
 				is_country_type = default
-				is_nomadic = no # TODO?
 				# if their ideal planet class is not a normal planet type, they're probably not supposed to get habitable planets
 				# eg life seeded, void dwellers, shattered ring, etc
 				OR = {
@@ -36,6 +35,7 @@ event = {
 					ideal_planet_class = pc_arctic
 					ideal_planet_class = pc_alpine
 					ideal_planet_class = pc_tundra
+					ideal_planet_class = pc_ark
 				}
 				# specifically forbidden origins
 				NOT = {
@@ -44,7 +44,7 @@ event = {
 				}
 			}
 			save_event_target_as = painted_galaxy_current_country
-			capital_scope.planet.solar_system = {
+			capital_scope.solar_system = {
 				random_neighbor_system = {
 					limit = { NOT = { is_same_value = last_created_system } }
 					painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t1_first_colony }

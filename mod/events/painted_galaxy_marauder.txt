@@ -1,6 +1,5 @@
 namespace = painted_galaxy_marauder
 
-# TODO? heirs of the khan changes?
 # spawn missing marauder systems
 event = {
 	id = painted_galaxy_marauder.1

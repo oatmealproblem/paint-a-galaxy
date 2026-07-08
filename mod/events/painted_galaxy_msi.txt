@@ -15,7 +15,7 @@ event = {
 	immediate = {
 		set_spawn_system_batch = begin
 		event_target:MSI_country = {
-			capital_scope.planet.solar_system = {
+			capital_scope.solar_system = {
 				random_neighbor_system = {
 					painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t2_second_colony }
 				}

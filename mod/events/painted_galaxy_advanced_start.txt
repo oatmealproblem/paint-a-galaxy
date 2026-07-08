@@ -33,7 +33,6 @@ event = {
 					limit = {
 						is_ai = yes
 						is_country_type = default
-						is_nomadic = no # TODO?
 						NOT = { has_country_flag = is_advanced_start_AI }
 						# only allow origins with advanced_start = yes
 						OR = {
@@ -75,15 +74,18 @@ event = {
 						}
 					}
 					# claim neighboring systems
-					capital_scope.planet.solar_system = {
-						every_neighbor_system = {
-							limit = {
-								NOT = { exists = owner }
-								count_fleet_in_system = { count = 0 }
-							}
-							create_starbase = {
-								size = starbase_outpost
-								owner = prevprev
+					if = {
+						limit = { is_nomadic = no }
+						capital_scope.solar_system = {
+							every_neighbor_system = {
+								limit = {
+									NOT = { exists = owner }
+									count_fleet_in_system = { count = 0 }
+								}
+								create_starbase = {
+									size = starbase_outpost
+									owner = prevprev
+								}
 							}
 						}
 					}

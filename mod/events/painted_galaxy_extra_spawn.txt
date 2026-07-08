@@ -11,8 +11,7 @@ event = {
 		is_maybe_painted_galaxy = yes
 		any_country = {
 			is_country_type = default
-			is_nomadic = no # TODO?
-			capital_scope.planet.solar_system = {
+			capital_scope.solar_system = {
 				NOR = {
 					has_star_flag = empire_home_system
 					# exceptions
@@ -46,8 +45,7 @@ country_event = {
 		every_country = {
 			limit = {
 				is_country_type = default
-				is_nomadic = no # TODO?
-				capital_scope.planet.solar_system = {
+				capital_scope.solar_system = {
 					NOR = {
 						has_star_flag = empire_home_system
 						# exceptions
