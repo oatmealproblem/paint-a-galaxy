@@ -65,6 +65,7 @@ interface _Tool<
 	action_type: ActionType;
 	default_settings: Settings;
 	snap_to_solar_system: boolean;
+	can_snap_to_grid: boolean;
 	invert_lock_behavior: boolean;
 	render: {
 		type: 'line' | 'stroke' | 'none';
@@ -82,6 +83,7 @@ const freehand_draw: _Tool<
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -104,6 +106,7 @@ const freehand_erase: _Tool<
 	step: 'paint',
 	action_type: 'multi_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -126,6 +129,7 @@ const circle_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -147,6 +151,7 @@ const circle_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -168,6 +173,7 @@ const ellipse_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -191,6 +197,7 @@ const ellipse_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -214,6 +221,7 @@ const rectangle_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -235,6 +243,7 @@ const rectangle_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -256,6 +265,7 @@ const line_draw: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -279,6 +289,7 @@ const line_erase: _Tool<
 	step: 'paint',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -303,6 +314,7 @@ const hyperlane_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'line',
@@ -323,6 +335,7 @@ const nebula_create: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -343,6 +356,7 @@ const nebula_delete: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'none',
@@ -363,6 +377,7 @@ const solar_system_create: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: false,
+	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	render: {
 		type: 'none',
@@ -383,6 +398,7 @@ const solar_system_delete: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -406,6 +422,7 @@ const solar_system_lock: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'stroke',
@@ -429,6 +446,7 @@ const solar_system_unlock: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: true,
 	render: {
 		type: 'stroke',
@@ -452,6 +470,7 @@ const spawn_preferred_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'none',
@@ -472,6 +491,7 @@ const spawn_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'none',
@@ -492,6 +512,7 @@ const wormhole_toggle: _Tool<
 	step: 'tweak',
 	action_type: 'double_point',
 	snap_to_solar_system: true,
+	can_snap_to_grid: false,
 	invert_lock_behavior: false,
 	render: {
 		type: 'line',

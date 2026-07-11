@@ -460,7 +460,9 @@
 					onFalse: () =>
 						Option.some(
 							get_mouse_coordinates(e, grid_points, grid_delaunay)[
-								grid_config.snap ? 'grid' : 'canvas'
+								grid_config.snap && current_tool.value.can_snap_to_grid ?
+									'grid'
+								:	'canvas'
 							],
 						),
 				}),
@@ -477,9 +479,9 @@
 	onmousemove={(e) => {
 		const coordinates = get_mouse_coordinates(e, grid_points, grid_delaunay);
 		mouse_coordinates = Option.some(coordinates);
+		const tool = Option.orElse(active_tool, () => current_tool);
 		const snap_to_solar_system = pipe(
-			active_tool,
-			Option.orElse(() => current_tool),
+			tool,
 			Option.map(
 				(value) =>
 					value.snap_to_solar_system &&
@@ -502,8 +504,12 @@
 						Option.none()
 					:	Option.some(solar_system.coordinate),
 				)
-			: grid_config.snap ? Option.some(coordinates.grid)
-			: Option.some(coordinates.canvas);
+			: (
+				grid_config.snap &&
+				Option.exists(tool, (value) => value.can_snap_to_grid)
+			) ?
+				Option.some(coordinates.grid)
+			:	Option.some(coordinates.canvas);
 		if (
 			Option.isSome(active_tool) &&
 			Option.isSome(active_tool_settings) &&
