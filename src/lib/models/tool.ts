@@ -67,6 +67,7 @@ interface _Tool<
 	snap_to_solar_system: boolean;
 	can_snap_to_grid: boolean;
 	invert_lock_behavior: boolean;
+	show_preview: boolean;
 	render: {
 		type: 'line' | 'stroke' | 'none';
 		color: string;
@@ -85,6 +86,7 @@ const freehand_draw: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: true,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -108,6 +110,7 @@ const freehand_erase: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: true,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -131,6 +134,7 @@ const circle_draw: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -153,6 +157,7 @@ const circle_erase: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -175,6 +180,7 @@ const ellipse_draw: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -199,6 +205,7 @@ const ellipse_erase: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -223,6 +230,7 @@ const rectangle_draw: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -245,6 +253,7 @@ const rectangle_erase: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -267,6 +276,7 @@ const line_draw: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -291,6 +301,7 @@ const line_erase: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -316,6 +327,7 @@ const hyperlane_toggle: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'line',
 		color: 'var(--color-primary-500)',
@@ -337,6 +349,7 @@ const nebula_create: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'stroke',
 		color: 'var(--color-primary-500)',
@@ -358,6 +371,7 @@ const nebula_delete: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -379,6 +393,7 @@ const solar_system_create: _Tool<
 	snap_to_solar_system: false,
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -400,6 +415,7 @@ const solar_system_delete: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: true,
 	render: {
 		type: 'stroke',
 		color: 'var(--color-error-500)',
@@ -424,6 +440,7 @@ const solar_system_lock: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: true,
 	render: {
 		type: 'stroke',
 		color: 'var(--color-primary-500)',
@@ -448,6 +465,7 @@ const solar_system_unlock: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: true,
+	show_preview: true,
 	render: {
 		type: 'stroke',
 		color: 'var(--color-primary-500)',
@@ -472,6 +490,7 @@ const spawn_preferred_toggle: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -493,6 +512,7 @@ const spawn_toggle: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'none',
 		color: 'none',
@@ -514,6 +534,7 @@ const wormhole_toggle: _Tool<
 	snap_to_solar_system: true,
 	can_snap_to_grid: false,
 	invert_lock_behavior: false,
+	show_preview: false,
 	render: {
 		type: 'line',
 		color: 'var(--color-primary-500)',

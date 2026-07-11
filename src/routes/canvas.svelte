@@ -103,16 +103,35 @@
 	);
 	let tool_points = $state<Coordinate[]>([]);
 	let stroke_path = $derived(
-		tool_points.length > 1 ?
-			editor().calculate_path(
-				pipe(
-					active_tool,
-					Option.map((value) => value.id),
-					Option.getOrElse(() => editor().primary_tool_id),
-				),
-				tool_points,
-			)
-		:	'',
+		pipe(
+			active_tool,
+			Option.orElse(() =>
+				(
+					Option.exists(current_tool, (tool) => tool.show_preview) &&
+					Option.isSome(mouse_coordinates)
+				) ?
+					current_tool
+				:	Option.none(),
+			),
+			Option.map((tool) => {
+				const points =
+					tool_points.length === 0 ?
+						pipe(
+							mouse_coordinates,
+							Option.map((value) =>
+								tool.action_type === 'double_point' ?
+									[value.canvas, value.canvas]
+								:	[value.canvas],
+							),
+						)
+					:	Option.some(tool_points);
+				return Option.match(points, {
+					onNone: () => '',
+					onSome: (points) => editor().calculate_path(tool.id, points),
+				});
+			}),
+			Option.getOrElse(() => ''),
+		),
 	);
 
 	const solar_system_delaunay = $derived(
@@ -319,7 +338,7 @@
 				tool_points[0]
 			) {
 				editor().apply_tool(active_tool.value.id, tool_points[0], ctx);
-			} else if (tool_points.length > 1) {
+			} else {
 				editor().apply_tool(active_tool.value.id, tool_points, ctx);
 			}
 			active_tool = Option.none();
@@ -469,7 +488,10 @@
 				Option.match({
 					onSome(value) {
 						active_tool = current_tool;
-						tool_points = [value];
+						tool_points =
+							current_tool.value.action_type === 'double_point' ?
+								[value, value]
+							:	[value];
 					},
 					onNone() {},
 				}),
@@ -527,7 +549,7 @@
 				}),
 				Match.when('double_point', () => {
 					if (tool_points.length === 0) {
-						tool_points = [point.value];
+						tool_points = [point.value, point.value];
 					} else if (!Equal.equals(tool_points[0], point.value)) {
 						tool_points = [tool_points[0]!, point.value];
 					}
@@ -693,12 +715,17 @@
 						Core
 					</text>
 				{/if}
-				{#if Option.isSome(active_tool) && active_tool.value.render.type === 'stroke'}
+				{#if stroke_path !== '' && Option.isSome(Option.orElse(active_tool, () => current_tool))}
+					{@const tool = pipe(
+						active_tool,
+						Option.orElse(() => current_tool),
+						Option.getOrThrow,
+					)}
 					<path
 						d={stroke_path}
-						fill={active_tool.value.render.color}
-						opacity={'opacity' in active_tool.value.default_settings ?
-							editor().tool_settings[active_tool.value.id].opacity
+						fill={tool.render.color}
+						opacity={'opacity' in tool.default_settings ?
+							editor().tool_settings[tool.id].opacity
 						:	1}
 					/>
 				{/if}
