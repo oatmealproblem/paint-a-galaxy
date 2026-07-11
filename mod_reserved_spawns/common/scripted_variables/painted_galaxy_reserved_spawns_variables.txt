@@ -1,0 +1,1 @@
+@has_painted_galaxy_reserved_spawns = 1

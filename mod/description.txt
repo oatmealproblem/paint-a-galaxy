@@ -9,7 +9,7 @@ Make your own custom maps and scenarios!
     [*] System names
     [*] Unique systems
     [*] Spawn locations
-    [*] Reserved spawns - use a trait to choose where each player / custom AI start
+    [*] [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3762808682]Reserved spawns submod - choose where each player / custom AI starts[/url]
   [/list]
   [*] Save and load multiple projects
 [/list]

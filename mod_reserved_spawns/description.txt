@@ -1,0 +1,23 @@
+Choose where each player and custom-designed AI spawns!
+(for [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115]Paint a Galaxy[/url])
+
+[list]
+  [*] In [url=https://oatmealproblem.github.io/paint-a-galaxy]the web app[/url], open system details and set the spawn to Reserved A-Z
+  [list]
+    [*] alternatively subscribe to [url=https://steamcommunity.com/workshop/filedetails/?id=3541574403]a community map[/url] with Reserved spawns
+  [/list]
+  [*] In the empire designer, select the corresponding species trait (eg Reserved Spawn A)
+  [list]
+    [*]This does [b]not[/b] use any of your trait points of picks
+  [/list]
+  [*] Start a game with that map and empire
+  [list]
+    [*] The empire will spawn in that specific system
+    [*] The Reserved Spawn "trait" will be automatically removed
+  [/list]
+[/list]
+
+You can use this for the AI too. Create a design with the a Reserved Spawn trait, save it, and set it to force-spawn. Surround yourself with friends or enemies, or custom place each empire to recreate your favorite fictional galaxy. Let you imagination run wild!
+
+[url=https://discord.gg/bHVez2C][img]https://i.imgur.com/4Und3QN.png[/img][/url]
+Come chat in #oatmeal-mods

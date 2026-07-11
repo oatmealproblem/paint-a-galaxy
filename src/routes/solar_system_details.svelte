@@ -191,9 +191,9 @@
 											<dt class="font-bold inline">Reserved</dt>
 											<dd class="inline">
 												Empires will only spawn here if they have the matching
-												species trait (eg Reserved Spawn A). This can be used to
-												precisely control the locations of all players and
-												custom-designed AI empires.
+												species trait (eg Reserved Spawn A) from the Reserved
+												Spawns submod. This can be used to precisely control the
+												locations of players and custom-designed AI.
 											</dd>
 										</div>
 									</dl>

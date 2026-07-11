@@ -1,0 +1,4 @@
+inline_script = {
+	script = painted_galaxy_reserved_spawn_trait/$HAS_RESERVED_SPAWNS$
+	VALUE = $VALUE$
+}
