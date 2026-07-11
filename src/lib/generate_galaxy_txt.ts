@@ -36,56 +36,41 @@ const COMMON = `
 	num_hyperlanes_default = 1
 	colonizable_planet_odds = 1.0
 	primitive_odds = 1.0
+
+	# don't limit by galaxy size; modded players can do crazy things if they want
+	fallen_empire_max = 6
+	marauder_empire_max = 3
+	extra_crisis_strength = { 10 25 }
 `;
 
 const TINY = `
 	fallen_empire_default = 0
-	fallen_empire_max = 1
 	marauder_empire_default = 1
-	marauder_empire_max = 1
-	advanced_empire_default = 0
 	crisis_strength = 0.5
-	extra_crisis_strength = { 10 25 }
 `;
 
 const SMALL = `
 	fallen_empire_default = 1
-	fallen_empire_max = 2
 	marauder_empire_default = 1
-	marauder_empire_max = 2
-	advanced_empire_default = 1
 	crisis_strength = 0.75
-	extra_crisis_strength = { 10 25 }
 `;
 
 const MEDIUM = `
 	fallen_empire_default = 2
-	fallen_empire_max = 3
 	marauder_empire_default = 2
-	marauder_empire_max = 2
-	advanced_empire_default = 2
 	crisis_strength = 1.0
-	extra_crisis_strength = { 10 25 }
 `;
 
 const LARGE = `
 	fallen_empire_default = 3
-	fallen_empire_max = 4
 	marauder_empire_default = 2
-	marauder_empire_max = 3
-	advanced_empire_default = 3
 	crisis_strength = 1.25
-	extra_crisis_strength = { 10 25 }
 `;
 
 const HUGE = `
 	fallen_empire_default = 4
-	fallen_empire_max = 6
 	marauder_empire_default = 3
-	marauder_empire_max = 3
-	advanced_empire_default = 4
 	crisis_strength = 1.5
-	extra_crisis_strength = { 10 25 }
 `;
 
 export function generate_stellaris_galaxy(project: Project): string {
@@ -96,9 +81,34 @@ export function generate_stellaris_galaxy(project: Project): string {
 		(solar_system) => solar_system.spawn_type === 'preferred',
 	);
 
+	// stats
+	const num_solar_systems = project.solar_systems.length;
+	const num_spawns = project.solar_systems.filter(
+		(system) => system.spawn_type !== 'disabled',
+	).length;
+	const num_reserved_spawns = project.solar_systems.filter((system) =>
+		system.spawn_type.startsWith('reserved'),
+	).length;
+	const max_safe_ai_spawns = Math.max(0, num_spawns - num_reserved_spawns - 1);
+	const num_wormholes = project.wormholes.length;
+	const recommended_dlc = pipe(
+		project.solar_systems,
+		Iterable.filterMap((solar_system) =>
+			solar_system.get_initializer_metadata(),
+		),
+		Iterable.flatMap((metadata) => metadata.dlc),
+		Array.sort(Order.string),
+		Array.dedupeAdjacent,
+		Array.join(', '),
+		(s) => (s === '' ? 'None' : s),
+	);
+
 	const ai_empire_settings = `
  	num_empires = { min = 0 max = ${potential_home_stars.length - 1} }	# reduce max by 1 to save a spot for the player
-	num_empire_default = ${Math.round((potential_home_stars.length - 1) / 2)}
+	num_empire_default = ${Math.min(max_safe_ai_spawns, Math.round((potential_home_stars.length - 1) / 2))} # max/2
+	advanced_empire_default = ${Math.round((potential_home_stars.length - 1) / 8)} # max/8
+	nomad_empire_default = ${Math.round((potential_home_stars.length - 1) / 10)} # max/10
+	nomad_empire_max = ${potential_home_stars.length - 1} # same as num_empires max, go nomads-only if you want
 	`;
 
 	let size_based_settings = TINY;
@@ -308,28 +318,6 @@ export function generate_stellaris_galaxy(project: Project): string {
 			),
 		)
 		.join('\n');
-
-	// stats
-	const num_solar_systems = project.solar_systems.length;
-	const num_spawns = project.solar_systems.filter(
-		(system) => system.spawn_type !== 'disabled',
-	).length;
-	const num_reserved_spawns = project.solar_systems.filter((system) =>
-		system.spawn_type.startsWith('reserved'),
-	).length;
-	const max_safe_ai_spawns = Math.max(0, num_spawns - num_reserved_spawns - 1);
-	const num_wormholes = project.wormholes.length;
-	const recommended_dlc = pipe(
-		project.solar_systems,
-		Iterable.filterMap((solar_system) =>
-			solar_system.get_initializer_metadata(),
-		),
-		Iterable.flatMap((metadata) => metadata.dlc),
-		Array.sort(Order.string),
-		Array.dedupeAdjacent,
-		Array.join(', '),
-		(s) => (s === '' ? 'None' : s),
-	);
 
 	return [
 		'# README for what to do with this file, read the Steam Workshop page https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115',
