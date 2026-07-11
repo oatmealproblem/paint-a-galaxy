@@ -10,6 +10,7 @@
 	import { Project } from '$lib/models/project';
 	import { GridConfig } from '$lib/models/grid_config';
 	import { download_blob } from '$lib/blob';
+	import ModeToggle from './mode_toggle.svelte';
 
 	type RecordUnknown = Record<string, unknown>;
 	type Command =
@@ -439,6 +440,7 @@
 		</Portal>
 	</Menu>
 	<div class="grow"></div>
+	<ModeToggle />
 	<Menu>
 		<Menu.Trigger class="btn">Community</Menu.Trigger>
 		<Portal>

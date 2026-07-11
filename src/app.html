@@ -1,9 +1,14 @@
 <!doctype html>
-<html lang="en" data-theme="wintry" class="scheme-dark">
+<html lang="en" data-theme="wintry" data-mode="dark">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			if (localStorage.getItem('paint-a-galaxy-mode') === 'light') {
+				document.documentElement.dataset.mode = 'light';
+			}
+		</script>
 		%sveltekit.head%
 	</head>
 	<body

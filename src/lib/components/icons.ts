@@ -14,10 +14,12 @@ import LineSquiggle from '@lucide/svelte/icons/line-squiggle';
 import Lock from '@lucide/svelte/icons/lock';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import Minus from '@lucide/svelte/icons/minus';
+import Moon from '@lucide/svelte/icons/moon';
 import RectangleHorizontal from '@lucide/svelte/icons/rectangle-horizontal';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 import Sparkle from '@lucide/svelte/icons/sparkle';
 import Square from '@lucide/svelte/icons/square';
+import Sun from '@lucide/svelte/icons/sun';
 import Waypoints from '@lucide/svelte/icons/waypoints';
 import X from '@lucide/svelte/icons/x';
 
@@ -38,10 +40,12 @@ export const Icons = {
 	Lock,
 	MapPin,
 	Minus,
+	Moon,
 	RectangleHorizontal,
 	RotateCcw,
 	Sparkle,
 	Square,
+	Sun,
 	Waypoints,
 	X,
 };
