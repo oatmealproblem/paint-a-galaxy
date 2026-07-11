@@ -1,7 +1,7 @@
 painted_galaxy_set_precursor_flags = {
 	set_global_flag = painted_galaxy_$FLAG$
 	# borrowed from Precursor Selection https://steamcommunity.com/sharedfiles/filedetails/?id=3039370479
-	capital_scope.carrier.solar_system = {
+	capital_scope.solar_system = {
 		while = {
 			count = 40
 			closest_system = {
