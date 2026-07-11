@@ -305,6 +305,7 @@ export class Editor {
 	}
 
 	apply_actions(actions: Action[], { is_redo = false } = {}) {
+		if (actions.length === 0) return Promise.resolve();
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const actions_service = yield* Actions;
