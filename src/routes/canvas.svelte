@@ -736,6 +736,10 @@
 				{/if}
 
 				{#each solar_systems as solar_system (solar_system.id)}
+					{@const stroke =
+						solar_system.locked ?
+							'var(--color-warning-500)'
+						:	'var(--color-surface-950)'}
 					{#if editor().warned_solar_system_ids.includes(solar_system.id)}
 						<circle
 							cx={solar_system.coordinate.x}
@@ -773,7 +777,7 @@
 							   l 4 -2
 							   Z"
 							fill="var(--color-secondary-500)"
-							stroke="var(--color-surface-950)"
+							{stroke}
 							stroke-width="1"
 						/>
 					{:else if solar_system.spawn_type.startsWith('reserved')}
@@ -799,7 +803,7 @@
 							L {solar_system.coordinate.x + inner_dx} {solar_system.coordinate.y - inner_dy}
 							Z"
 							fill="var(--color-secondary-500)"
-							stroke="var(--color-surface-950)"
+							{stroke}
 							stroke-width="1"
 						/>
 						<text
@@ -818,7 +822,7 @@
 							cy={solar_system.coordinate.y}
 							r={3.5}
 							fill="var(--color-secondary-500)"
-							stroke="var(--color-surface-950)"
+							{stroke}
 							stroke-width="1"
 						/>
 					{:else if Option.isSome(solar_system.get_initializer()) || Option.isSome(solar_system.get_name())}
@@ -829,7 +833,7 @@
 							width={size}
 							height={size}
 							fill="var(--color-secondary-100)"
-							stroke="var(--color-surface-950)"
+							{stroke}
 							stroke-width="1"
 						/>
 					{:else}
@@ -838,7 +842,7 @@
 							cy={solar_system.coordinate.y}
 							r={2.5}
 							fill="var(--color-surface-50)"
-							stroke="var(--color-surface-950)"
+							{stroke}
 							stroke-width="1"
 						/>
 					{/if}
