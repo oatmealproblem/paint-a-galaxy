@@ -1,0 +1,7 @@
+painted_galaxy_change_pc = {
+	set_planet_flag = painted_galaxy_changed_pc
+	change_pc = $PC$
+	# change_pc causes building_colony_shelter (or equivalent) to be created; remove it to prevent duplicates
+	remove_all_buildings = yes
+	reset_planet = yes
+}

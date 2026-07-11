@@ -1,0 +1,4 @@
+if = {
+	limit = { owner = { has_origin = origin_acot_grimdark } }
+	painted_galaxy_change_pc = { PC = pc_dark_fractured }
+}
