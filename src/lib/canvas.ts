@@ -8,7 +8,7 @@ type StrokeConfig = {
 };
 
 export function draw_stroke(
-	ctx: CanvasRenderingContext2D,
+	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
 	path: string,
 	config: StrokeConfig,
 ) {

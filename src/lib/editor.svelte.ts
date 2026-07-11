@@ -40,6 +40,8 @@ export class Editor {
 				opacity: 0,
 				size: 0,
 				cap_style: 0,
+				bulk: 0,
+				bulk_brush_size: 0,
 			})),
 		),
 	);
@@ -178,6 +180,7 @@ export class Editor {
 		tool_id: ToolId,
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 	): string {
+		console.log(tool_id);
 		const settings = this.tool_settings[tool_id];
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;

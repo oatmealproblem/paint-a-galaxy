@@ -35,6 +35,8 @@ export const ToolSettingId = Schema.Literal(
 	'blur',
 	'opacity',
 	'cap_style',
+	'bulk',
+	'bulk_brush_size',
 );
 export type ToolSettingId = typeof ToolSettingId.Type;
 
@@ -372,7 +374,7 @@ const solar_system_create: _Tool<
 const solar_system_delete: _Tool<
 	'solar_system_delete',
 	'single_point',
-	Record<string, never>
+	{ bulk: number; bulk_brush_size: number }
 > = {
 	id: 'solar_system_delete',
 	name: 'Delete Solar System',
@@ -383,16 +385,19 @@ const solar_system_delete: _Tool<
 	snap_to_solar_system: true,
 	invert_lock_behavior: false,
 	render: {
-		type: 'none',
-		color: 'none',
+		type: 'stroke',
+		color: 'var(--color-error-500)',
 	},
-	default_settings: {},
+	default_settings: {
+		bulk: 0,
+		bulk_brush_size: 50,
+	},
 };
 
 const solar_system_lock: _Tool<
 	'solar_system_lock',
 	'single_point',
-	Record<string, never>
+	{ bulk: number; bulk_brush_size: number }
 > = {
 	id: 'solar_system_lock',
 	name: 'Lock Solar System',
@@ -403,16 +408,19 @@ const solar_system_lock: _Tool<
 	snap_to_solar_system: true,
 	invert_lock_behavior: false,
 	render: {
-		type: 'none',
-		color: 'none',
+		type: 'stroke',
+		color: 'var(--color-primary-500)',
 	},
-	default_settings: {},
+	default_settings: {
+		bulk: 0,
+		bulk_brush_size: 50,
+	},
 };
 
 const solar_system_unlock: _Tool<
 	'solar_system_unlock',
 	'single_point',
-	Record<string, never>
+	{ bulk: number; bulk_brush_size: number }
 > = {
 	id: 'solar_system_unlock',
 	name: 'Unlock Solar System',
@@ -423,10 +431,13 @@ const solar_system_unlock: _Tool<
 	snap_to_solar_system: true,
 	invert_lock_behavior: true,
 	render: {
-		type: 'none',
-		color: 'none',
+		type: 'stroke',
+		color: 'var(--color-primary-500)',
 	},
-	default_settings: {},
+	default_settings: {
+		bulk: 0,
+		bulk_brush_size: 50,
+	},
 };
 
 const spawn_preferred_toggle: _Tool<

@@ -73,7 +73,14 @@ export class Tools extends Context.Tag('Tools')<
 		Effect.gen(function* () {
 			const keyval = yield* KeyVal;
 
-			const null_settings = { blur: 0, opacity: 0, size: 0, cap_style: 0 };
+			const null_settings = {
+				blur: 0,
+				opacity: 0,
+				size: 0,
+				cap_style: 0,
+				bulk: 0,
+				bulk_brush_size: 0,
+			};
 			const load_settings: (typeof Tools)['Service']['load_settings'] = (
 				tool_id,
 				default_settings,
@@ -139,6 +146,72 @@ export class Tools extends Context.Tag('Tools')<
 					}),
 				);
 
+			function calculate_freehand_path(
+				coordinates: Coordinate[],
+				size: number,
+			) {
+				const stroke = getStroke(coordinates, {
+					size,
+					thinning: 0.5,
+					streamline: 0.5,
+					smoothing: 1,
+				}) as [number, number][];
+				const first = stroke[0];
+				if (first == null) return '';
+				return stroke
+					.reduce(
+						(acc, [x0, y0], i, arr) => {
+							const next = arr.at(i + 1);
+							if (next == null) return acc;
+							const [x1, y1] = next;
+							acc.push(` ${x0},${y0} ${(x0 + x1) / 2},${(y0 + y1) / 2}`);
+							return acc;
+						},
+						['M ', `${first[0]},${first[1]}`, ' Q'],
+					)
+					.concat('Z')
+					.join('');
+			}
+
+			function get_solar_systems_payload(
+				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
+				settings: Record<ToolSettingId, number>,
+				project: Project,
+			): SolarSystem[] {
+				if (settings.bulk == 0) {
+					const coordinate = get_single_payload(payload);
+					return project.solar_systems.filter((solar_system) =>
+						Equal.equals(solar_system.coordinate, coordinate),
+					);
+				} else {
+					const path = calculate_freehand_path(
+						get_multi_payload(payload),
+						settings.bulk_brush_size,
+					);
+					const canvas = new OffscreenCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+					const ctx = canvas.getContext('2d')!;
+					draw_stroke(ctx, path, {
+						opacity: 1,
+						size: 0, // size only matters for blur
+						blur: 0,
+						color: '#FFFFFF',
+					});
+					const image_data = ctx.getImageData(
+						0,
+						0,
+						CANVAS_WIDTH,
+						CANVAS_HEIGHT,
+					);
+					return project.solar_systems.filter(
+						(solar_system) =>
+							image_data.data[
+								solar_system.coordinate.y * CANVAS_WIDTH * 4 +
+									solar_system.coordinate.x * 4
+							] !== 0,
+					);
+				}
+			}
+
 			function get_single_payload(
 				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 			) {
@@ -168,28 +241,25 @@ export class Tools extends Context.Tag('Tools')<
 			) =>
 				Match.value(tool_id as ToolId).pipe(
 					Match.when(Match.is('freehand_draw', 'freehand_erase'), () => {
-						const stroke = getStroke(get_multi_payload(payload), {
-							size: settings.size,
-							thinning: 0.5,
-							streamline: 0.5,
-							smoothing: 1,
-						}) as [number, number][];
-						const first = stroke[0];
-						if (first == null) return '';
-						return stroke
-							.reduce(
-								(acc, [x0, y0], i, arr) => {
-									const next = arr.at(i + 1);
-									if (next == null) return acc;
-									const [x1, y1] = next;
-									acc.push(` ${x0},${y0} ${(x0 + x1) / 2},${(y0 + y1) / 2}`);
-									return acc;
-								},
-								['M ', `${first[0]},${first[1]}`, ' Q'],
-							)
-							.concat('Z')
-							.join('');
+						return calculate_freehand_path(
+							get_multi_payload(payload),
+							settings.size,
+						);
 					}),
+					Match.when(
+						Match.is(
+							'solar_system_delete',
+							'solar_system_lock',
+							'solar_system_unlock',
+						),
+						() => {
+							if (settings.bulk === 0) return '';
+							return calculate_freehand_path(
+								get_multi_payload(payload),
+								settings.bulk_brush_size,
+							);
+						},
+					),
 					Match.when(
 						Match.is('circle_draw', 'circle_erase', 'nebula_create'),
 						() => {
@@ -254,9 +324,6 @@ export class Tools extends Context.Tag('Tools')<
 							'hyperlane_toggle',
 							'nebula_delete',
 							'solar_system_create',
-							'solar_system_delete',
-							'solar_system_lock',
-							'solar_system_unlock',
 							'spawn_preferred_toggle',
 							'spawn_toggle',
 							'wormhole_toggle',
@@ -409,74 +476,75 @@ export class Tools extends Context.Tag('Tools')<
 						}
 					}),
 					Match.when('solar_system_delete', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						const solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, coordinate),
+						const solar_systems = get_solar_systems_payload(
+							payload,
+							settings,
+							project,
+						).filter((solar_system) => !solar_system.locked);
+						const solar_system_ids = new Set(
+							solar_systems.map((solar_system) => solar_system.id),
 						);
-						if (solar_system) {
-							const is_connection_to_solar_system = (connection: Connection) =>
-								connection.a === solar_system.id ||
-								connection.b === solar_system.id;
-							const hyperlanes = project.hyperlanes.filter(
-								is_connection_to_solar_system,
-							);
-							const wormholes = project.wormholes.filter(
-								is_connection_to_solar_system,
-							);
-							return Effect.succeed([
-								...hyperlanes.map(
-									(connection) =>
-										new Action.DeleteHyperlaneAction({ connection }),
-								),
-								...wormholes.map(
-									(connection) =>
-										new Action.DeleteWormholeAction({ connection }),
-								),
-								new Action.DeleteSolarSystemAction({ solar_system }),
-							]);
-						} else {
-							return Effect.succeed([]);
-						}
+						const hyperlanes = project.hyperlanes.filter(
+							(connection) =>
+								solar_system_ids.has(connection.a) ||
+								solar_system_ids.has(connection.b),
+						);
+						const wormholes = project.wormholes.filter(
+							(connection) =>
+								solar_system_ids.has(connection.a) ||
+								solar_system_ids.has(connection.b),
+						);
+						return Effect.succeed([
+							...hyperlanes.map(
+								(connection) =>
+									new Action.DeleteHyperlaneAction({ connection }),
+							),
+							...wormholes.map(
+								(connection) => new Action.DeleteWormholeAction({ connection }),
+							),
+							...solar_systems.map(
+								(solar_system) =>
+									new Action.DeleteSolarSystemAction({ solar_system }),
+							),
+						]);
 					}),
 					Match.when('solar_system_lock', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						const solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, coordinate),
-						);
-						if (solar_system) {
-							const updated_solar_system = new SolarSystem({
-								...solar_system,
-								locked: true,
-							});
-							return Effect.succeed([
-								new Action.UpdateSolarSystemAction({
+						const solar_systems = get_solar_systems_payload(
+							payload,
+							settings,
+							project,
+						).filter((solar_system) => !solar_system.locked);
+						return Effect.succeed(
+							solar_systems.map((solar_system) => {
+								const updated_solar_system = new SolarSystem({
+									...solar_system,
+									locked: true,
+								});
+								return new Action.UpdateSolarSystemAction({
 									old_value: solar_system,
 									new_value: updated_solar_system,
-								}),
-							]);
-						} else {
-							return Effect.succeed([]);
-						}
+								});
+							}),
+						);
 					}),
 					Match.when('solar_system_unlock', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						const solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, coordinate),
-						);
-						if (solar_system) {
-							const updated_solar_system = new SolarSystem({
-								...solar_system,
-								locked: false,
-							});
-							return Effect.succeed([
-								new Action.UpdateSolarSystemAction({
+						const solar_systems = get_solar_systems_payload(
+							payload,
+							settings,
+							project,
+						).filter((solar_system) => solar_system.locked);
+						return Effect.succeed(
+							solar_systems.map((solar_system) => {
+								const updated_solar_system = new SolarSystem({
+									...solar_system,
+									locked: false,
+								});
+								return new Action.UpdateSolarSystemAction({
 									old_value: solar_system,
 									new_value: updated_solar_system,
-								}),
-							]);
-						} else {
-							return Effect.succeed([]);
-						}
+								});
+							}),
+						);
 					}),
 					Match.when('spawn_preferred_toggle', () => {
 						const coordinate = get_single_payload(payload).to_rounded();

@@ -12,6 +12,7 @@
 	import {
 		Portal,
 		SegmentedControl,
+		Switch,
 		Tooltip,
 	} from '@skeletonlabs/skeleton-svelte';
 	import { Icons } from '$lib/components/icons';
@@ -93,7 +94,7 @@
 	<header class="flex gap-2 items-baseline">
 		<h3 class="inline font-bold text-surface-900-100">{tool.name}</h3>
 		<em class="text-sm text-surface-800-200">
-			{#if tool.id === editor().secondary_tool_id}shift+{/if}click{#if tool.action_type !== 'single_point'}+drag{/if}
+			{#if tool.id === editor().secondary_tool_id}shift+{/if}click{#if tool.action_type !== 'single_point' || editor().tool_settings[tool.id].bulk === 1}+drag{/if}
 		</em>
 		<div class="grow"></div>
 		<Tooltip positioning={{ placement: 'top' }}>
@@ -208,6 +209,35 @@
 		>
 			{#snippet label()}Blur{/snippet}
 			{#snippet output(value)}{value}x{/snippet}
+		</Slider>
+	{/if}
+
+	{#if 'bulk' in tool.default_settings}
+		<Switch
+			checked={editor().tool_settings[tool.id].bulk === 1}
+			onCheckedChange={(details) =>
+				editor().update_tool_settings(tool.id, {
+					...editor().tool_settings[tool.id],
+					bulk: details.checked ? 1 : 0,
+				})}
+		>
+			<Switch.Control>
+				<Switch.Thumb />
+			</Switch.Control>
+			<Switch.Label class="flex gap-1">Bulk Mode</Switch.Label>
+			<Switch.HiddenInput />
+		</Switch>
+	{/if}
+
+	{#if 'bulk_brush_size' in tool.default_settings && editor().tool_settings[tool.id].bulk === 1}
+		<Slider
+			min={0}
+			max={500}
+			step={1}
+			value={editor().tool_settings[tool.id].bulk_brush_size}
+			on_value_change={on_value_change(tool.id, 'bulk_brush_size')}
+		>
+			{#snippet label()}Bulk Brush Size{/snippet}
 		</Slider>
 	{/if}
 {/snippet}

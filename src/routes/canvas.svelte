@@ -52,6 +52,12 @@
 			}
 		}
 	});
+	const current_tool_settings = $derived(
+		pipe(
+			current_tool,
+			Option.map((tool) => editor().tool_settings[tool.id]),
+		),
+	);
 
 	const grid_config = $derived(editor().project.grid_config);
 	const grid_points = $derived(
@@ -80,6 +86,12 @@
 	>(Option.none());
 
 	let active_tool = $state<Option.Option<Tool>>(Option.none());
+	const active_tool_settings = $derived(
+		pipe(
+			active_tool,
+			Option.map((tool) => editor().tool_settings[tool.id]),
+		),
+	);
 	let snapped_solar_system_id = $state.raw<Option.Option<SolarSystemId>>(
 		Option.none(),
 	);
@@ -300,8 +312,12 @@
 	onmouseup={(e) => {
 		if (e.button !== 0) return;
 		if (!ctx) return;
-		if (Option.isSome(active_tool)) {
-			if (active_tool.value.action_type === 'single_point' && tool_points[0]) {
+		if (Option.isSome(active_tool) && Option.isSome(active_tool_settings)) {
+			if (
+				active_tool.value.action_type === 'single_point' &&
+				active_tool_settings.value.bulk === 0 &&
+				tool_points[0]
+			) {
 				editor().apply_tool(active_tool.value.id, tool_points[0], ctx);
 			} else if (tool_points.length > 1) {
 				editor().apply_tool(active_tool.value.id, tool_points, ctx);
@@ -371,6 +387,7 @@
 		onSome: (tool) =>
 			(
 				tool.snap_to_solar_system &&
+				editor().tool_settings[tool.id].bulk === 0 &&
 				Option.exists(
 					snapped_solar_system,
 					(system) => system.locked !== tool.invert_lock_behavior,
@@ -424,10 +441,14 @@
 			return;
 		}
 		if (e.button !== 0) return;
-		if (Option.isSome(current_tool)) {
+		if (Option.isSome(current_tool) && Option.isSome(current_tool_settings)) {
 			pipe(
 				current_tool,
-				Option.map((value) => value.snap_to_solar_system),
+				Option.map(
+					(value) =>
+						value.snap_to_solar_system &&
+						current_tool_settings.value.bulk === 0,
+				),
 				Option.getOrElse(() => false),
 				Boolean.match({
 					onTrue: () =>
@@ -459,7 +480,11 @@
 		const snap_to_solar_system = pipe(
 			active_tool,
 			Option.orElse(() => current_tool),
-			Option.map((value) => value.snap_to_solar_system),
+			Option.map(
+				(value) =>
+					value.snap_to_solar_system &&
+					editor().tool_settings[value.id].bulk === 0,
+			),
 			Option.getOrElse(() => false),
 		);
 		if (solar_system_delaunay) {
@@ -479,10 +504,20 @@
 				)
 			: grid_config.snap ? Option.some(coordinates.grid)
 			: Option.some(coordinates.canvas);
-		if (Option.isSome(active_tool) && Option.isSome(point)) {
+		if (
+			Option.isSome(active_tool) &&
+			Option.isSome(active_tool_settings) &&
+			Option.isSome(point)
+		) {
 			Match.value(active_tool.value.action_type).pipe(
 				Match.when('single_point', () => {
-					tool_points = [point.value];
+					if (active_tool_settings.value.bulk === 0) {
+						tool_points = [point.value];
+					} else {
+						if (!Equal.equals(tool_points.at(-1), point.value)) {
+							tool_points.push(point.value);
+						}
+					}
 				}),
 				Match.when('double_point', () => {
 					if (tool_points.length === 0) {
