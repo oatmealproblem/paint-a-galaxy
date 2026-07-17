@@ -8,29 +8,24 @@ country_event = {
 	trigger = {
 		is_maybe_painted_galaxy = yes
 		is_nomadic = yes
-		NAND = {
-			has_technology = tech_fission_power
-			has_technology = tech_thrusters_1
-		}
 	}
 	immediate = {
+		painted_galaxy_give_starting_tech = { TECH = tech_thrusters_1 }
+		painted_galaxy_give_starting_tech = { TECH = ship_armor_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_mass_drivers_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_flak_batteries_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_missiles_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_reactor_boosters_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_shields_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_lasers_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_pd_tracking_1 }
 		if = {
-			limit = {
-				NOT = { has_technology = tech_fission_power }
-			}
-			give_technology = {
-				tech = tech_fission_power
-				message = no
-			}
+			limit = { is_eager_explorer_empire = yes }
+			painted_galaxy_give_starting_tech = { TECH = tech_subspace_drive }
+		} else = {
+			painted_galaxy_give_starting_tech = { TECH = tech_hyper_drive_1 }
 		}
-		if = {
-			limit = {
-				NOT = { has_technology = tech_thrusters_1 }
-			}
-			give_technology = {
-				tech = tech_thrusters_1
-				message = no
-			}
-		}
+		# give this last, otherwise starting arkship is missing components
+		painted_galaxy_give_starting_tech = { TECH = tech_fission_power }
 	}
 }

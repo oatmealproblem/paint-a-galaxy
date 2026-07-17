@@ -1,0 +1,11 @@
+painted_galaxy_give_starting_tech = {
+		if = {
+			limit = {
+				NOT = { has_technology = $TECH$ }
+			}
+			give_technology = {
+				tech = $TECH$
+				message = no
+			}
+		}
+}
