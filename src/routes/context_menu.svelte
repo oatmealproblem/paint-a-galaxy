@@ -72,7 +72,7 @@
 			);
 			const solar_system = editor().project.get_solar_system_unsafe(id);
 			// apply the 'solar_system_delete' tool instead of creating the DeleteSolarSystemAction manually, so hyperlanes etc are also deleted
-			editor().apply_tool('solar_system_delete', solar_system.coordinate, ctx);
+			editor().apply_tool('solar_system_delete', [solar_system.coordinate], ctx);
 		} else if (details.value.startsWith('delete_nebula')) {
 			const key = pipe(
 				details.value.split('|'),
