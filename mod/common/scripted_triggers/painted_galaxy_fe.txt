@@ -1,0 +1,17 @@
+painted_galaxy_is_fe_preferred_spawn = {
+	optimize_memory
+	has_star_flag = painted_galaxy_fe_spawn_preferred
+}
+
+painted_galaxy_is_fe_highly_preferred_spawn = {
+	optimize_memory
+	has_star_flag = painted_galaxy_fe_spawn_preferred
+	OR = {
+		has_star_flag = painted_galaxy_fe_spawn_materialist
+		has_star_flag = painted_galaxy_fe_spawn_spiritualist
+		has_star_flag = painted_galaxy_fe_spawn_xenophile
+		has_star_flag = painted_galaxy_fe_spawn_xenophobe
+		has_star_flag = painted_galaxy_fe_spawn_machine
+		has_star_flag = painted_galaxy_fe_spawn_hive
+	}
+}

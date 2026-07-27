@@ -27,6 +27,8 @@ export const ToolId = Schema.Literal(
 	'spawn_preferred_toggle',
 	'spawn_toggle',
 	'wormhole_toggle',
+	'fallen_empire_zone_create',
+	'fallen_empire_zone_delete',
 );
 export type ToolId = typeof ToolId.Type;
 
@@ -39,6 +41,15 @@ export const ToolSettingId = Schema.Literal(
 	'bulk_brush_size',
 );
 export type ToolSettingId = typeof ToolSettingId.Type;
+
+export const EMPTY_TOOL_SETTINGS = {
+	blur: 0,
+	opacity: 0,
+	size: 0,
+	cap_style: 0,
+	bulk: 0,
+	bulk_brush_size: 0,
+} as const satisfies Record<ToolSettingId, number>;
 
 export const CAP_STYLE = {
 	butt: 0,
@@ -352,7 +363,7 @@ const nebula_create: _Tool<
 	show_preview: false,
 	render: {
 		type: 'stroke',
-		color: 'var(--color-primary-500)',
+		color: 'var(--color-tertiary-500)',
 	},
 	default_settings: {},
 };
@@ -542,6 +553,49 @@ const wormhole_toggle: _Tool<
 	default_settings: {},
 };
 
+const fallen_empire_zone_create: _Tool<
+	'fallen_empire_zone_create',
+	'single_point',
+	Record<string, never>
+> = {
+	id: 'fallen_empire_zone_create',
+	name: 'Create Fallen Empire Zone',
+	description:
+		'Designate a zone where a Fallen Empire can spawn. Right-click and Open Details for more options.',
+	step: 'tweak',
+	action_type: 'single_point',
+	snap_to_solar_system: false,
+	can_snap_to_grid: true,
+	invert_lock_behavior: false,
+	show_preview: false,
+	render: {
+		type: 'none',
+		color: 'none',
+	},
+	default_settings: {},
+};
+
+const fallen_empire_zone_delete: _Tool<
+	'fallen_empire_zone_delete',
+	'single_point',
+	Record<string, never>
+> = {
+	id: 'fallen_empire_zone_delete',
+	name: 'Delete Fallen Empire Zone',
+	description: 'Delete a Fallen Empire zone.',
+	step: 'tweak',
+	action_type: 'single_point',
+	snap_to_solar_system: false,
+	can_snap_to_grid: false,
+	invert_lock_behavior: false,
+	show_preview: false,
+	render: {
+		type: 'none',
+		color: 'none',
+	},
+	default_settings: {},
+};
+
 export type ToolActionTypePayload = {
 	multi_point: Coordinate[];
 	single_point: Coordinate;
@@ -569,6 +623,8 @@ export const tools = {
 	wormhole_toggle,
 	nebula_create,
 	nebula_delete,
+	fallen_empire_zone_create,
+	fallen_empire_zone_delete,
 } satisfies Record<
 	ToolId,
 	_Tool<
@@ -669,5 +725,13 @@ export const tool_pairs: ToolPair[] = [
 		primary: tools.nebula_create,
 		secondary: tools.nebula_delete,
 		icon: 'Cloud',
+	},
+	{
+		id: 'fallen-empire-zone',
+		name: 'Create/Delete Fallen Empire Zone',
+		step: 'tweak',
+		primary: tools.fallen_empire_zone_create,
+		secondary: tools.fallen_empire_zone_delete,
+		icon: 'Castle',
 	},
 ];

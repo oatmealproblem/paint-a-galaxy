@@ -1,9 +1,15 @@
 import { Array, Iterable, Option, Order, pipe } from 'effect';
 
 import {
-	FALLEN_EMPIRE_SPAWN_RADIUS,
+	FALLEN_EMPIRE_ZONE_RADIUS,
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
+	GIGA_RANDOM_CORE_RADIUS,
+	L_CLUSTER_CX,
+	L_CLUSTER_CY,
+	L_CLUSTER_RADIUS,
+	FALLEN_EMPIRE_ZONE_ANGLES,
+	FALLEN_EMPIRE_ZONE_DEFAULT_DISTANCE,
 } from './constants';
 import type { Project } from './models/project';
 import { SolarSystem } from './models/solar_system';
@@ -13,6 +19,22 @@ import {
 	initializer_metadata,
 	type InitializerKey,
 } from './data/initializer_metadata';
+import {
+	FallenEmpireZone,
+	FallenEmpireZoneId,
+} from './models/fallen_empire_zone';
+import { convert_degrees_to_radians } from './math';
+
+const DIRECTIONS = {
+	0: 'e',
+	45: 'se',
+	90: 's',
+	135: 'sw',
+	180: 'w',
+	225: 'nw',
+	270: 'n',
+	315: 'ne',
+} as const;
 
 const COMMON = `
 	priority = 10
@@ -117,23 +139,33 @@ export function generate_stellaris_galaxy(project: Project): string {
 	if (project.solar_systems.length >= 800) size_based_settings = LARGE;
 	if (project.solar_systems.length >= 1000) size_based_settings = HUGE;
 
-	const fallen_empire_spawns: {
-		solar_system: SolarSystem;
-		direction: 'n' | 'e' | 's' | 'w';
-	}[] = [];
-	for (const star of project.solar_systems) {
-		for (const direction of ['n', 'e', 's', 'w'] as const) {
+	const fallen_empire_zones: FallenEmpireZone[] =
+		project.fallen_empire_zones.slice();
+	// find additional FE spawns
+	for (const solar_system of project.solar_systems) {
+		for (const angle of FALLEN_EMPIRE_ZONE_ANGLES) {
 			if (
+				!fallen_empire_zones.some((zone) => zone.origin === solar_system.id) &&
 				can_spawn_fallen_empire_in_direction(
-					star,
-					direction,
+					solar_system,
+					angle,
 					project.solar_systems,
-					fallen_empire_spawns.map((fe) =>
-						get_fallen_empire_origin(fe.solar_system, fe.direction),
+					fallen_empire_zones.map((zone) =>
+						project.get_fallen_empire_zone_coordinate_unsafe(zone),
 					),
 				)
 			) {
-				fallen_empire_spawns.push({ solar_system: star, direction });
+				fallen_empire_zones.push(
+					new FallenEmpireZone({
+						id: FallenEmpireZoneId.make(crypto.randomUUID()),
+						origin: solar_system.id,
+						type: 'random',
+						angle,
+						connections: [],
+						distance: FALLEN_EMPIRE_ZONE_DEFAULT_DISTANCE,
+						fallback_to_random: false,
+					}),
+				);
 			}
 		}
 	}
@@ -249,13 +281,39 @@ export function generate_stellaris_galaxy(project: Project): string {
 				}
 			}
 
-			const this_star_fallen_empire_spawns = fallen_empire_spawns.filter(
-				(fe) => fe.solar_system === solar_system,
+			const fe_zone = Array.findFirst(
+				fallen_empire_zones,
+				(zone) => zone.origin === solar_system.id,
 			);
 			const fe_spawn_effect =
-				this_star_fallen_empire_spawns.length > 0 ?
-					`set_star_flag = painted_galaxy_fe_spawn ${this_star_fallen_empire_spawns.map((fe) => `set_star_flag = painted_galaxy_fe_spawn_${fe.direction}`).join(' ')}`
+				Option.isSome(fe_zone) ?
+					[
+						'set_star_flag = painted_galaxy_fe_spawn',
+						`set_star_flag = painted_galaxy_fe_spawn_${DIRECTIONS[fe_zone.value.angle]}`,
+						`set_star_flag = painted_galaxy_fe_spawn_${fe_zone.value.type}`,
+						`set_star_flag = painted_galaxy_fe_spawn_distance_${fe_zone.value.distance}`,
+						...(project.fallen_empire_zones.includes(fe_zone.value) ?
+							['set_star_flag = painted_galaxy_fe_spawn_preferred']
+						:	[]),
+						...(fe_zone.value.connections.length > 0 ?
+							[
+								'set_star_flag = painted_galaxy_fe_custom_connections',
+								`set_star_flag = painted_galaxy_fe_custom_connection_id_${fallen_empire_zones.indexOf(fe_zone.value)}`,
+							]
+						:	[]),
+						...(fe_zone.value.fallback_to_random ?
+							['set_star_flag = painted_galaxy_fe_spawn_fallback']
+						:	[]),
+					].join(' ')
 				:	'';
+
+			const fe_connection_effect = fallen_empire_zones
+				.filter((zone) => zone.connections.includes(solar_system.id))
+				.map(
+					(zone) =>
+						`set_star_flag = painted_galaxy_fe_custom_connection_to_${fallen_empire_zones.indexOf(zone)}`,
+				)
+				.join(' ');
 
 			const wormhole_index = project.wormholes.findIndex(
 				(connection) =>
@@ -267,7 +325,12 @@ export function generate_stellaris_galaxy(project: Project): string {
 					`set_star_flag = painted_galaxy_wormhole_${wormhole_index} set_star_flag = empire_cluster`
 				:	'';
 
-			const effects = [fe_spawn_effect, wormhole_effect, initializer_effect];
+			const effects = [
+				fe_spawn_effect,
+				fe_connection_effect,
+				wormhole_effect,
+				initializer_effect,
+			];
 			const effect =
 				effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
 			return `\tsystem = { ${basics} ${name} ${initializer} ${spawn_weight} ${effect} }`;
@@ -345,60 +408,49 @@ export function generate_stellaris_galaxy(project: Project): string {
 	].join('\n');
 }
 
-function get_fallen_empire_origin(
-	solar_system: SolarSystem,
-	direction: 'n' | 's' | 'e' | 'w',
-): Coordinate {
-	switch (direction) {
-		case 'n':
-			return Coordinate.make({
-				x: solar_system.coordinate.x,
-				y: solar_system.coordinate.y - FALLEN_EMPIRE_SPAWN_RADIUS,
-			});
-		case 's':
-			return Coordinate.make({
-				x: solar_system.coordinate.x,
-				y: solar_system.coordinate.y + FALLEN_EMPIRE_SPAWN_RADIUS,
-			});
-		case 'e':
-			return Coordinate.make({
-				x: solar_system.coordinate.x + FALLEN_EMPIRE_SPAWN_RADIUS,
-				y: solar_system.coordinate.y,
-			});
-		case 'w':
-			return Coordinate.make({
-				x: solar_system.coordinate.x - FALLEN_EMPIRE_SPAWN_RADIUS,
-				y: solar_system.coordinate.y,
-			});
-	}
-}
-
 function can_spawn_fallen_empire_in_direction(
 	from_solar_system: SolarSystem,
-	direction: 'n' | 's' | 'e' | 'w',
+	direction: FallenEmpireZone['angle'],
 	solar_systems: readonly SolarSystem[],
 	existing_fallen_empire_spawns: Coordinate[],
 ): boolean {
-	const origin = get_fallen_empire_origin(from_solar_system, direction);
-	// origin is not near edge of canvas
-	if (
-		origin.x < FALLEN_EMPIRE_SPAWN_RADIUS ||
-		origin.x > CANVAS_WIDTH - FALLEN_EMPIRE_SPAWN_RADIUS ||
-		origin.y < FALLEN_EMPIRE_SPAWN_RADIUS ||
-		origin.y > CANVAS_HEIGHT - FALLEN_EMPIRE_SPAWN_RADIUS
-	)
-		return false;
-	// spawn area does not contain any stars or overlap with another fallen empire spawn area
-	return (
-		solar_systems.every(
-			(solar_system) =>
-				solar_system.coordinate.distance_to(origin) >=
-				FALLEN_EMPIRE_SPAWN_RADIUS,
-		) &&
-		existing_fallen_empire_spawns.every(
-			(coordinate) =>
-				coordinate.distance_to(origin) >= FALLEN_EMPIRE_SPAWN_RADIUS * 2,
-		)
+	const center = from_solar_system.coordinate.get_coordinate_in_direction(
+		convert_degrees_to_radians(direction),
+		FALLEN_EMPIRE_ZONE_DEFAULT_DISTANCE,
+	);
+
+	const is_near_core =
+		center.distance_to(
+			new Coordinate({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 }),
+		) <
+		GIGA_RANDOM_CORE_RADIUS + FALLEN_EMPIRE_ZONE_RADIUS;
+
+	const is_near_l_cluster =
+		center.distance_to(new Coordinate({ x: L_CLUSTER_CX, y: L_CLUSTER_CY })) <
+		L_CLUSTER_RADIUS + FALLEN_EMPIRE_ZONE_RADIUS;
+
+	const is_near_edge =
+		center.x < FALLEN_EMPIRE_ZONE_RADIUS ||
+		center.x > CANVAS_WIDTH - FALLEN_EMPIRE_ZONE_RADIUS ||
+		center.y < FALLEN_EMPIRE_ZONE_RADIUS ||
+		center.y > CANVAS_HEIGHT - FALLEN_EMPIRE_ZONE_RADIUS;
+
+	const is_near_solar_system = solar_systems.some(
+		(solar_system) =>
+			solar_system.coordinate.distance_to(center) < FALLEN_EMPIRE_ZONE_RADIUS,
+	);
+
+	const is_near_fe_zone = existing_fallen_empire_spawns.some(
+		(coordinate) =>
+			coordinate.distance_to(center) < FALLEN_EMPIRE_ZONE_RADIUS * 2,
+	);
+
+	return !(
+		is_near_core ||
+		is_near_l_cluster ||
+		is_near_edge ||
+		is_near_solar_system ||
+		is_near_fe_zone
 	);
 }
 

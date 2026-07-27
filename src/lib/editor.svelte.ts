@@ -19,6 +19,7 @@ import { View } from './services/view';
 import { GeneratorSettings } from './models/generator_settings';
 import { Generator } from './services/generator';
 import { SolarSystemId } from './models/solar_system';
+import type { FallenEmpireZoneId } from './models/fallen_empire_zone';
 
 type EditorLayer = Layer.Layer<Actions | Generator | Projects | Tools | View>;
 
@@ -63,6 +64,7 @@ export class Editor {
 	readonly can_undo = $derived(this.#done_stack.length > 0);
 	readonly can_redo = $derived(this.#undone_stack.length > 0);
 	warned_solar_system_ids = $state.raw<SolarSystemId[]>([]);
+	warned_fallen_empire_zone_ids = $state.raw<FallenEmpireZoneId[]>([]);
 
 	constructor(
 		projects: readonly ProjectListing[],
@@ -180,7 +182,6 @@ export class Editor {
 		tool_id: ToolId,
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 	): string {
-		console.log(tool_id);
 		const settings = this.tool_settings[tool_id];
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;
@@ -195,8 +196,6 @@ export class Editor {
 		spawns = false,
 		nebulas = false,
 	}) {
-		console.log('Generating...');
-		const start = performance.now();
 		let project = this.project;
 		const all_generator_actions: Action[] = [];
 
@@ -276,15 +275,15 @@ export class Editor {
 		this.project = project;
 		this.#done_stack.push(all_generator_actions);
 		this.#undone_stack = [];
-		console.log('Done:', performance.now() - start);
 	}
 
 	apply_tool(
 		tool_id: ToolId,
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 		ctx: CanvasRenderingContext2D,
+		override_settings?: Record<ToolSettingId, number>,
 	) {
-		const settings = this.#tool_settings[tool_id];
+		const settings = override_settings ?? this.#tool_settings[tool_id];
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;

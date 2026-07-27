@@ -15,6 +15,7 @@ import {
 	tokenize,
 } from '$lib/parse_txt';
 import { Coordinate } from './coordinate';
+import { FallenEmpireZone, FallenEmpireZoneId } from './fallen_empire_zone';
 
 export class ProjectListing extends Schema.Class<ProjectListing>(
 	'ProjectListing',
@@ -48,6 +49,13 @@ export class Project extends Schema.Class<Project>('Project')({
 	nebulas: Schema.Array(Nebula),
 	hyperlanes: Schema.Array(Connection),
 	wormholes: Schema.Array(Connection),
+	fallen_empire_zones: Schema.Array(FallenEmpireZone).pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => [],
+			decoding: () => [],
+		}),
+	),
 	generator_settings: GeneratorSettings.pipe(
 		Schema.optional,
 		Schema.withDefaults({
@@ -72,6 +80,21 @@ export class Project extends Schema.Class<Project>('Project')({
 
 	get_solar_system_unsafe(id: SolarSystemId): SolarSystem {
 		return Option.getOrThrow(this.get_solar_system(id));
+	}
+
+	get_fallen_empire_zone_coordinate(zone: FallenEmpireZone) {
+		return this.get_solar_system(zone.origin).pipe(
+			Option.map((solar_system) =>
+				solar_system.coordinate.get_coordinate_in_direction(
+					zone.radians,
+					zone.distance,
+				),
+			),
+		);
+	}
+
+	get_fallen_empire_zone_coordinate_unsafe(zone: FallenEmpireZone) {
+		return Option.getOrThrow(this.get_fallen_empire_zone_coordinate(zone));
 	}
 
 	static async make_empty(name: string) {
@@ -280,6 +303,100 @@ export class Project extends Schema.Class<Project>('Project')({
 			Array.fromIterable,
 		);
 
+		const fallen_empire_connected_systems = pipe(
+			filter_object_entries(scenario, 'system'),
+			Iterable.filterMap((system) => {
+				const solar_system_id = SolarSystemId.make(
+					find_number_entry(system, 'id', { int: true }),
+				);
+				const effect_json_string = JSON.stringify(
+					system.find((entry) => entry[0] === 'effect') ?? [],
+				);
+				const connection_id = Number.parseInt(
+					effect_json_string.match(
+						/painted_galaxy_fe_custom_connection_to_(\d+)/,
+					)?.[1] ?? '-1',
+				);
+				if (connection_id === -1) {
+					return Option.none();
+				} else {
+					return Option.some({ connection_id, solar_system_id });
+				}
+			}),
+			Array.fromIterable,
+		);
+
+		const fallen_empire_zones = pipe(
+			filter_object_entries(scenario, 'system'),
+			Iterable.filterMap((system) => {
+				const origin = SolarSystemId.make(
+					find_number_entry(system, 'id', { int: true }),
+				);
+				const effect_json_string = JSON.stringify(
+					system.find((entry) => entry[0] === 'effect') ?? [],
+				);
+				const is_custom_fe_spawn = effect_json_string.includes(
+					'painted_galaxy_fe_spawn_preferred',
+				);
+				if (!is_custom_fe_spawn) return Option.none();
+				const angle =
+					effect_json_string.includes('painted_galaxy_fe_spawn_se') ? 45
+					: effect_json_string.includes('painted_galaxy_fe_spawn_sw') ? 135
+					: effect_json_string.includes('painted_galaxy_fe_spawn_nw') ? 225
+					: effect_json_string.includes('painted_galaxy_fe_spawn_ne') ? 315
+					: effect_json_string.includes('painted_galaxy_fe_spawn_e') ? 0
+					: effect_json_string.includes('painted_galaxy_fe_spawn_s') ? 90
+					: effect_json_string.includes('painted_galaxy_fe_spawn_n') ? 270
+					: 180; // west
+				const type =
+					effect_json_string.includes('painted_galaxy_fe_spawn_materialist') ?
+						'materialist'
+					: (
+						effect_json_string.includes('painted_galaxy_fe_spawn_spiritualist')
+					) ?
+						'spiritualist'
+					: effect_json_string.includes('painted_galaxy_fe_spawn_xenophile') ?
+						'xenophile'
+					: effect_json_string.includes('painted_galaxy_fe_spawn_xenophobe') ?
+						'xenophobe'
+					: effect_json_string.includes('painted_galaxy_fe_spawn_machine') ?
+						'machine'
+					: effect_json_string.includes('painted_galaxy_fe_spawn_hive') ? 'hive'
+					: 'random';
+				const distance = Number.parseInt(
+					effect_json_string.match(
+						/painted_galaxy_fe_spawn_distance_(\d+)/,
+					)?.[1] ?? '30',
+				) as FallenEmpireZone['distance'];
+				const connection_id = Number.parseInt(
+					effect_json_string.match(
+						/painted_galaxy_fe_custom_connection_id_(\d+)/,
+					)?.[1] ?? '-1',
+				);
+				const connections =
+					connection_id === -1 ?
+						[]
+					:	fallen_empire_connected_systems
+							.filter((pair) => pair.connection_id === connection_id)
+							.map((pair) => pair.solar_system_id);
+				const fallback_to_random = effect_json_string.includes(
+					'painted_galaxy_fe_spawn_fallback',
+				);
+				return Option.some(
+					new FallenEmpireZone({
+						id: FallenEmpireZoneId.make(crypto.randomUUID()),
+						origin,
+						distance,
+						angle,
+						type,
+						connections,
+						fallback_to_random,
+					}),
+				);
+			}),
+			Array.fromIterable,
+		);
+
 		return new Project({
 			name,
 			step,
@@ -288,6 +405,7 @@ export class Project extends Schema.Class<Project>('Project')({
 			nebulas,
 			hyperlanes,
 			wormholes,
+			fallen_empire_zones,
 		});
 	}
 }

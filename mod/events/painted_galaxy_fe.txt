@@ -8,97 +8,244 @@ event = {
 		is_maybe_painted_galaxy = yes
 	}
 	immediate = {
+		# set FE type to random if missing required_dlc
+		if = {
+			limit = { has_biogenesis_dlc = no }
+			every_system = {
+				limit = { has_star_flag = painted_galaxy_fe_spawn_hive }
+				remove_star_flag = painted_galaxy_fe_spawn_hive
+				set_star_flag = painted_galaxy_fe_spawn_random
+			}
+		}
+
+		# set defaults
+		every_system = {
+			limit = {
+				has_star_flag = painted_galaxy_fe_spawn
+				NOR = {
+					has_star_flag = painted_galaxy_fe_spawn_random
+					has_star_flag = painted_galaxy_fe_spawn_spiritualist
+					has_star_flag = painted_galaxy_fe_spawn_materialist
+					has_star_flag = painted_galaxy_fe_spawn_xenophile
+					has_star_flag = painted_galaxy_fe_spawn_xenophobe
+					has_star_flag = painted_galaxy_fe_spawn_machine
+					has_star_flag = painted_galaxy_fe_spawn_hive
+				}
+			}
+			set_star_flag = painted_galaxy_fe_spawn_random
+		}
+		every_system = {
+			limit = {
+				has_star_flag = painted_galaxy_fe_spawn
+				NOR = {
+					has_star_flag = painted_galaxy_fe_spawn_distance_30
+					has_star_flag = painted_galaxy_fe_spawn_distance_40
+					has_star_flag = painted_galaxy_fe_spawn_distance_50
+					has_star_flag = painted_galaxy_fe_spawn_distance_60
+					has_star_flag = painted_galaxy_fe_spawn_distance_70
+					has_star_flag = painted_galaxy_fe_spawn_distance_80
+					has_star_flag = painted_galaxy_fe_spawn_distance_90
+					has_star_flag = painted_galaxy_fe_spawn_distance_100
+					has_star_flag = painted_galaxy_fe_spawn_distance_110
+					has_star_flag = painted_galaxy_fe_spawn_distance_120
+					has_star_flag = painted_galaxy_fe_spawn_distance_130
+					has_star_flag = painted_galaxy_fe_spawn_distance_140
+					has_star_flag = painted_galaxy_fe_spawn_distance_150
+					has_star_flag = painted_galaxy_fe_spawn_distance_160
+					has_star_flag = painted_galaxy_fe_spawn_distance_170
+					has_star_flag = painted_galaxy_fe_spawn_distance_180
+					has_star_flag = painted_galaxy_fe_spawn_distance_190
+					has_star_flag = painted_galaxy_fe_spawn_distance_200
+				}
+			}
+			set_star_flag = painted_galaxy_fe_spawn_distance_40
+		}
+
 		set_spawn_system_batch = begin
 		# global event country hasn't been created yet, just use a random one
 		random_country = {
+			export_trigger_value_to_variable = {
+				trigger = count_system
+				parameters = {
+					limit = { painted_galaxy_is_fe_preferred_spawn = yes }
+				}
+				variable = painted_galaxy_available_fe_preferred_spawns
+			}
+			export_trigger_value_to_variable = {
+				trigger = count_system
+				parameters = {
+					limit = { painted_galaxy_is_fe_highly_preferred_spawn = yes }
+				}
+				variable = painted_galaxy_available_fe_highly_preferred_spawns
+			}
 			set_variable = {
-				which = painted_galaxy_fe_spawns
+				which = painted_galaxy_fe_spawned
 				value = 0
 			}
 			while = {
 				limit = {
 					check_galaxy_setup_value = {
 						setting = num_fallen_empires
-						value > painted_galaxy_fe_spawns
+						value > painted_galaxy_fe_spawned
 					}
 				}
-				# as of 4.0, add_variable is available, but using change_variable still for easier 3.14 compat
-				change_variable = {
-					which = painted_galaxy_fe_spawns
+				add_variable = {
+					which = painted_galaxy_fe_spawned
 					value = 1
 				}
-				random_list = {
-					100 = {
-						modifier = {
-							factor = 0
-							any_country = { has_country_flag = fallen_empire_1 }
-						}
-						modifier = {
-							factor = 99999
-							any_country = { has_origin = origin_scion }
-						}
-						country_event = { id = painted_galaxy_fe.10 }
-					}
-					100 = {
-						modifier = {
-							factor = 0
-							any_country = { has_country_flag = fallen_empire_2 }
-						}
-						modifier = {
-							factor = 99999
-							any_country = { has_origin = origin_scion }
-						}
-						country_event = { id = painted_galaxy_fe.20 }
-					}
-					100 = {
-						modifier = {
-							factor = 0
-							any_country = { has_country_flag = fallen_empire_3 }
-						}
-						country_event = { id = painted_galaxy_fe.30 }
-					}
-					100 = {
-						modifier = {
-							factor = 0
-							any_country = { has_country_flag = fallen_empire_4 }
-						}
-						country_event = { id = painted_galaxy_fe.40 }
-					}
-					100 = {
-						modifier = {
-							factor = 0
-							any_country = { has_country_flag = fallen_empire_machine }
-						}
-						country_event = { id = painted_galaxy_fe.50 }
-					}
-					100 = {
-						modifier = {
-							factor = 0
-							has_global_flag = hive_fe_spawned
-						}
-						modifier = {
-							factor = 0
-							has_biogenesis_dlc = no
-						}
-						modifier = {
-							factor = 5
-							any_country = {
-								is_ai = no
-								country_uses_bio_ships = yes
+
+				random_system = {
+					limit = {
+						has_star_flag = painted_galaxy_fe_spawn
+						OR = {
+							painted_galaxy_is_fe_preferred_spawn = yes
+							check_variable_arithmetic = {
+								which = prev.painted_galaxy_available_fe_preferred_spawns
+								value = 0
 							}
 						}
-						country_event = { id = painted_galaxy_fe.60 }
+						OR = {
+							painted_galaxy_is_fe_highly_preferred_spawn = yes
+							check_variable_arithmetic = {
+								which = prev.painted_galaxy_available_fe_highly_preferred_spawns
+								value = 0
+							}
+						}
+					}
+					save_event_target_as = painted_galaxy_fe_origin
+					random_list = {
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_materialist
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 99999
+								any_country = { has_origin = origin_scion }
+							}
+							modifier = {
+								factor = 0
+								any_country = { has_country_flag = fallen_empire_1 }
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.10 }
+						}
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_spiritualist
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 99999
+								any_country = { has_origin = origin_scion }
+							}
+							modifier = {
+								factor = 0
+								any_country = { has_country_flag = fallen_empire_2 }
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.20 }
+						}
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_xenophile
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 0
+								any_country = { has_country_flag = fallen_empire_3 }
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.30 }
+						}
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_xenophobe
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 0
+								any_country = { has_country_flag = fallen_empire_4 }
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.40 }
+						}
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_machine
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 0
+								any_country = { has_country_flag = fallen_empire_machine }
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.50 }
+						}
+						0 = {
+							modifier = {
+								add = 100
+								OR = {
+									has_star_flag = painted_galaxy_fe_spawn_hive
+									has_star_flag = painted_galaxy_fe_spawn_random
+								}
+							}
+							modifier = {
+								factor = 0
+								has_global_flag = hive_fe_spawned
+							}
+							modifier = {
+								factor = 0
+								has_biogenesis_dlc = no
+							}
+							modifier = {
+								factor = 5
+								any_country = {
+									is_ai = no
+									country_uses_bio_ships = yes
+								}
+							}
+							painted_galaxy_fe_spawned_update_flags_and_variables = yes
+							system_event = { id = painted_galaxy_fe.60 }
+						}
 					}
 				}
 			}
-			clear_variable = painted_galaxy_fe_spawns
+
+			every_system = {
+				limit = {
+					has_star_flag = painted_galaxy_fe_spawn
+					has_star_flag = painted_galaxy_fe_spawn_fallback
+				}
+				save_event_target_as = painted_galaxy_fe_origin
+				system_event = { id = painted_galaxy_fe.70 }
+			}
+
+			clear_variable = painted_galaxy_fe_spawned
+			clear_variable = painted_galaxy_available_fe_preferred_spawns
+			clear_variable = painted_galaxy_available_fe_highly_preferred_spawns
 		}
 		set_spawn_system_batch = end
 	}
 }
 
 # spawn materialist fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.10
 	hide_window = yes
 	is_triggered_only = yes
@@ -126,28 +273,69 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_1 }
 			last_created_system = {
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_1_2 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_1 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_1_2
+					MIN_ANGLE = 0
+					MAX_ANGLE = 20
+					ID = 1
+					CONNECT = 0
 				}
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_2 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_1
+					MIN_ANGLE = 100
+					MAX_ANGLE = 120
+					ID = 2
+					CONNECT = 0
 				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 50
+					MAX_ANGLE = 70
+					ID = 2_1
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 150
+					MAX_ANGLE = 170
+					ID = 2_2
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_2
+					MIN_ANGLE = 250
+					MAX_ANGLE = 260
+					ID = 3
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 200
+					MAX_ANGLE = 220
+					ID = 3_1
+					CONNECT = 3
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 300
+					MAX_ANGLE = 320
+					ID = 3_2
+					CONNECT = 3
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1 TO = 2_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_2 TO = 3_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3_2 TO = 1 } }
+				painted_galaxy_connect_fe_systems = yes
 			}
 		}
 	}
 }
 
 # spawn spiritualist fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.20
 	hide_window = yes
 	is_triggered_only = yes
@@ -179,20 +367,54 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_2 }
 			last_created_system = {
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_1 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_1
+					MIN_ANGLE = 60
+					MAX_ANGLE = 80
+					ID = 1
+					CONNECT = 0
 				}
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_2 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 0
+					MAX_ANGLE = 20
+					ID = 1_1
+					CONNECT = 1
 				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 120
+					MAX_ANGLE = 140
+					ID = 1_2
+					CONNECT = 1
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_2
+					MIN_ANGLE = 240
+					MAX_ANGLE = 260
+					ID = 2
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 180
+					MAX_ANGLE = 200
+					ID = 2_1
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 300
+					MAX_ANGLE = 320
+					ID = 2_2
+					CONNECT = 2
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1_2 TO = 2_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_2 TO = 1_1 } }
+				painted_galaxy_connect_fe_systems = yes
 				if = {
 					limit = { NOT = { any_system = { has_star_flag = holy_system_1 } } }
 					random_system = {
@@ -273,7 +495,7 @@ country_event = {
 }
 
 # spawn xenophile fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.30
 	hide_window = yes
 	is_triggered_only = yes
@@ -301,28 +523,69 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_3 }
 			last_created_system = {
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_xeno_zoo }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_1 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_xeno_zoo
+					MIN_ANGLE = 0
+					MAX_ANGLE = 20
+					ID = 1
+					CONNECT = 0
 				}
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_2 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_1
+					MIN_ANGLE = 100
+					MAX_ANGLE = 120
+					ID = 2
+					CONNECT = 0
 				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 50
+					MAX_ANGLE = 70
+					ID = 2_1
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 150
+					MAX_ANGLE = 170
+					ID = 2_2
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_2
+					MIN_ANGLE = 250
+					MAX_ANGLE = 270
+					ID = 3
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 200
+					MAX_ANGLE = 220
+					ID = 3_1
+					CONNECT = 3
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 300
+					MAX_ANGLE = 320
+					ID = 3_2
+					CONNECT = 3
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1 TO = 2_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_2 TO = 3_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3_2 TO = 1 } }
+				painted_galaxy_connect_fe_systems = yes
 			}
 		}
 	}
 }
 
 # spawn xenophobe fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.40
 	hide_window = yes
 	is_triggered_only = yes
@@ -352,30 +615,83 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_4 }
 			last_created_system = {
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_1 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_1
+					MIN_ANGLE = 40
+					MAX_ANGLE = 50
+					ID = 1
+					CONNECT = 0
 				}
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_orbitals_2 }
-				last_created_system = {
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_1 }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_col_2 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 0
+					MAX_ANGLE = 10
+					ID = 1_1
+					CONNECT = 1
 				}
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_shielded_1 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_shielded_2 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_shielded_3 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 80
+					MAX_ANGLE = 90
+					ID = 1_2
+					CONNECT = 1
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_shielded_1
+					MIN_ANGLE = 120
+					MAX_ANGLE = 130
+					ID = 1_3
+					CONNECT = 1_2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_orbitals_2
+					MIN_ANGLE = 200
+					MAX_ANGLE = 210
+					ID = 2
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_1
+					MIN_ANGLE = 160
+					MAX_ANGLE = 170
+					ID = 2_1
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_col_2
+					MIN_ANGLE = 240
+					MAX_ANGLE = 250
+					ID = 2_2
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_shielded_2
+					MIN_ANGLE = 280
+					MAX_ANGLE = 290
+					ID = 2_3
+					CONNECT = 2_2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_shielded_3
+					MIN_ANGLE = 320
+					MAX_ANGLE = 330
+					ID = 3
+					CONNECT = 0
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1_3 TO = 2_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_3 TO = 3 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3 TO = 1_1 } }
+				painted_galaxy_connect_fe_systems = yes
 			}
 		}
 	}
 }
 
 # spawn machine fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.50
 	hide_window = yes
 	is_triggered_only = yes
@@ -400,21 +716,49 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_machine }
 			last_created_system = {
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_machine_2 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_machine_3 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_machine_4 }
-				painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_machine_5 }
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_machine_2
+					MIN_ANGLE = 0
+					MAX_ANGLE = 30
+					ID = 1
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_machine_3
+					MIN_ANGLE = 90
+					MAX_ANGLE = 120
+					ID = 2
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_machine_4
+					MIN_ANGLE = 180
+					MAX_ANGLE = 210
+					ID = 3
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_machine_5
+					MIN_ANGLE = 270
+					MAX_ANGLE = 300
+					ID = 4
+					CONNECT = 0
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1 TO = 2 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2 TO = 3 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3 TO = 4 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 4 TO = 1 } }
+				painted_galaxy_connect_fe_systems = yes
 			}
 		}
 	}
 }
 
 # spawn hive fallen empire
-country_event = {
+system_event = {
 	id = painted_galaxy_fe.60
 	hide_window = yes
 	is_triggered_only = yes
@@ -445,35 +789,135 @@ country_event = {
 	hide_window = yes
 	is_triggered_only = yes
 	immediate = {
-		random_system = {
-			limit = { has_star_flag = painted_galaxy_fe_spawn }
+		event_target:painted_galaxy_fe_origin = {
 			painted_galaxy_spawn_fe_home_system = { INITIALIZER = fallen_hive_last_thought }
 			last_created_system = {
-				if = {
-					limit = { exists = event_target:fallen_empire_hive_war }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_war }
-					last_created_system = {
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_war_2 }
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_war_3 }
-					}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_war
+					MIN_ANGLE = 40
+					MAX_ANGLE = 50
+					ID = 1
+					CONNECT = 0
 				}
-				if = {
-					limit = { exists = event_target:fallen_empire_hive_growth }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_growth }
-					last_created_system = {
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_growth_2 }
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_growth_3 }
-					}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_war_2
+					MIN_ANGLE = 0
+					MAX_ANGLE = 10
+					ID = 1_1
+					CONNECT = 1
 				}
-				if = {
-					limit = { exists = event_target:fallen_empire_hive_control }
-					painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_control }
-					last_created_system = {
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_control_2 }
-						painted_galaxy_spawn_fe_system = { INITIALIZER = fallen_hive_control_3 }
-					}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_war_3
+					MIN_ANGLE = 80
+					MAX_ANGLE = 90
+					ID = 1_2
+					CONNECT = 1
 				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_growth
+					MIN_ANGLE = 160
+					MAX_ANGLE = 170
+					ID = 2
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_growth_2
+					MIN_ANGLE = 120
+					MAX_ANGLE = 130
+					ID = 2_1
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_growth_3
+					MIN_ANGLE = 200
+					MAX_ANGLE = 210
+					ID = 2_2
+					CONNECT = 2
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_control
+					MIN_ANGLE = 280
+					MAX_ANGLE = 290
+					ID = 3
+					CONNECT = 0
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_control_2
+					MIN_ANGLE = 240
+					MAX_ANGLE = 250
+					ID = 3_1
+					CONNECT = 3
+				}
+				painted_galaxy_spawn_fe_system = {
+					INITIALIZER = fallen_hive_control_3
+					MIN_ANGLE = 320
+					MAX_ANGLE = 330
+					ID = 3_2
+					CONNECT = 3
+				}
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1_2 TO = 2_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_2 TO = 3_1 } }
+				random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3_2 TO = 1_1 } }
+				painted_galaxy_connect_fe_systems = yes
 			}
+		}
+	}
+}
+
+# spawn random fallback systems
+system_event = {
+	id = painted_galaxy_fe.70
+	hide_window = yes
+	is_triggered_only = yes
+	immediate = {
+		painted_galaxy_spawn_fe_home_system = { INITIALIZER = random }
+		last_created_system = {
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 0
+				MAX_ANGLE = 20
+				ID = 1_1
+				CONNECT = 0
+			}
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 60
+				MAX_ANGLE = 80
+				ID = 1_2
+				CONNECT = 1_1
+			}
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 120
+				MAX_ANGLE = 140
+				ID = 2_1
+				CONNECT = 0
+			}
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 180
+				MAX_ANGLE = 200
+				ID = 2_2
+				CONNECT = 2_1
+			}
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 240
+				MAX_ANGLE = 260
+				ID = 3_1
+				CONNECT = 0
+			}
+			painted_galaxy_spawn_fe_system = {
+				INITIALIZER = random
+				MIN_ANGLE = 300
+				MAX_ANGLE = 320
+				ID = 3_2
+				CONNECT = 3_1
+			}
+			random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 1_2 TO = 2_1 } }
+			random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 2_2 TO = 3_1 } }
+			random = { chance = 50 painted_galaxy_fe_add_hyperlane = { FROM = 3_2 TO = 1_1 } }
+			painted_galaxy_connect_fe_systems = yes
 		}
 	}
 }

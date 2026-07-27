@@ -144,6 +144,35 @@ export class Actions extends Context.Tag('Actions')<
 									),
 								});
 							},
+							CreateFallenEmpireZoneAction: (action) => {
+								updated_project = new Project({
+									...updated_project,
+									fallen_empire_zones: [
+										...updated_project.fallen_empire_zones,
+										action.zone,
+									],
+								});
+							},
+							DeleteFallenEmpireZoneAction: (action) => {
+								updated_project = new Project({
+									...updated_project,
+									fallen_empire_zones:
+										updated_project.fallen_empire_zones.filter(
+											(zone) => !Equal.equals(zone, action.zone),
+										),
+								});
+							},
+							UpdateFallenEmpireZoneAction: (action) => {
+								updated_project = new Project({
+									...updated_project,
+									fallen_empire_zones: updated_project.fallen_empire_zones.map(
+										(zone) =>
+											Equal.equals(zone, action.old_value) ?
+												action.new_value
+											:	zone,
+									),
+								});
+							},
 						}),
 					);
 				}

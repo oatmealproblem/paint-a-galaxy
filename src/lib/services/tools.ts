@@ -1,5 +1,6 @@
 import {
 	CAP_STYLE,
+	EMPTY_TOOL_SETTINGS,
 	tools,
 	ToolSettingId,
 	ToolSettings,
@@ -27,11 +28,22 @@ import { Action } from '$lib/models/action';
 import { KeyVal } from './key_val';
 import getStroke from 'perfect-freehand';
 import { Coordinate } from '$lib/models/coordinate';
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '$lib/constants';
+import {
+	CANVAS_HEIGHT,
+	CANVAS_WIDTH,
+	FALLEN_EMPIRE_ZONE_ANGLES,
+	FALLEN_EMPIRE_ZONE_DISTANCES,
+	FALLEN_EMPIRE_ZONE_RADIUS,
+} from '$lib/constants';
 import { draw_stroke } from '$lib/canvas';
 import { Connection } from '$lib/models/connection';
 import { Nebula } from '$lib/models/nebula';
 import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
+import {
+	FallenEmpireZone,
+	FallenEmpireZoneId,
+} from '$lib/models/fallen_empire_zone';
+import { convert_degrees_to_radians, get_degrees_difference } from '$lib/math';
 
 class ToolsPersistenceError extends Schema.TaggedError<ToolsPersistenceError>(
 	'ToolsPersistenceError',
@@ -73,14 +85,6 @@ export class Tools extends Context.Tag('Tools')<
 		Effect.gen(function* () {
 			const keyval = yield* KeyVal;
 
-			const null_settings = {
-				blur: 0,
-				opacity: 0,
-				size: 0,
-				cap_style: 0,
-				bulk: 0,
-				bulk_brush_size: 0,
-			};
 			const load_settings: (typeof Tools)['Service']['load_settings'] = (
 				tool_id,
 				default_settings,
@@ -91,7 +95,7 @@ export class Tools extends Context.Tag('Tools')<
 						Option.match(option, {
 							onSome: (some) =>
 								pipe(
-									null_settings,
+									EMPTY_TOOL_SETTINGS,
 									Record.map((value, key) =>
 										Option.getOrElse(
 											some[key],
@@ -100,7 +104,7 @@ export class Tools extends Context.Tag('Tools')<
 									),
 								),
 							onNone: () => ({
-								...null_settings,
+								...EMPTY_TOOL_SETTINGS,
 								...default_settings,
 							}),
 						}),
@@ -327,6 +331,8 @@ export class Tools extends Context.Tag('Tools')<
 							'spawn_preferred_toggle',
 							'spawn_toggle',
 							'wormhole_toggle',
+							'fallen_empire_zone_create',
+							'fallen_empire_zone_delete',
 						),
 						() => '',
 					),
@@ -494,6 +500,9 @@ export class Tools extends Context.Tag('Tools')<
 								solar_system_ids.has(connection.a) ||
 								solar_system_ids.has(connection.b),
 						);
+						const fallen_empire_zones = project.fallen_empire_zones.filter(
+							(zone) => solar_system_ids.has(zone.origin),
+						);
 						return Effect.succeed([
 							...hyperlanes.map(
 								(connection) =>
@@ -501,6 +510,9 @@ export class Tools extends Context.Tag('Tools')<
 							),
 							...wormholes.map(
 								(connection) => new Action.DeleteWormholeAction({ connection }),
+							),
+							...fallen_empire_zones.map(
+								(zone) => new Action.DeleteFallenEmpireZoneAction({ zone }),
 							),
 							...solar_systems.map(
 								(solar_system) =>
@@ -629,6 +641,95 @@ export class Tools extends Context.Tag('Tools')<
 						} else {
 							return Effect.succeed([]);
 						}
+					}),
+					Match.when('fallen_empire_zone_create', () => {
+						const coordinate = get_single_payload(payload);
+						let best: Option.Option<{
+							system: SolarSystem;
+							angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
+							distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
+						}> = Option.none();
+						let best_distance_from_target = Infinity;
+						for (const system of project.solar_systems) {
+							if (
+								project.fallen_empire_zones.some(
+									(zone) => zone.origin === system.id,
+								)
+							) {
+								// no more than 1 FE zone per system
+								continue;
+							}
+							const dx = coordinate.x - system.coordinate.x;
+							const dy = coordinate.y - system.coordinate.y;
+							const raw_distance = Math.hypot(dx, dy);
+							const raw_angle =
+								((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+							const distance = FALLEN_EMPIRE_ZONE_DISTANCES.reduce(
+								(prev, curr) =>
+									(
+										Math.abs(curr - raw_distance) <
+										Math.abs(prev - raw_distance)
+									) ?
+										curr
+									:	prev,
+							);
+							const angle = FALLEN_EMPIRE_ZONE_ANGLES.reduce((prev, curr) =>
+								(
+									get_degrees_difference(curr, raw_angle) <
+									get_degrees_difference(prev, raw_angle)
+								) ?
+									curr
+								:	prev,
+							);
+							const angle_rad = convert_degrees_to_radians(angle);
+							const cx = system.coordinate.x + distance * Math.cos(angle_rad);
+							const cy = system.coordinate.y + distance * Math.sin(angle_rad);
+							const distance_from_target = Math.hypot(
+								cx - coordinate.x,
+								cy - coordinate.y,
+							);
+							if (
+								distance_from_target < best_distance_from_target ||
+								(distance_from_target === best_distance_from_target &&
+									distance <
+										best.pipe(
+											Option.map((value) => value.distance),
+											Option.getOrElse(() => Infinity),
+										))
+							) {
+								best_distance_from_target = distance_from_target;
+								best = Option.some({ system, distance, angle });
+							}
+						}
+						if (Option.isNone(best)) return Effect.succeed([]);
+						const zone = new FallenEmpireZone({
+							id: FallenEmpireZoneId.make(crypto.randomUUID()),
+							type: 'random',
+							origin: best.value.system.id,
+							distance: best.value.distance,
+							angle: best.value.angle,
+							connections: [],
+							fallback_to_random: false,
+						});
+						return Effect.succeed([
+							new Action.CreateFallenEmpireZoneAction({ zone }),
+						]);
+					}),
+					Match.when('fallen_empire_zone_delete', () => {
+						const coordinate = get_single_payload(payload);
+						for (const zone of project.fallen_empire_zones) {
+							const center =
+								project.get_fallen_empire_zone_coordinate_unsafe(zone);
+							if (
+								Math.hypot(center.x - coordinate.x, center.y - coordinate.y) <=
+								FALLEN_EMPIRE_ZONE_RADIUS
+							) {
+								return Effect.succeed([
+									new Action.DeleteFallenEmpireZoneAction({ zone }),
+								]);
+							}
+						}
+						return Effect.succeed([]);
 					}),
 					Match.exhaustive,
 				);

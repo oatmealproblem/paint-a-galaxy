@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { Menu, Portal } from '@skeletonlabs/skeleton-svelte';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Match } from 'effect';
 	import { CUSTOM_COMMAND, ID } from '$lib/constants';
@@ -11,6 +9,7 @@
 	import { GridConfig } from '$lib/models/grid_config';
 	import { download_blob } from '$lib/blob';
 	import ModeToggle from './mode_toggle.svelte';
+	import { Icons } from '$lib/components/icons';
 
 	type RecordUnknown = Record<string, unknown>;
 	type Command =
@@ -99,7 +98,7 @@
 	>
 		<Menu.ItemText>{value * 100}%</Menu.ItemText>
 		<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
-			<CheckIcon class="size-4" />
+			<Icons.Check class="size-4" />
 		</Menu.ItemIndicator>
 	</Menu.OptionItem>
 {/snippet}
@@ -138,7 +137,7 @@
 						<Menu.TriggerItem value="open">
 							<Menu.ItemText>Open</Menu.ItemText>
 							<Menu.ItemIndicator>
-								<ChevronRightIcon class="size-4" />
+								<Icons.ChevronRight class="size-4" />
 							</Menu.ItemIndicator>
 							<Portal>
 								<Menu.Positioner class="z-10!">
@@ -242,7 +241,7 @@
 					>
 						<Menu.ItemText>Snap to Grid</Menu.ItemText>
 						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
-							<CheckIcon class="size-4" />
+							<Icons.Check class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
 					{@render menu_item_command(
@@ -270,7 +269,7 @@
 						<Menu.TriggerItem value="set_zoom">
 							<Menu.ItemText>Set Zoom</Menu.ItemText>
 							<Menu.ItemIndicator>
-								<ChevronRightIcon class="size-4" />
+								<Icons.ChevronRight class="size-4" />
 							</Menu.ItemIndicator>
 							<Portal>
 								<Menu.Positioner class="z-10!">
@@ -331,7 +330,7 @@
 								Canvas Opacity: {editor().current_step_canvas_opacity * 100}%
 							</Menu.ItemText>
 							<Menu.ItemIndicator>
-								<ChevronRightIcon class="size-4" />
+								<Icons.ChevronRight class="size-4" />
 							</Menu.ItemIndicator>
 							<Portal>
 								<Menu.Positioner class="z-10!">
@@ -366,7 +365,7 @@
 					>
 						<Menu.ItemText>Show Center Mark</Menu.ItemText>
 						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
-							<CheckIcon class="size-4" />
+							<Icons.Check class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
 					<Menu.OptionItem
@@ -380,7 +379,7 @@
 					>
 						<Menu.ItemText>Show Map Limit</Menu.ItemText>
 						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
-							<CheckIcon class="size-4" />
+							<Icons.Check class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
 					<Menu.OptionItem
@@ -394,7 +393,7 @@
 					>
 						<Menu.ItemText>Show L-Cluster</Menu.ItemText>
 						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
-							<CheckIcon class="size-4" />
+							<Icons.Check class="size-4" />
 						</Menu.ItemIndicator>
 					</Menu.OptionItem>
 					<Menu.Separator class="border-surface-300-700" />
@@ -415,7 +414,7 @@
 							<Menu.ItemIndicator
 								class="hidden data-[state=checked]:block ms-2"
 							>
-								<CheckIcon class="size-4" />
+								<Icons.Check class="size-4" />
 							</Menu.ItemIndicator>
 						</Menu.OptionItem>
 						<Menu.OptionItem
@@ -431,7 +430,7 @@
 							<Menu.ItemIndicator
 								class="hidden data-[state=checked]:block ms-2"
 							>
-								<CheckIcon class="size-4" />
+								<Icons.Check class="size-4" />
 							</Menu.ItemIndicator>
 						</Menu.OptionItem>
 					</Menu.ItemGroup>

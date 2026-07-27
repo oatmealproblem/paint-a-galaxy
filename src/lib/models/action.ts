@@ -2,6 +2,7 @@ import { Schema } from 'effect';
 import { SolarSystem } from './solar_system';
 import { Connection } from './connection';
 import { Nebula } from './nebula';
+import { FallenEmpireZone } from './fallen_empire_zone';
 
 class SetCanvasAction extends Schema.TaggedClass<SetCanvasAction>()(
 	'SetCanvasAction',
@@ -137,6 +138,47 @@ class DeleteNebulaAction extends Schema.TaggedClass<DeleteNebulaAction>()(
 	}
 }
 
+export class CreateFallenEmpireZoneAction extends Schema.TaggedClass<CreateFallenEmpireZoneAction>()(
+	'CreateFallenEmpireZoneAction',
+	{
+		zone: FallenEmpireZone,
+	},
+) {
+	invert(): DeleteFallenEmpireZoneAction {
+		return DeleteFallenEmpireZoneAction.make({
+			zone: this.zone,
+		});
+	}
+}
+
+export class DeleteFallenEmpireZoneAction extends Schema.TaggedClass<DeleteFallenEmpireZoneAction>()(
+	'DeleteFallenEmpireZoneAction',
+	{
+		zone: FallenEmpireZone,
+	},
+) {
+	invert(): CreateFallenEmpireZoneAction {
+		return CreateFallenEmpireZoneAction.make({
+			zone: this.zone,
+		});
+	}
+}
+
+export class UpdateFallenEmpireZoneAction extends Schema.TaggedClass<UpdateFallenEmpireZoneAction>()(
+	'UpdateFallenEmpireZoneAction',
+	{
+		old_value: FallenEmpireZone,
+		new_value: FallenEmpireZone,
+	},
+) {
+	invert(): UpdateFallenEmpireZoneAction {
+		return UpdateFallenEmpireZoneAction.make({
+			old_value: this.new_value,
+			new_value: this.old_value,
+		});
+	}
+}
+
 export const Action = Object.assign(
 	Schema.Union(
 		SetCanvasAction,
@@ -149,6 +191,9 @@ export const Action = Object.assign(
 		DeleteWormholeAction,
 		CreateNebulaAction,
 		DeleteNebulaAction,
+		CreateFallenEmpireZoneAction,
+		DeleteFallenEmpireZoneAction,
+		UpdateFallenEmpireZoneAction,
 	),
 	{
 		SetCanvasAction,
@@ -161,6 +206,9 @@ export const Action = Object.assign(
 		DeleteWormholeAction,
 		CreateNebulaAction,
 		DeleteNebulaAction,
+		CreateFallenEmpireZoneAction,
+		DeleteFallenEmpireZoneAction,
+		UpdateFallenEmpireZoneAction,
 	},
 );
 
@@ -174,4 +222,7 @@ export type Action =
 	| CreateWormholeAction
 	| DeleteWormholeAction
 	| CreateNebulaAction
-	| DeleteNebulaAction;
+	| DeleteNebulaAction
+	| CreateFallenEmpireZoneAction
+	| DeleteFallenEmpireZoneAction
+	| UpdateFallenEmpireZoneAction;

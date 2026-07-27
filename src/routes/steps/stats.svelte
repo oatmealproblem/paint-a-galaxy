@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Info from '$lib/components/info.svelte';
 	import SectionHeader from '$lib/components/section_header.svelte';
+	import { FALLEN_EMPIRE_ZONE_RADIUS } from '$lib/constants';
 	import {
 		initializer_metadata,
 		type InitializerKey,
@@ -117,6 +118,47 @@
 		check_for_missing_associated_systems(
 			['ratling_1_1', 'ratling_1_2', 'ratling_1_3'],
 			systems_by_initializer,
+		),
+	);
+	const fallen_empire_zones = $derived(editor().project.fallen_empire_zones);
+	const fallen_empire_zone_centers = $derived(
+		pipe(
+			fallen_empire_zones,
+			Iterable.filterMap((zone) =>
+				pipe(
+					editor().project.get_fallen_empire_zone_coordinate(zone),
+					Option.map((center) => ({ zone, center })),
+				),
+			),
+			Array.fromIterable,
+		),
+	);
+	const overlapping_fallen_empire_zone_ids = $derived(
+		pipe(
+			fallen_empire_zone_centers,
+			Iterable.filter(({ zone, center }) =>
+				fallen_empire_zone_centers.some(
+					(other) =>
+						other.zone.id !== zone.id &&
+						center.distance_to(other.center) < FALLEN_EMPIRE_ZONE_RADIUS * 2,
+				),
+			),
+			Iterable.map(({ zone }) => zone.id),
+			Array.fromIterable,
+		),
+	);
+	const solar_system_ids_in_fallen_empire_zones = $derived(
+		pipe(
+			solar_systems,
+			Iterable.filter((solar_system) =>
+				fallen_empire_zone_centers.some(
+					({ center }) =>
+						solar_system.coordinate.distance_to(center) <
+						FALLEN_EMPIRE_ZONE_RADIUS,
+				),
+			),
+			Iterable.map((solar_system) => solar_system.id),
+			Array.fromIterable,
 		),
 	);
 
@@ -299,6 +341,46 @@
 				missing_ratling,
 				'Missing Ketling Systems',
 			)}
+			{#if overlapping_fallen_empire_zone_ids.length > 0}
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
+				<tr
+					class={WARNING_STYLE}
+					onmouseover={() =>
+						(editor().warned_fallen_empire_zone_ids =
+							overlapping_fallen_empire_zone_ids)}
+					onmouseout={() => (editor().warned_fallen_empire_zone_ids = [])}
+				>
+					<td>
+						Overlapping Fallen Empire Zones
+						<Info class="text-warning-50-950 relative top-0.5">
+							Fallen Empire zones should not overlap. Fallen Empire systems may
+							spawn on top of each other.
+						</Info>
+					</td>
+					<td class="text-end">{overlapping_fallen_empire_zone_ids.length}</td>
+				</tr>
+			{/if}
+			{#if solar_system_ids_in_fallen_empire_zones.length > 0}
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
+				<tr
+					class={WARNING_STYLE}
+					onmouseover={() =>
+						(editor().warned_solar_system_ids =
+							solar_system_ids_in_fallen_empire_zones)}
+					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				>
+					<td>
+						Systems in Fallen Empire Zones
+						<Info class="text-warning-50-950 relative top-0.5">
+							Fallen Empire zones should be empty. Solar systems inside a zone
+							may overlap with Fallen Empire systems spawned at game start.
+						</Info>
+					</td>
+					<td class="text-end">
+						{solar_system_ids_in_fallen_empire_zones.length}
+					</td>
+				</tr>
+			{/if}
 		</tbody>
 	</table>
 </div>

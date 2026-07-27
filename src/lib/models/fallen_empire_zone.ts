@@ -1,9 +1,20 @@
 import { Schema } from 'effect';
 import { SolarSystemId } from './solar_system';
+import {
+	FALLEN_EMPIRE_ZONE_ANGLES,
+	FALLEN_EMPIRE_ZONE_DISTANCES,
+} from '$lib/constants';
+import { convert_degrees_to_radians } from '$lib/math';
+
+export const FallenEmpireZoneId = Schema.UUID.pipe(
+	Schema.brand('FallenEmpireZoneId'),
+);
+export type FallenEmpireZoneId = typeof FallenEmpireZoneId.Type;
 
 export class FallenEmpireZone extends Schema.Class<FallenEmpireZone>(
 	'FallenEmpireZone',
 )({
+	id: FallenEmpireZoneId,
 	type: Schema.Literal(
 		'random',
 		'materialist',
@@ -14,7 +25,12 @@ export class FallenEmpireZone extends Schema.Class<FallenEmpireZone>(
 		'hive',
 	),
 	origin: SolarSystemId,
-	distance: Schema.Literal(30, 40, 50, 60, 70, 80, 90, 100),
-	angle: Schema.Literal(0, 45, 90, 135, 180, 225, 270, 315),
-	connections: Schema.Option(Schema.Array(SolarSystemId)),
-}) {}
+	distance: Schema.Literal(...FALLEN_EMPIRE_ZONE_DISTANCES),
+	angle: Schema.Literal(...FALLEN_EMPIRE_ZONE_ANGLES),
+	connections: Schema.Array(SolarSystemId),
+	fallback_to_random: Schema.Boolean,
+}) {
+	get radians() {
+		return convert_degrees_to_radians(this.angle);
+	}
+}

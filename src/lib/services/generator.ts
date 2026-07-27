@@ -90,6 +90,12 @@ export class Generator extends Context.Tag('Generator')<
 			);
 		}
 
+		function delete_fallen_empire_zones(project: Project): Action[] {
+			return project.fallen_empire_zones.map((zone) =>
+				Action.DeleteFallenEmpireZoneAction.make({ zone }),
+			);
+		}
+
 		const generate_solar_systems = (project: Project) =>
 			Effect.gen(function* () {
 				const { number_of_systems, min_distance_between_systems } =
@@ -250,6 +256,7 @@ export class Generator extends Context.Tag('Generator')<
 				return [
 					...delete_hyperlanes(project),
 					...delete_wormholes(project),
+					...delete_fallen_empire_zones(project),
 					...delete_solar_systems(project),
 					...create_solar_system_actions,
 				];

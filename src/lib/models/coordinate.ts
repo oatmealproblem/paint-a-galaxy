@@ -27,6 +27,13 @@ export class Coordinate extends Schema.Class<Coordinate>('Coordinate')({
 		return Math.hypot(this.x - coordinate.x, this.y - coordinate.y);
 	}
 
+	get_coordinate_in_direction(radians: number, distance: number) {
+		return Coordinate.make({
+			x: this.x + Math.cos(radians) * distance,
+			y: this.y + Math.sin(radians) * distance,
+		});
+	}
+
 	static from_stellaris_coordinate(
 		stellaris_coordinate: Coordinate,
 	): Coordinate {

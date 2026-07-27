@@ -1,54 +1,370 @@
-painted_galaxy_spawn_fe_home_system = {
+painted_galaxy_fe_spawned_update_flags_and_variables = {
+	optimize_memory
+	if = {
+		limit = { painted_galaxy_is_fe_preferred_spawn = yes }
+		prev = {
+			subtract_variable = {
+				which = painted_galaxy_available_fe_preferred_spawns
+				value = 1
+			}
+		}
+	}
+	if = {
+		limit = { painted_galaxy_is_fe_highly_preferred_spawn = yes }
+		prev = {
+			subtract_variable = {
+				which = painted_galaxy_available_fe_highly_preferred_spawns
+				value = 1
+			}
+		}
+	}
 	remove_star_flag = painted_galaxy_fe_spawn
+	remove_star_flag = painted_galaxy_fe_spawn_preferred
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = spiritualist }
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = materialist }
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = xenophile }
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = xenophobe }
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = machine }
+	painted_galaxy_fe_spawned_update_flags_and_variables_for_type = { TYPE = hive }
+}
+
+painted_galaxy_fe_spawned_update_flags_and_variables_for_type = {
+	optimize_memory
+	if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_$TYPE$ }
+		remove_star_flag = painted_galaxy_fe_spawn_$TYPE$
+		# if other systems specify this type, set them to random and decrease highly preferred count
+		every_system = {
+			limit = { has_star_flag = painted_galaxy_fe_spawn_$TYPE$ }
+			remove_star_flag = painted_galaxy_fe_spawn_$TYPE$
+			set_star_flag = painted_galaxy_fe_spawn_random
+			prevprev = {
+				subtract_variable = {
+					which = painted_galaxy_available_fe_highly_preferred_spawns
+					value = 1
+				}
+			}
+		}
+	}
+}
+
+painted_galaxy_spawn_fe_home_system = {
+	optimize_memory
 	if = {
 		limit = { has_star_flag = painted_galaxy_fe_spawn_e }
-		spawn_system = {
-			initializer = $INITIALIZER$
-			min_distance = 50
-			max_distance = 50
-			min_orientation_angle = 0
-			max_orientation_angle = 0
-		}
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 0 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_ne }
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 45 }
 	} else_if = {
 		limit = { has_star_flag = painted_galaxy_fe_spawn_n }
-		spawn_system = {
-			initializer = $INITIALIZER$
-			min_distance = 50
-			max_distance = 50
-			min_orientation_angle = 90
-			max_orientation_angle = 90
-		}
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 90 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_nw }
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 135 }
 	} else_if = {
 		limit = { has_star_flag = painted_galaxy_fe_spawn_w }
-		spawn_system = {
-			initializer = $INITIALIZER$
-			min_distance = 50
-			max_distance = 50
-			min_orientation_angle = 180
-			max_orientation_angle = 180
-		}
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 180 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_sw }
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 225 }
 	} else_if = {
 		limit = { has_star_flag = painted_galaxy_fe_spawn_s }
-		spawn_system = {
-			initializer = $INITIALIZER$
-			min_distance = 50
-			max_distance = 50
-			min_orientation_angle = 270
-			max_orientation_angle = 270
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 270 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_se }
+		painted_galaxy_spawn_fe_home_system_inner = { INITIALIZER = $INITIALIZER$ ANGLE = 315 }
+	}
+}
+
+painted_galaxy_spawn_fe_home_system_inner = {
+	optimize_memory
+	if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_30 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 30 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_40 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 40 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_50 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 50 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_60 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 60 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_70 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 70 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_80 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 80 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_90 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 90 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_100 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 100 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_110 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 110 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_120 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 120 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_130 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 130 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_140 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 140 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_150 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 150 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_160 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 160 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_170 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 170 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_180 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 180 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_190 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 190 }
+	} else_if = {
+		limit = { has_star_flag = painted_galaxy_fe_spawn_distance_200 }
+		painted_galaxy_spawn_fe_home_system_inner_inner = { INITIALIZER = $INITIALIZER$ ANGLE = $ANGLE$ DISTANCE = 200 }
+	}
+}
+
+painted_galaxy_spawn_fe_home_system_inner_inner = {
+	optimize_memory
+	spawn_system = {
+		initializer = $INITIALIZER$
+		hyperlane = no
+		min_distance = $DISTANCE$
+		max_distance = $DISTANCE$
+		min_orientation_angle = $ANGLE$
+		max_orientation_angle = $ANGLE$
+		effect = {
+			set_star_flag = painted_galaxy_fe_system
+			save_event_target_as = painted_galaxy_fe_system_0
 		}
 	}
 }
 
 painted_galaxy_spawn_fe_system = {
+	optimize_memory
 	spawn_system = {
 		initializer = $INITIALIZER$
-		max_distance = 15
+		hyperlane = no
+		min_distance = 15
+		max_distance = 25
+		min_orientation_angle = $MIN_ANGLE$
+		max_orientation_angle = $MAX_ANGLE$
 		effect = {
-			if = {
-				limit = { NOT = { has_hyperlane_to = prev } }
-				add_hyperlane = { from = this to = prev }
+			set_star_flag = painted_galaxy_fe_system
+			save_event_target_as = painted_galaxy_fe_system_$ID$
+			painted_galaxy_fe_add_hyperlane = { FROM = $ID$ TO = $CONNECT$ }
+		}
+	}
+}
+
+painted_galaxy_fe_add_hyperlane = {
+	optimize_memory
+	event_target:painted_galaxy_fe_system_$FROM$ = {
+		if = {
+			limit = {
+				NOT = { has_hyperlane_to = event_target:painted_galaxy_fe_system_$TO$ }
+			}
+			add_hyperlane = { from = this to = event_target:painted_galaxy_fe_system_$TO$ }
+		}
+	}
+}
+
+painted_galaxy_connect_fe_systems = {
+	optimize_memory
+	if = {
+		limit = {
+			event_target:painted_galaxy_fe_origin = { has_star_flag = painted_galaxy_fe_custom_connections }
+		}
+		painted_galaxy_connect_fe_systems_custom = { ID = 0 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 1 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 2 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 3 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 4 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 5 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 6 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 7 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 8 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 9 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 10 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 11 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 12 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 13 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 14 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 15 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 16 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 17 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 18 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 19 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 20 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 21 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 22 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 23 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 24 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 25 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 26 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 27 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 28 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 29 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 30 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 31 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 32 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 33 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 34 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 35 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 36 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 37 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 38 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 39 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 40 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 41 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 42 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 43 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 44 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 45 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 46 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 47 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 48 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 49 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 50 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 51 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 52 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 53 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 54 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 55 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 56 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 57 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 58 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 59 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 60 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 61 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 62 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 63 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 64 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 65 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 66 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 67 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 68 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 69 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 70 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 71 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 72 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 73 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 74 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 75 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 76 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 77 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 78 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 79 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 80 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 81 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 82 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 83 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 84 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 85 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 86 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 87 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 88 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 89 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 90 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 91 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 92 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 93 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 94 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 95 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 96 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 97 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 98 }
+		painted_galaxy_connect_fe_systems_custom = { ID = 99 }
+	} else = {
+		painted_galaxy_connect_fe_systems_random = yes
+	}
+}
+
+painted_galaxy_connect_fe_systems_custom = {
+	optimize_memory
+	if = {
+		limit = {
+			event_target:painted_galaxy_fe_origin = { has_star_flag = painted_galaxy_fe_custom_connection_id_$ID$ }
+		}
+		every_system = {
+			limit = { has_star_flag = painted_galaxy_fe_custom_connection_to_$ID$ }
+			save_event_target_as = painted_galaxy_fe_connect_from
+			ordered_system = {
+				limit = { has_star_flag = painted_galaxy_fe_system }
+				position = 0
+				order_by = value:painted_galaxy_euclidean_distance_to_event_target|EVENT_TARGET|painted_galaxy_fe_connect_from|
+				inverse = yes
+				add_hyperlane = { from = event_target:painted_galaxy_fe_connect_from to = this }
 			}
 		}
+		# clean up
+		every_system = { remove_star_flag = painted_galaxy_fe_system }
+	}
+}
+
+# in every fe_system (in random order)
+# find the closest non-fe_system that hasn't been connected yet
+# add a hyperlane if its closest fe_system is the same as the fe_system we started with
+# finally, clean up the flags
+painted_galaxy_connect_fe_systems_random = {
+	optimize_memory
+	while = {
+		count = 10 # at most 10 fe_systems
+		random_system = {
+			limit = {
+				has_star_flag = painted_galaxy_fe_system
+				NOT = { has_star_flag = painted_galaxy_fe_attempted }
+			}
+			set_star_flag = painted_galaxy_fe_attempted
+			save_event_target_as = painted_galaxy_fe_connect_from
+			ordered_system = {
+				limit = {
+					NOT = { has_star_flag = painted_galaxy_fe_system }
+					NOT = { has_star_flag = painted_galaxy_fe_connected }
+				}
+				position = 0
+				order_by = value:painted_galaxy_euclidean_distance_to_event_target|EVENT_TARGET|painted_galaxy_fe_connect_from|
+				inverse = yes
+				save_event_target_as = painted_galaxy_fe_connect_to
+				ordered_system = {
+					limit = { has_star_flag = painted_galaxy_fe_system }
+					position = 0
+					order_by = value:painted_galaxy_euclidean_distance_to_event_target|EVENT_TARGET|painted_galaxy_fe_connect_to|
+					inverse = yes
+					if = {
+						limit = {
+							is_same_value = event_target:painted_galaxy_fe_connect_from
+							check_variable_arithmetic = {
+								which = value:painted_galaxy_euclidean_distance_to_event_target|EVENT_TARGET|painted_galaxy_fe_connect_to|
+								value <= 100
+							}
+						}
+						add_hyperlane = { from = event_target:painted_galaxy_fe_connect_from to = event_target:painted_galaxy_fe_connect_to }
+						event_target:painted_galaxy_fe_connect_to = {
+							set_star_flag = painted_galaxy_fe_connected
+						}
+					}
+				}
+			}
+		}
+	}
+	# clean up
+	every_system = {
+		remove_star_flag = painted_galaxy_fe_system
+		remove_star_flag = painted_galaxy_fe_attempted
+		remove_star_flag = painted_galaxy_fe_connected
 	}
 }
 

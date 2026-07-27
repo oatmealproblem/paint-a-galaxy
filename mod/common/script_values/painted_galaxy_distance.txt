@@ -1,0 +1,11 @@
+painted_galaxy_euclidean_distance_to_event_target = {
+	base = 0
+	complex_trigger_modifier = {
+		trigger = distance
+		mode = add
+		parameters = {
+			source = event_target:$EVENT_TARGET$
+			type = euclidean
+		}
+	}
+}

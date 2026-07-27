@@ -11,7 +11,7 @@ country_event = {
 	}
 	immediate = {
 		painted_galaxy_give_starting_tech = { TECH = tech_thrusters_1 }
-		painted_galaxy_give_starting_tech = { TECH = ship_armor_1 }
+		painted_galaxy_give_starting_tech = { TECH = tech_ship_armor_1 }
 		painted_galaxy_give_starting_tech = { TECH = tech_mass_drivers_1 }
 		painted_galaxy_give_starting_tech = { TECH = tech_flak_batteries_1 }
 		painted_galaxy_give_starting_tech = { TECH = tech_missiles_1 }

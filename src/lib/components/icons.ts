@@ -1,7 +1,10 @@
 import ArrowDownUp from '@lucide/svelte/icons/arrow-down-up';
 import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 import ArrowRight from '@lucide/svelte/icons/arrow-right';
+import Castle from '@lucide/svelte/icons/castle';
+import Check from '@lucide/svelte/icons/check';
 import ChevronDown from '@lucide/svelte/icons/chevron-down';
+import ChevronRight from '@lucide/svelte/icons/chevron-right';
 import Circle from '@lucide/svelte/icons/circle';
 import Cloud from '@lucide/svelte/icons/cloud';
 import Download from '@lucide/svelte/icons/download';
@@ -27,7 +30,10 @@ export const Icons = {
 	ArrowDownUp,
 	ArrowLeft,
 	ArrowRight,
+	Castle,
+	Check,
 	ChevronDown,
+	ChevronRight,
 	Circle,
 	Cloud,
 	Download,

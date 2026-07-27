@@ -7,7 +7,13 @@
 		CUSTOM_COMMAND,
 		DETAILS_DEFAULT_HEIGHT,
 		DETAILS_DEFAULT_WIDTH,
+		FALLEN_EMPIRE_ZONE_RADIUS,
+		GIGA_AETERNUM_CORE_RADIUS,
+		GIGA_RANDOM_CORE_RADIUS,
 		ID,
+		L_CLUSTER_CX,
+		L_CLUSTER_CY,
+		L_CLUSTER_RADIUS,
 	} from '$lib/constants';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
@@ -21,8 +27,13 @@
 	import type { Nebula } from '$lib/models/nebula';
 	import type { Project } from '$lib/models/project';
 	import SolarSystemDetails from './solar_system_details.svelte';
+	import FallenEmpireZoneDetails from './fallen_empire_zone_details.svelte';
 	import ContextMenu from './context_menu.svelte';
 	import { generate_grid_path, generate_grid_points } from '$lib/grid';
+	import type {
+		FallenEmpireZone,
+		FallenEmpireZoneId,
+	} from '$lib/models/fallen_empire_zone';
 
 	const editor = get_editor();
 	const project = $derived(editor().project);
@@ -30,6 +41,7 @@
 	const hyperlanes = $derived(project.hyperlanes);
 	const wormholes = $derived(project.wormholes);
 	const nebulas = $derived(project.nebulas);
+	const fallen_empire_zones = $derived(project.fallen_empire_zones);
 
 	let is_shift_pressed = $state(false);
 	let is_left_pressed = $state(false);
@@ -273,10 +285,13 @@
 	const custom_cursor = `url("${custom_crosshair}") 10 10, crosshair`;
 	const warning_pattern_size = 20;
 	const warning_pattern_stripe_size = 5;
+	const fe_zone_pattern_size = 10;
+	const fe_zone_pattern_stripe_size = 5;
 
 	let context_menu_data = $state.raw<
 		Option.Option<{
 			solar_system: Option.Option<SolarSystem>;
+			fallen_empire_zones: FallenEmpireZone[];
 			nebulas: Nebula[];
 			coordinate: Coordinate;
 			coordinate_has_solar_system: boolean;
@@ -301,19 +316,24 @@
 		const nebulas = project.nebulas.filter(
 			(nebula) => nebula.coordinate.distance_to(coordinate) <= nebula.radius,
 		);
+		const fallen_empire_zones = project.fallen_empire_zones.filter((zone) => {
+			const center = project.get_fallen_empire_zone_coordinate_unsafe(zone);
+			return center.distance_to(coordinate) < FALLEN_EMPIRE_ZONE_RADIUS;
+		});
 		context_menu_data = Option.some({
 			coordinate,
 			coordinate_has_solar_system,
 			nebulas,
+			fallen_empire_zones,
 			solar_system,
 		});
 	}
 
-	let details_position = $state({
+	let solar_system_details_position = $state({
 		x: document.body.clientWidth / 2 - DETAILS_DEFAULT_WIDTH / 2,
 		y: document.body.clientHeight / 2 - DETAILS_DEFAULT_HEIGHT / 2,
 	});
-	let details_size = $state({
+	let solar_system_details_size = $state({
 		width: DETAILS_DEFAULT_WIDTH,
 		height: DETAILS_DEFAULT_HEIGHT,
 	});
@@ -323,6 +343,23 @@
 	const details_opened_solar_system = $derived(
 		Option.flatMap(details_opened_solar_system_id, (value) =>
 			editor().project.get_solar_system(value),
+		),
+	);
+
+	let fe_details_position = $state({
+		x: document.body.clientWidth / 2 - DETAILS_DEFAULT_WIDTH / 2 + 40,
+		y: document.body.clientHeight / 2 - DETAILS_DEFAULT_HEIGHT / 2 + 40,
+	});
+	let fe_details_size = $state({
+		width: DETAILS_DEFAULT_WIDTH,
+		height: DETAILS_DEFAULT_HEIGHT,
+	});
+	let details_opened_fe_zone_id = $state.raw<Option.Option<FallenEmpireZoneId>>(
+		Option.none(),
+	);
+	const details_opened_fe_zone = $derived(
+		Option.flatMapNullable(details_opened_fe_zone_id, (id) =>
+			fallen_empire_zones.find((z) => z.id === id),
 		),
 	);
 </script>
@@ -393,8 +430,17 @@
 	on_close_requested={() => {
 		details_opened_solar_system_id = Option.none();
 	}}
-	bind:position={details_position}
-	bind:size={details_size}
+	bind:position={solar_system_details_position}
+	bind:size={solar_system_details_size}
+/>
+
+<FallenEmpireZoneDetails
+	zone={details_opened_fe_zone}
+	on_close_requested={() => {
+		details_opened_fe_zone_id = Option.none();
+	}}
+	bind:position={fe_details_position}
+	bind:size={fe_details_size}
 />
 
 <main
@@ -582,6 +628,9 @@
 		open_solar_system_details={(id) => {
 			details_opened_solar_system_id = Option.some(id);
 		}}
+		open_fallen_empire_zone_details={(id) => {
+			details_opened_fe_zone_id = Option.some(id);
+		}}
 	>
 		<svg
 			bind:this={svg}
@@ -663,18 +712,36 @@
 						class="fill-warning-500/25"
 					/>
 				</pattern>
+				<pattern
+					id="fe_zone_pattern"
+					patternUnits="userSpaceOnUse"
+					patternTransform="rotate(-45)"
+					height={fe_zone_pattern_size}
+					width={fe_zone_pattern_size}
+				>
+					<rect
+						height={fe_zone_pattern_size}
+						width={fe_zone_pattern_size}
+						fill="none"
+					/>
+					<rect
+						height={fe_zone_pattern_stripe_size}
+						width={fe_zone_pattern_size}
+						class="fill-secondary-500/25"
+					/>
+				</pattern>
 				{#if editor().view_settings.show_l_cluster}
 					<circle
-						cx={CANVAS_WIDTH / 2 + 420}
-						cy={CANVAS_HEIGHT / 2 - 420}
-						r={70}
+						cx={L_CLUSTER_CX}
+						cy={L_CLUSTER_CY}
+						r={L_CLUSTER_RADIUS}
 						class="stroke-warning-500"
 						fill="url(#warning_pattern)"
 						stroke-width="2"
 					/>
 					<text
-						x={CANVAS_WIDTH / 2 + 420}
-						y={CANVAS_HEIGHT / 2 - 420}
+						x={L_CLUSTER_CX}
+						y={L_CLUSTER_CY}
 						class="fill-warning-500"
 						dominant-baseline="middle"
 						text-anchor="middle"
@@ -687,7 +754,7 @@
 					<circle
 						cx={CANVAS_WIDTH / 2}
 						cy={CANVAS_HEIGHT / 2}
-						r={100}
+						r={GIGA_RANDOM_CORE_RADIUS}
 						class="stroke-warning-500"
 						fill="url(#warning_pattern)"
 						stroke-width="2"
@@ -697,7 +764,7 @@
 					<circle
 						cx={CANVAS_WIDTH / 2}
 						cy={CANVAS_HEIGHT / 2}
-						r={65}
+						r={GIGA_AETERNUM_CORE_RADIUS}
 						class="stroke-warning-500"
 						fill="url(#warning_pattern)"
 						stroke-width="2"
@@ -782,13 +849,75 @@
 					/>
 				{/each}
 
+				{#each fallen_empire_zones as zone (zone.id)}
+					{@const origin = project.get_solar_system_unsafe(zone.origin)}
+					{@const center =
+						project.get_fallen_empire_zone_coordinate_unsafe(zone)}
+					{@const connections = zone.connections}
+					<circle
+						cx={center.x}
+						cy={center.y}
+						r={FALLEN_EMPIRE_ZONE_RADIUS}
+						fill="url(#fe_zone_pattern)"
+						class="stroke-secondary-500"
+						stroke-width="2"
+					/>
+					<text
+						x={center.x}
+						y={center.y}
+						class="fill-secondary-300"
+						dominant-baseline="middle"
+						text-anchor="middle"
+						font-size={10}
+					>
+						{zone.type}
+					</text>
+					<line
+						x1={center.x}
+						y1={center.y}
+						x2={origin.coordinate.x}
+						y2={origin.coordinate.y}
+						class="stroke-secondary-500"
+						stroke-width="1"
+						stroke-dasharray="0 4"
+						stroke-linecap="round"
+					/>
+					{#each connections as connected_id (connected_id)}
+						{@const connected = project.get_solar_system(connected_id)}
+						{#if Option.isSome(connected)}
+							<line
+								x1={center.x}
+								y1={center.y}
+								x2={connected.value.coordinate.x}
+								y2={connected.value.coordinate.y}
+								class="stroke-secondary-500"
+								stroke-width="1"
+							/>
+						{/if}
+					{/each}
+					{#if editor().warned_fallen_empire_zone_ids.includes(zone.id)}
+						<circle
+							cx={center.x}
+							cy={center.y}
+							r={FALLEN_EMPIRE_ZONE_RADIUS}
+							fill="none"
+							class="fill-warning-500/25 stroke-warning-500"
+							stroke-width="2"
+						/>
+					{/if}
+				{/each}
+
 				<!-- connecting line from details box to solar system -->
 				{#if Option.isSome(details_opened_solar_system)}
 					{@const solar_system = details_opened_solar_system.value}
 					{@const details_coordinate = get_mouse_coordinates(
 						{
-							clientX: details_position.x + details_size.width / 2,
-							clientY: details_position.y + details_size.height / 2,
+							clientX:
+								solar_system_details_position.x +
+								solar_system_details_size.width / 2,
+							clientY:
+								solar_system_details_position.y +
+								solar_system_details_size.height / 2,
 						},
 						grid_points,
 						grid_delaunay,
@@ -801,6 +930,31 @@
 						x2={details_coordinate.x}
 						y2={details_coordinate.y}
 					/>
+				{/if}
+
+				<!-- connecting line from details box to fallen empire zone -->
+				{#if Option.isSome(details_opened_fe_zone)}
+					{@const zone_coordinate = project.get_fallen_empire_zone_coordinate(
+						details_opened_fe_zone.value,
+					)}
+					{#if Option.isSome(zone_coordinate)}
+						{@const details_coordinate = get_mouse_coordinates(
+							{
+								clientX: fe_details_position.x + fe_details_size.width / 2,
+								clientY: fe_details_position.y + fe_details_size.height / 2,
+							},
+							grid_points,
+							grid_delaunay,
+						).canvas}
+						<line
+							class="stroke-primary-500"
+							stroke-width={3 / transform.k}
+							x1={zone_coordinate.value.x}
+							y1={zone_coordinate.value.y}
+							x2={details_coordinate.x}
+							y2={details_coordinate.y}
+						/>
+					{/if}
 				{/if}
 
 				{#each solar_systems as solar_system (solar_system.id)}

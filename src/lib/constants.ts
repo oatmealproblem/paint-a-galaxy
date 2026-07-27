@@ -8,8 +8,22 @@ export const DETAILS_DEFAULT_HEIGHT = 368;
 
 // size of each "arm" of the plus sign marking the center of the canvas
 export const CENTER_MARK_SIZE = 10;
+// various "guide" zones
+export const GIGA_RANDOM_CORE_RADIUS = 100;
+export const GIGA_AETERNUM_CORE_RADIUS = 65;
+export const L_CLUSTER_RADIUS = 70;
+export const L_CLUSTER_CX = CANVAS_WIDTH / 2 + 420;
+export const L_CLUSTER_CY = CANVAS_HEIGHT / 2 - 420;
 // search for empty circles to dynamically spawn FEs on game start
-export const FALLEN_EMPIRE_SPAWN_RADIUS = 50;
+export const FALLEN_EMPIRE_ZONE_RADIUS = 30;
+export const FALLEN_EMPIRE_ZONE_DEFAULT_DISTANCE = 40;
+export const FALLEN_EMPIRE_ZONE_DISTANCES = [
+	30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190,
+	200,
+] as const;
+export const FALLEN_EMPIRE_ZONE_ANGLES = [
+	0, 45, 90, 135, 180, 225, 270, 315,
+] as const;
 // number of nebulas to generate when randomizing
 export const NUM_RANDOM_NEBULAS = 6;
 // min and max radius of random nebulas
