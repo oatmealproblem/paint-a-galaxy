@@ -850,7 +850,6 @@
 				{/each}
 
 				{#each fallen_empire_zones as zone (zone.id)}
-					{@const origin = project.get_solar_system_unsafe(zone.origin)}
 					{@const center =
 						project.get_fallen_empire_zone_coordinate_unsafe(zone)}
 					{@const connections = zone.connections}
@@ -872,16 +871,6 @@
 					>
 						{zone.type}
 					</text>
-					<line
-						x1={center.x}
-						y1={center.y}
-						x2={origin.coordinate.x}
-						y2={origin.coordinate.y}
-						class="stroke-secondary-500"
-						stroke-width="1"
-						stroke-dasharray="0 4"
-						stroke-linecap="round"
-					/>
 					{#each connections as connected_id (connected_id)}
 						{@const connected = project.get_solar_system(connected_id)}
 						{#if Option.isSome(connected)}

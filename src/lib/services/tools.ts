@@ -238,6 +238,70 @@ export class Tools extends Context.Tag('Tools')<
 				throw Error('Unexpected non-array tool payload');
 			}
 
+			// find the origin system, angle, and distance that gets a fallen
+			// empire zone center closest to the target coordinate
+			function find_best_fallen_empire_zone_placement(
+				project: Project,
+				target: Coordinate,
+				excluded_origin_ids: ReadonlySet<SolarSystemId> = new Set(),
+			): Option.Option<{
+				system: SolarSystem;
+				angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
+				distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
+			}> {
+				let best: Option.Option<{
+					system: SolarSystem;
+					angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
+					distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
+				}> = Option.none();
+				let best_distance_from_target = Infinity;
+				for (const system of project.solar_systems) {
+					if (excluded_origin_ids.has(system.id)) continue;
+					if (
+						project.fallen_empire_zones.some(
+							(zone) => zone.origin === system.id,
+						)
+					) {
+						// no more than 1 FE zone per system
+						continue;
+					}
+					const dx = target.x - system.coordinate.x;
+					const dy = target.y - system.coordinate.y;
+					const raw_distance = Math.hypot(dx, dy);
+					const raw_angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+					const distance = FALLEN_EMPIRE_ZONE_DISTANCES.reduce((prev, curr) =>
+						Math.abs(curr - raw_distance) < Math.abs(prev - raw_distance) ?
+							curr
+						:	prev,
+					);
+					const angle = FALLEN_EMPIRE_ZONE_ANGLES.reduce((prev, curr) =>
+						(
+							get_degrees_difference(curr, raw_angle) <
+							get_degrees_difference(prev, raw_angle)
+						) ?
+							curr
+						:	prev,
+					);
+					const angle_rad = convert_degrees_to_radians(angle);
+					const cx = system.coordinate.x + distance * Math.cos(angle_rad);
+					const cy = system.coordinate.y + distance * Math.sin(angle_rad);
+					const distance_from_target = Math.hypot(cx - target.x, cy - target.y);
+					if (
+						distance_from_target < best_distance_from_target ||
+						(distance_from_target === best_distance_from_target &&
+							distance <
+								best.pipe(
+									Option.map((value) => value.distance),
+									Option.getOrElse(() => Infinity),
+								))
+					) {
+						best_distance_from_target = distance_from_target;
+						best = Option.some({ system, distance, angle });
+					}
+				}
+				return best;
+			}
+
 			const calculate_path: (typeof Tools)['Service']['calculate_path'] = (
 				tool_id,
 				settings,
@@ -500,9 +564,41 @@ export class Tools extends Context.Tag('Tools')<
 								solar_system_ids.has(connection.a) ||
 								solar_system_ids.has(connection.b),
 						);
-						const fallen_empire_zones = project.fallen_empire_zones.filter(
-							(zone) => solar_system_ids.has(zone.origin),
+						// fallen empire zones whose origin is deleted are re-homed to
+						// a new origin that best preserves their location; if no valid
+						// new origin exists, they are deleted
+						const fallen_empire_zone_actions: Action[] = [];
+						const unavailable_origin_ids = new Set<SolarSystemId>(
+							solar_system_ids,
 						);
+						for (const zone of project.fallen_empire_zones) {
+							if (!solar_system_ids.has(zone.origin)) continue;
+							const coordinate =
+								project.get_fallen_empire_zone_coordinate_unsafe(zone);
+							const placement = find_best_fallen_empire_zone_placement(
+								project,
+								coordinate,
+								unavailable_origin_ids,
+							);
+							if (Option.isNone(placement)) {
+								fallen_empire_zone_actions.push(
+									new Action.DeleteFallenEmpireZoneAction({ zone }),
+								);
+							} else {
+								unavailable_origin_ids.add(placement.value.system.id);
+								fallen_empire_zone_actions.push(
+									new Action.UpdateFallenEmpireZoneAction({
+										old_value: zone,
+										new_value: new FallenEmpireZone({
+											...zone,
+											origin: placement.value.system.id,
+											distance: placement.value.distance,
+											angle: placement.value.angle,
+										}),
+									}),
+								);
+							}
+						}
 						return Effect.succeed([
 							...hyperlanes.map(
 								(connection) =>
@@ -511,9 +607,7 @@ export class Tools extends Context.Tag('Tools')<
 							...wormholes.map(
 								(connection) => new Action.DeleteWormholeAction({ connection }),
 							),
-							...fallen_empire_zones.map(
-								(zone) => new Action.DeleteFallenEmpireZoneAction({ zone }),
-							),
+							...fallen_empire_zone_actions,
 							...solar_systems.map(
 								(solar_system) =>
 									new Action.DeleteSolarSystemAction({ solar_system }),
@@ -644,63 +738,10 @@ export class Tools extends Context.Tag('Tools')<
 					}),
 					Match.when('fallen_empire_zone_create', () => {
 						const coordinate = get_single_payload(payload);
-						let best: Option.Option<{
-							system: SolarSystem;
-							angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
-							distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
-						}> = Option.none();
-						let best_distance_from_target = Infinity;
-						for (const system of project.solar_systems) {
-							if (
-								project.fallen_empire_zones.some(
-									(zone) => zone.origin === system.id,
-								)
-							) {
-								// no more than 1 FE zone per system
-								continue;
-							}
-							const dx = coordinate.x - system.coordinate.x;
-							const dy = coordinate.y - system.coordinate.y;
-							const raw_distance = Math.hypot(dx, dy);
-							const raw_angle =
-								((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
-							const distance = FALLEN_EMPIRE_ZONE_DISTANCES.reduce(
-								(prev, curr) =>
-									(
-										Math.abs(curr - raw_distance) <
-										Math.abs(prev - raw_distance)
-									) ?
-										curr
-									:	prev,
-							);
-							const angle = FALLEN_EMPIRE_ZONE_ANGLES.reduce((prev, curr) =>
-								(
-									get_degrees_difference(curr, raw_angle) <
-									get_degrees_difference(prev, raw_angle)
-								) ?
-									curr
-								:	prev,
-							);
-							const angle_rad = convert_degrees_to_radians(angle);
-							const cx = system.coordinate.x + distance * Math.cos(angle_rad);
-							const cy = system.coordinate.y + distance * Math.sin(angle_rad);
-							const distance_from_target = Math.hypot(
-								cx - coordinate.x,
-								cy - coordinate.y,
-							);
-							if (
-								distance_from_target < best_distance_from_target ||
-								(distance_from_target === best_distance_from_target &&
-									distance <
-										best.pipe(
-											Option.map((value) => value.distance),
-											Option.getOrElse(() => Infinity),
-										))
-							) {
-								best_distance_from_target = distance_from_target;
-								best = Option.some({ system, distance, angle });
-							}
-						}
+						const best = find_best_fallen_empire_zone_placement(
+							project,
+							coordinate,
+						);
 						if (Option.isNone(best)) return Effect.succeed([]);
 						const zone = new FallenEmpireZone({
 							id: FallenEmpireZoneId.make(crypto.randomUUID()),
