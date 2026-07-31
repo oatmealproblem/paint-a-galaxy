@@ -369,6 +369,21 @@
 		if (e.button !== 0) return;
 		if (!ctx) return;
 		if (Option.isSome(active_tool) && Option.isSome(active_tool_settings)) {
+			// correct the snapped system
+			// this will run for no-ops (locked systems) too, but not a big deal
+			const moved_solar_system =
+				(
+					active_tool.value.id === 'solar_system_move' ||
+					active_tool.value.id === 'cluster_move'
+				) ?
+					project.solar_systems.find((solar_system) =>
+						Equal.equals(solar_system.coordinate, tool_points[0]),
+					)
+				:	null;
+			if (moved_solar_system) {
+				snapped_solar_system_id = Option.some(moved_solar_system.id);
+			}
+			// apply tool
 			if (
 				active_tool.value.action_type === 'single_point' &&
 				active_tool_settings.value.bulk === 0 &&
@@ -378,6 +393,7 @@
 			} else {
 				editor().apply_tool(active_tool.value.id, tool_points, ctx);
 			}
+			// clear tool
 			active_tool = Option.none();
 			tool_points = [];
 		}
@@ -451,7 +467,7 @@
 	style:cursor={Option.match(current_tool, {
 		onSome: (tool) =>
 			(
-				tool.snap_to_solar_system &&
+				tool.snap_to_solar_system !== 'none' &&
 				editor().tool_settings[tool.id].bulk === 0 &&
 				Option.exists(
 					snapped_solar_system,
@@ -511,7 +527,7 @@
 				current_tool,
 				Option.map(
 					(value) =>
-						value.snap_to_solar_system &&
+						value.snap_to_solar_system !== 'none' &&
 						current_tool_settings.value.bulk === 0,
 				),
 				Option.getOrElse(() => false),
@@ -550,11 +566,18 @@
 		const tool = Option.orElse(active_tool, () => current_tool);
 		const snap_to_solar_system = pipe(
 			tool,
-			Option.map(
-				(value) =>
-					value.snap_to_solar_system &&
-					editor().tool_settings[value.id].bulk === 0,
-			),
+			Option.map((value) => {
+				if (value.snap_to_solar_system === 'all') {
+					return editor().tool_settings[value.id].bulk === 0;
+				}
+				if (value.snap_to_solar_system === 'first') {
+					return (
+						Option.isNone(active_tool) &&
+						editor().tool_settings[value.id].bulk === 0
+					);
+				}
+				return false;
+			}),
 			Option.getOrElse(() => false),
 		);
 		if (solar_system_delaunay) {
@@ -961,7 +984,7 @@
 							stroke-width="2"
 						/>
 					{/if}
-					{#if Option.match( context_menu_data, { onNone: () => Option.match( active_tool, { onNone: () => Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system && tool_points.some(Equal.equals(solar_system.coordinate)) }, ), onSome: (value) => Option.contains(value.solar_system, solar_system) }, )}
+					{#if Option.match( context_menu_data, { onNone: () => Option.match( active_tool, { onNone: () => Option.contains(snapped_solar_system, solar_system), onSome: (value) => value.snap_to_solar_system !== 'none' && tool_points.some(Equal.equals(solar_system.coordinate)) }, ), onSome: (value) => Option.contains(value.solar_system, solar_system) }, )}
 						<circle
 							cx={solar_system.coordinate.x}
 							cy={solar_system.coordinate.y}

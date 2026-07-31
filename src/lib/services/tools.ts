@@ -23,8 +23,9 @@ import {
 	Array,
 	Order,
 	Number,
+	HashSet,
 } from 'effect';
-import { Action } from '$lib/models/action';
+import { Action, type UpdateFallenEmpireZoneAction } from '$lib/models/action';
 import { KeyVal } from './key_val';
 import getStroke from 'perfect-freehand';
 import { Coordinate } from '$lib/models/coordinate';
@@ -239,25 +240,39 @@ export class Tools extends Context.Tag('Tools')<
 			}
 
 			// find the origin system, angle, and distance that gets a fallen
-			// empire zone center closest to the target coordinate
-			function find_best_fallen_empire_zone_placement(
-				project: Project,
-				target: Coordinate,
-				excluded_origin_ids: ReadonlySet<SolarSystemId> = new Set(),
-			): Option.Option<{
-				system: SolarSystem;
+			// empire zone center closest to the target coordinate;
+			// solar_system_coordinate_overrides allows evaluating systems at
+			// coordinates they are about to be moved to
+			function find_best_fallen_empire_zone_placement({
+				project,
+				target,
+				denied_origin_ids = new Set(),
+				allowed_origin_ids = new Set(),
+				solar_system_coordinate_overrides = new Map(),
+			}: {
+				project: Project;
+				target: Coordinate;
+				denied_origin_ids?: ReadonlySet<SolarSystemId>;
+				allowed_origin_ids?: ReadonlySet<SolarSystemId>;
+				solar_system_coordinate_overrides?: ReadonlyMap<
+					SolarSystemId,
+					Coordinate
+				>;
+			}): Option.Option<{
+				origin: SolarSystemId;
 				angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
 				distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
 			}> {
 				let best: Option.Option<{
-					system: SolarSystem;
+					origin: SolarSystemId;
 					angle: (typeof FALLEN_EMPIRE_ZONE_ANGLES)[number];
 					distance: (typeof FALLEN_EMPIRE_ZONE_DISTANCES)[number];
 				}> = Option.none();
 				let best_distance_from_target = Infinity;
 				for (const system of project.solar_systems) {
-					if (excluded_origin_ids.has(system.id)) continue;
+					if (denied_origin_ids.has(system.id)) continue;
 					if (
+						!allowed_origin_ids.has(system.id) &&
 						project.fallen_empire_zones.some(
 							(zone) => zone.origin === system.id,
 						)
@@ -265,8 +280,11 @@ export class Tools extends Context.Tag('Tools')<
 						// no more than 1 FE zone per system
 						continue;
 					}
-					const dx = target.x - system.coordinate.x;
-					const dy = target.y - system.coordinate.y;
+					const coordinate =
+						solar_system_coordinate_overrides.get(system.id) ??
+						system.coordinate;
+					const dx = target.x - coordinate.x;
+					const dy = target.y - coordinate.y;
 					const raw_distance = Math.hypot(dx, dy);
 					const raw_angle = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
 					const distance = FALLEN_EMPIRE_ZONE_DISTANCES.reduce((prev, curr) =>
@@ -283,9 +301,11 @@ export class Tools extends Context.Tag('Tools')<
 						:	prev,
 					);
 					const angle_rad = convert_degrees_to_radians(angle);
-					const cx = system.coordinate.x + distance * Math.cos(angle_rad);
-					const cy = system.coordinate.y + distance * Math.sin(angle_rad);
-					const distance_from_target = Math.hypot(cx - target.x, cy - target.y);
+					const center = coordinate.get_coordinate_in_direction(
+						angle_rad,
+						distance,
+					);
+					const distance_from_target = center.distance_to(target);
 					if (
 						distance_from_target < best_distance_from_target ||
 						(distance_from_target === best_distance_from_target &&
@@ -296,7 +316,7 @@ export class Tools extends Context.Tag('Tools')<
 								))
 					) {
 						best_distance_from_target = distance_from_target;
-						best = Option.some({ system, distance, angle });
+						best = Option.some({ origin: system.id, distance, angle });
 					}
 				}
 				return best;
@@ -392,6 +412,8 @@ export class Tools extends Context.Tag('Tools')<
 							'hyperlane_toggle',
 							'nebula_delete',
 							'solar_system_create',
+							'solar_system_move',
+							'cluster_move',
 							'spawn_preferred_toggle',
 							'spawn_toggle',
 							'wormhole_toggle',
@@ -568,32 +590,28 @@ export class Tools extends Context.Tag('Tools')<
 						// a new origin that best preserves their location; if no valid
 						// new origin exists, they are deleted
 						const fallen_empire_zone_actions: Action[] = [];
-						const unavailable_origin_ids = new Set<SolarSystemId>(
-							solar_system_ids,
-						);
+						const denied_origin_ids = new Set<SolarSystemId>(solar_system_ids);
 						for (const zone of project.fallen_empire_zones) {
 							if (!solar_system_ids.has(zone.origin)) continue;
-							const coordinate =
+							const target =
 								project.get_fallen_empire_zone_coordinate_unsafe(zone);
-							const placement = find_best_fallen_empire_zone_placement(
+							const placement = find_best_fallen_empire_zone_placement({
 								project,
-								coordinate,
-								unavailable_origin_ids,
-							);
+								target,
+								denied_origin_ids,
+							});
 							if (Option.isNone(placement)) {
 								fallen_empire_zone_actions.push(
 									new Action.DeleteFallenEmpireZoneAction({ zone }),
 								);
 							} else {
-								unavailable_origin_ids.add(placement.value.system.id);
+								denied_origin_ids.add(placement.value.origin);
 								fallen_empire_zone_actions.push(
 									new Action.UpdateFallenEmpireZoneAction({
 										old_value: zone,
 										new_value: new FallenEmpireZone({
 											...zone,
-											origin: placement.value.system.id,
-											distance: placement.value.distance,
-											angle: placement.value.angle,
+											...placement.value,
 										}),
 									}),
 								);
@@ -737,20 +755,18 @@ export class Tools extends Context.Tag('Tools')<
 						}
 					}),
 					Match.when('fallen_empire_zone_create', () => {
-						const coordinate = get_single_payload(payload);
-						const best = find_best_fallen_empire_zone_placement(
+						const target = get_single_payload(payload);
+						const placement = find_best_fallen_empire_zone_placement({
 							project,
-							coordinate,
-						);
-						if (Option.isNone(best)) return Effect.succeed([]);
+							target,
+						});
+						if (Option.isNone(placement)) return Effect.succeed([]);
 						const zone = new FallenEmpireZone({
 							id: FallenEmpireZoneId.make(crypto.randomUUID()),
 							type: 'random',
-							origin: best.value.system.id,
-							distance: best.value.distance,
-							angle: best.value.angle,
 							connections: [],
 							fallback_to_random: false,
+							...placement.value,
 						});
 						return Effect.succeed([
 							new Action.CreateFallenEmpireZoneAction({ zone }),
@@ -771,6 +787,265 @@ export class Tools extends Context.Tag('Tools')<
 							}
 						}
 						return Effect.succeed([]);
+					}),
+					Match.when('solar_system_move', () => {
+						const [origin, dest] = get_double_payload(payload);
+						const solar_system = project.solar_systems.find((s) =>
+							Equal.equals(s.coordinate, origin),
+						);
+
+						// TODO: toast for noops
+						// noop if locked
+						if (!solar_system || solar_system.locked) return Effect.succeed([]);
+						// noop if not actually moved
+						const new_coordinate = Coordinate.make({
+							x: dest.x,
+							y: dest.y,
+						}).to_rounded();
+						if (Equal.equals(solar_system.coordinate, new_coordinate))
+							return Effect.succeed([]);
+						// noop if the destination is occupied by another system
+						if (
+							project.solar_systems.some(
+								(s) =>
+									s.id !== solar_system.id &&
+									Equal.equals(s.coordinate, new_coordinate),
+							)
+						)
+							return Effect.succeed([]);
+
+						const updated_solar_system = new SolarSystem({
+							...solar_system,
+							coordinate: new_coordinate,
+						});
+						const actions: Action[] = [
+							new Action.UpdateSolarSystemAction({
+								old_value: solar_system,
+								new_value: updated_solar_system,
+							}),
+						];
+
+						// update FallenEmpireZone originating from moved system
+						const fallen_empire_zone = Iterable.findFirst(
+							project.fallen_empire_zones,
+							(zone) => zone.origin === solar_system.id,
+						);
+						if (Option.isSome(fallen_empire_zone)) {
+							const zone = fallen_empire_zone.value;
+							const target =
+								project.get_fallen_empire_zone_coordinate_unsafe(zone);
+							const placement = find_best_fallen_empire_zone_placement({
+								project,
+								target,
+								allowed_origin_ids: new Set([solar_system.id]),
+								solar_system_coordinate_overrides: new Map([
+									[solar_system.id, new_coordinate],
+								]),
+							});
+							if (Option.isSome(placement)) {
+								actions.push(
+									new Action.UpdateFallenEmpireZoneAction({
+										old_value: zone,
+										new_value: new FallenEmpireZone({
+											...zone,
+											...placement.value,
+										}),
+									}),
+								);
+							}
+						}
+
+						return Effect.succeed(actions);
+					}),
+					Match.when('cluster_move', () => {
+						const [origin, dest] = get_double_payload(payload);
+						const start_system = project.solar_systems.find((s) =>
+							Equal.equals(s.coordinate, origin),
+						);
+
+						if (!start_system || start_system.locked) return Effect.succeed([]);
+
+						const delta_x = dest.x - origin.x;
+						const delta_y = dest.y - origin.y;
+						if (delta_x === 0 && delta_y === 0) return Effect.succeed([]);
+
+						const cluster_ids = new Set<SolarSystemId>();
+						const queue: SolarSystemId[] = [start_system.id];
+						cluster_ids.add(start_system.id);
+						const connected_fe_zone_ids = new Set<FallenEmpireZoneId>();
+
+						while (queue.length > 0) {
+							const current_id = queue.shift()!;
+							for (const hyperlane of project.hyperlanes) {
+								let neighbor_id: SolarSystemId | undefined;
+								if (hyperlane.a === current_id) neighbor_id = hyperlane.b;
+								else if (hyperlane.b === current_id) neighbor_id = hyperlane.a;
+								if (neighbor_id != null && !cluster_ids.has(neighbor_id)) {
+									cluster_ids.add(neighbor_id);
+									queue.push(neighbor_id);
+								}
+							}
+							for (const zone of project.fallen_empire_zones) {
+								if (connected_fe_zone_ids.has(zone.id)) continue;
+								if (zone.connections.includes(current_id)) {
+									connected_fe_zone_ids.add(zone.id);
+									for (const id of zone.connections) {
+										if (!cluster_ids.has(id)) {
+											cluster_ids.add(id);
+											queue.push(id);
+										}
+									}
+								}
+							}
+						}
+
+						const cluster_systems = project.solar_systems.filter((s) =>
+							cluster_ids.has(s.id),
+						);
+						if (cluster_systems.some((s) => s.locked))
+							return Effect.succeed([]);
+						const new_coordinate_by_id = new Map<SolarSystemId, Coordinate>(
+							cluster_systems.map((system) => [
+								system.id,
+								Coordinate.make({
+									x: system.coordinate.x + delta_x,
+									y: system.coordinate.y + delta_y,
+								}).to_rounded(),
+							]),
+						);
+
+						// noop if any cluster system would land on a non-cluster system
+						// TODO: show a warning toast once toasts are implemented
+						const occupied_coordinates = HashSet.fromIterable(
+							project.solar_systems
+								.filter((s) => !cluster_ids.has(s.id))
+								.map((s) => s.coordinate),
+						);
+						if (
+							Iterable.some(new_coordinate_by_id.values(), (coordinate) =>
+								HashSet.has(occupied_coordinates, coordinate),
+							)
+						)
+							return Effect.succeed([]);
+
+						const solar_system_actions = cluster_systems.map(
+							(system) =>
+								new Action.UpdateSolarSystemAction({
+									old_value: system,
+									new_value: new SolarSystem({
+										...system,
+										coordinate: new_coordinate_by_id.get(system.id)!,
+									}),
+								}),
+						);
+
+						const fallen_empire_zone_actions: UpdateFallenEmpireZoneAction[] =
+							[];
+						const denied_origin_ids = new Set<SolarSystemId>();
+						const allowed_origin_ids = new Set<SolarSystemId>();
+						// origins claimed by a re-home are denied to later zones, and
+						// vacated origins are freed again; resolution is greedy in
+						// iteration order, so a swap between two zones only works in
+						// one direction
+						for (const zone of project.fallen_empire_zones) {
+							const has_connection_in_cluster = zone.connections.some((id) =>
+								cluster_ids.has(id),
+							);
+							const origin_in_cluster = cluster_ids.has(zone.origin);
+							// 4 cases to consider
+							// - connected to cluster and origin in cluster: it will move with its origin, no update needed
+							// - not connected to cluster and origin not in cluster: won't move, as desired, no update needed
+							// - connected to cluster but origin not in cluster: need to re-home targeting translated center
+							// - not connected to cluster but origin in cluster: need to re-home targeting existing center
+							if (has_connection_in_cluster !== origin_in_cluster) {
+								const zone_center =
+									project.get_fallen_empire_zone_coordinate_unsafe(zone);
+								const target =
+									has_connection_in_cluster ?
+										new Coordinate({
+											x: zone_center.x + delta_x,
+											y: zone_center.y + delta_y,
+										})
+									:	zone_center;
+								const placement = find_best_fallen_empire_zone_placement({
+									project,
+									target,
+									denied_origin_ids,
+									allowed_origin_ids: new Set([
+										...allowed_origin_ids,
+										zone.origin,
+									]),
+									solar_system_coordinate_overrides: new_coordinate_by_id,
+								});
+								if (Option.isSome(placement)) {
+									if (placement.value.origin !== zone.origin) {
+										// claim the new origin
+										allowed_origin_ids.delete(placement.value.origin);
+										denied_origin_ids.add(placement.value.origin);
+										// free up the old origin
+										denied_origin_ids.delete(zone.origin);
+										allowed_origin_ids.add(zone.origin);
+									}
+									fallen_empire_zone_actions.push(
+										new Action.UpdateFallenEmpireZoneAction({
+											old_value: zone,
+											new_value: new FallenEmpireZone({
+												...zone,
+												...placement.value,
+											}),
+										}),
+									);
+								}
+							}
+						}
+
+						const nebula_actions = pipe(
+							project.nebulas,
+							Iterable.filterMap((nebula) => {
+								const overlaps_system = cluster_systems.some(
+									(s) =>
+										s.coordinate.distance_to(nebula.coordinate) <=
+										nebula.radius,
+								);
+								const overlaps_zone = [...connected_fe_zone_ids].some(
+									(zone_id) => {
+										const zone = project.fallen_empire_zones.find(
+											(z) => z.id === zone_id,
+										);
+										if (!zone) return false;
+										const zone_center =
+											project.get_fallen_empire_zone_coordinate_unsafe(zone);
+										return (
+											zone_center.distance_to(nebula.coordinate) <
+											nebula.radius + FALLEN_EMPIRE_ZONE_RADIUS
+										);
+									},
+								);
+								if (overlaps_system || overlaps_zone) {
+									const new_coordinate = Coordinate.make({
+										x: nebula.coordinate.x + delta_x,
+										y: nebula.coordinate.y + delta_y,
+									}).to_rounded();
+									return Option.some(
+										new Action.UpdateNebulaAction({
+											old_value: nebula,
+											new_value: new Nebula({
+												...nebula,
+												coordinate: new_coordinate,
+											}),
+										}),
+									);
+								} else {
+									return Option.none();
+								}
+							}),
+							Array.fromIterable,
+						);
+						return Effect.succeed([
+							...solar_system_actions,
+							...fallen_empire_zone_actions,
+							...nebula_actions,
+						]);
 					}),
 					Match.exhaustive,
 				);

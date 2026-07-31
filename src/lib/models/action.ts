@@ -45,7 +45,7 @@ export class DeleteSolarSystemAction extends Schema.TaggedClass<DeleteSolarSyste
 	}
 }
 
-class UpdateSolarSystemAction extends Schema.TaggedClass<UpdateSolarSystemAction>()(
+export class UpdateSolarSystemAction extends Schema.TaggedClass<UpdateSolarSystemAction>()(
 	'UpdateSolarSystemAction',
 	{
 		old_value: SolarSystem,
@@ -138,6 +138,21 @@ class DeleteNebulaAction extends Schema.TaggedClass<DeleteNebulaAction>()(
 	}
 }
 
+export class UpdateNebulaAction extends Schema.TaggedClass<UpdateNebulaAction>()(
+	'UpdateNebulaAction',
+	{
+		old_value: Nebula,
+		new_value: Nebula,
+	},
+) {
+	invert(): UpdateNebulaAction {
+		return UpdateNebulaAction.make({
+			old_value: this.new_value,
+			new_value: this.old_value,
+		});
+	}
+}
+
 export class CreateFallenEmpireZoneAction extends Schema.TaggedClass<CreateFallenEmpireZoneAction>()(
 	'CreateFallenEmpireZoneAction',
 	{
@@ -191,6 +206,7 @@ export const Action = Object.assign(
 		DeleteWormholeAction,
 		CreateNebulaAction,
 		DeleteNebulaAction,
+		UpdateNebulaAction,
 		CreateFallenEmpireZoneAction,
 		DeleteFallenEmpireZoneAction,
 		UpdateFallenEmpireZoneAction,
@@ -206,6 +222,7 @@ export const Action = Object.assign(
 		DeleteWormholeAction,
 		CreateNebulaAction,
 		DeleteNebulaAction,
+		UpdateNebulaAction,
 		CreateFallenEmpireZoneAction,
 		DeleteFallenEmpireZoneAction,
 		UpdateFallenEmpireZoneAction,
@@ -223,6 +240,7 @@ export type Action =
 	| DeleteWormholeAction
 	| CreateNebulaAction
 	| DeleteNebulaAction
+	| UpdateNebulaAction
 	| CreateFallenEmpireZoneAction
 	| DeleteFallenEmpireZoneAction
 	| UpdateFallenEmpireZoneAction;

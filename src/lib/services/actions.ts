@@ -4,6 +4,7 @@ import type {
 	CreateSolarSystemAction,
 	DeleteHyperlaneAction,
 	DeleteSolarSystemAction,
+	UpdateSolarSystemAction,
 } from '$lib/models/action';
 import { Project } from '$lib/models/project';
 import {
@@ -34,6 +35,7 @@ export class Actions extends Context.Tag('Actions')<
 				const BULKABLE_ACTIONS: Set<Action['_tag']> = new Set([
 					'CreateSolarSystemAction',
 					'DeleteSolarSystemAction',
+					'UpdateSolarSystemAction',
 					'CreateHyperlaneAction',
 					'DeleteHyperlaneAction',
 				]);
@@ -78,14 +80,19 @@ export class Actions extends Context.Tag('Actions')<
 									),
 								});
 							},
-							UpdateSolarSystemAction: (action) => {
+							UpdateSolarSystemAction: () => {
+								const updated_solar_system_by_id = Object.fromEntries(
+									(action_group as UpdateSolarSystemAction[]).map((action) => [
+										action.new_value.id,
+										action.new_value,
+									]),
+								);
 								updated_project = new Project({
 									...updated_project,
 									solar_systems: updated_project.solar_systems.map(
 										(solar_system) =>
-											solar_system.id === action.new_value.id ?
-												action.new_value
-											:	solar_system,
+											updated_solar_system_by_id[solar_system.id] ??
+											solar_system,
 									),
 								});
 							},
@@ -141,6 +148,16 @@ export class Actions extends Context.Tag('Actions')<
 									...updated_project,
 									nebulas: updated_project.nebulas.filter(
 										(connection) => !Equal.equals(connection, action.nebula),
+									),
+								});
+							},
+							UpdateNebulaAction: (action) => {
+								updated_project = new Project({
+									...updated_project,
+									nebulas: updated_project.nebulas.map((nebula) =>
+										Equal.equals(nebula, action.old_value) ?
+											action.new_value
+										:	nebula,
 									),
 								});
 							},

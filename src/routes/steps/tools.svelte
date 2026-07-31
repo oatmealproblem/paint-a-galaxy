@@ -60,7 +60,7 @@
 			<Tooltip positioning={{ placement: 'top' }}>
 				<Tooltip.Trigger>
 					{#snippet element(attributes: Record<string, unknown>)}
-						<div {...attributes} class="flex-1 flex">
+						<div {...attributes} class="flex-1 flex w-0">
 							<SegmentedControl.Item
 								value={tool_pair.id}
 								aria-label={tool_pair.name}

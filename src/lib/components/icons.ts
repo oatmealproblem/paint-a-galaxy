@@ -18,6 +18,7 @@ import Lock from '@lucide/svelte/icons/lock';
 import MapPin from '@lucide/svelte/icons/map-pin';
 import Minus from '@lucide/svelte/icons/minus';
 import Moon from '@lucide/svelte/icons/moon';
+import Move from '@lucide/svelte/icons/move';
 import RectangleHorizontal from '@lucide/svelte/icons/rectangle-horizontal';
 import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 import Sparkle from '@lucide/svelte/icons/sparkle';
@@ -47,6 +48,7 @@ export const Icons = {
 	MapPin,
 	Minus,
 	Moon,
+	Move,
 	RectangleHorizontal,
 	RotateCcw,
 	Sparkle,
