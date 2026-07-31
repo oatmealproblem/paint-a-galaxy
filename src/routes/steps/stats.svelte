@@ -1,12 +1,22 @@
 <script lang="ts">
 	import Info from '$lib/components/info.svelte';
 	import SectionHeader from '$lib/components/section_header.svelte';
-	import { FALLEN_EMPIRE_ZONE_RADIUS } from '$lib/constants';
+	import {
+		CANVAS_HEIGHT,
+		CANVAS_WIDTH,
+		FALLEN_EMPIRE_ZONE_RADIUS,
+		GIGA_AETERNUM_CORE_RADIUS,
+		GIGA_RANDOM_CORE_RADIUS,
+		L_CLUSTER_CX,
+		L_CLUSTER_CY,
+		L_CLUSTER_RADIUS,
+	} from '$lib/constants';
 	import {
 		initializer_metadata,
 		type InitializerKey,
 	} from '$lib/data/initializer_metadata';
 	import { get_editor } from '$lib/editor.svelte';
+	import { Coordinate } from '$lib/models/coordinate';
 	import type { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 	import { Array, Iterable, Option, pipe, Record } from 'effect';
 
@@ -160,6 +170,64 @@
 			Iterable.map((solar_system) => solar_system.id),
 			Array.fromIterable,
 		),
+	);
+	const out_of_bounds_system_ids = $derived(
+		pipe(
+			solar_systems,
+			Iterable.filter(
+				(solar_system) =>
+					solar_system.coordinate.x < 0 ||
+					solar_system.coordinate.x > CANVAS_WIDTH ||
+					solar_system.coordinate.y < 0 ||
+					solar_system.coordinate.y > CANVAS_HEIGHT,
+			),
+			Iterable.map((solar_system) => solar_system.id),
+			Array.fromIterable,
+		),
+	);
+	const l_cluster_center = Coordinate.make({
+		x: L_CLUSTER_CX,
+		y: L_CLUSTER_CY,
+	});
+
+	const systems_in_l_cluster_ids = $derived(
+		editor().view_settings.show_l_cluster ?
+			pipe(
+				solar_systems,
+				Iterable.filter(
+					(solar_system) =>
+						solar_system.coordinate.distance_to(l_cluster_center) <
+						L_CLUSTER_RADIUS,
+				),
+				Iterable.map((solar_system) => solar_system.id),
+				Array.fromIterable,
+			)
+		:	[],
+	);
+
+	const systems_in_core_ids = $derived(
+		(
+			editor().view_settings.show_giga_core ||
+				editor().view_settings.show_giga_aeternum
+		) ?
+			pipe(
+				solar_systems,
+				Iterable.filter((solar_system) => {
+					const dist = solar_system.coordinate.distance_to(new Coordinate({
+						x: CANVAS_WIDTH / 2,
+						y: CANVAS_HEIGHT / 2,
+					}));
+					return (
+						(editor().view_settings.show_giga_core &&
+							dist < GIGA_RANDOM_CORE_RADIUS) ||
+						(editor().view_settings.show_giga_aeternum &&
+							dist < GIGA_AETERNUM_CORE_RADIUS)
+					);
+				}),
+				Iterable.map((solar_system) => solar_system.id),
+				Array.fromIterable,
+			)
+		:	[],
 	);
 
 	type MissingSystemsWarning = {
@@ -379,6 +447,48 @@
 					<td class="text-end">
 						{solar_system_ids_in_fallen_empire_zones.length}
 					</td>
+				</tr>
+			{/if}
+			{#if out_of_bounds_system_ids.length > 0}
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
+				<tr
+					class={WARNING_STYLE}
+					onmouseover={() =>
+						(editor().warned_solar_system_ids = out_of_bounds_system_ids)}
+					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				>
+					<td>
+						Out-of-Bounds Solar Systems
+					</td>
+					<td class="text-end">{out_of_bounds_system_ids.length}</td>
+				</tr>
+			{/if}
+			{#if systems_in_l_cluster_ids.length > 0}
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
+				<tr
+					class={WARNING_STYLE}
+					onmouseover={() =>
+						(editor().warned_solar_system_ids = systems_in_l_cluster_ids)}
+					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				>
+					<td>
+						Systems in L-Cluster
+					</td>
+					<td class="text-end">{systems_in_l_cluster_ids.length}</td>
+				</tr>
+			{/if}
+			{#if systems_in_core_ids.length > 0}
+				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
+				<tr
+					class={WARNING_STYLE}
+					onmouseover={() =>
+						(editor().warned_solar_system_ids = systems_in_core_ids)}
+					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				>
+					<td>
+						Systems in Core Zone
+					</td>
+					<td class="text-end">{systems_in_core_ids.length}</td>
 				</tr>
 			{/if}
 		</tbody>
