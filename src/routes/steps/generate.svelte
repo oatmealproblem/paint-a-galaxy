@@ -25,9 +25,9 @@
 </script>
 
 <form class="flex flex-col gap-4">
-	<div class="input-group grid-cols-[auto_2.5rem]">
+	<div class="field-group grid-cols-[auto_2.5rem] gap-px">
 		<button
-			class="ig-btn ps-14 preset-filled-primary-500"
+			class="btn ps-14 preset-filled-primary-500"
 			onclick={() => on_generate_option_selected({ value: 'all' })}
 		>
 			Generate
@@ -36,7 +36,7 @@
 			positioning={{ placement: 'bottom-end' }}
 			onSelect={on_generate_option_selected}
 		>
-			<Menu.Trigger class="ig-btn px-0 preset-filled-primary-500">
+			<Menu.Trigger class="btn px-0 preset-filled-primary-500">
 				<Icons.ChevronDown />
 			</Menu.Trigger>
 			<Portal>
