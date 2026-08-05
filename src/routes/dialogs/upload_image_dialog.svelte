@@ -28,7 +28,14 @@
 	};
 </script>
 
-<Dialog {id} title="Upload Image" bind:this={dialog}>
+<Dialog
+	{id}
+	title="Upload Image"
+	bind:this={dialog}
+	on_open={() => {
+		files = [];
+	}}
+>
 	<form class="flex flex-col gap-4" {onsubmit}>
 		<FileUpload
 			accept="image/*"

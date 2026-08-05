@@ -8,7 +8,6 @@
 
 	const editor = get_editor();
 	const id = ID.configure_grid_dialog;
-	let is_duplicate_name = $state(false);
 	let dialog: Dialog;
 
 	let type: string = $state(editor().project.grid_config.type);
@@ -38,7 +37,18 @@
 	};
 </script>
 
-<Dialog {id} title="Configure Grid" bind:this={dialog}>
+<Dialog
+	{id}
+	title="Configure Grid"
+	bind:this={dialog}
+	on_open={() => {
+		type = editor().project.grid_config.type;
+		size = editor().project.grid_config.size;
+		rotate = editor().project.grid_config.rotate;
+		x_offset = -editor().project.grid_config.x_offset; // present in Stellaris coordinate system, save in canvas coordinate system
+		y_offset = editor().project.grid_config.y_offset;
+	}}
+>
 	<form class="flex flex-col gap-4" {onsubmit}>
 		<label>
 			<span class="label-text">Type</span>
@@ -112,11 +122,7 @@
 			>
 				Cancel
 			</button>
-			<button
-				class="btn preset-filled-primary-500 w-auto"
-				type="submit"
-				disabled={is_duplicate_name}
-			>
+			<button class="btn preset-filled-primary-500 w-auto" type="submit">
 				Save
 			</button>
 		</div>

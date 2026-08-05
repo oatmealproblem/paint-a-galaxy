@@ -2,11 +2,14 @@
 	import Dialog from '$lib/components/dialog.svelte';
 	import { CUSTOM_COMMAND, ID } from '$lib/constants';
 	import { get_editor } from '$lib/editor.svelte';
-	import type { EventHandler, FormEventHandler } from 'svelte/elements';
+	import type { EventHandler } from 'svelte/elements';
 
 	const editor = get_editor();
 	const id = ID.new_project_dialog;
-	let is_duplicate_name = $state(false);
+	let name = $state('');
+	const is_duplicate_name = $derived(
+		editor().projects.some((project) => project.name === clean_name(name)),
+	);
 	let dialog: Dialog;
 
 	function clean_name(name: string) {
@@ -31,18 +34,16 @@
 
 		dialog.close();
 	};
-
-	const oninput: FormEventHandler<HTMLInputElement> = (e) => {
-		const input = e.target as HTMLInputElement;
-		const name = input.value;
-		const trimmed = clean_name(name);
-		is_duplicate_name = editor().projects.some(
-			(project) => project.name === trimmed,
-		);
-	};
 </script>
 
-<Dialog {id} title="New Project" bind:this={dialog}>
+<Dialog
+	{id}
+	title="New Project"
+	bind:this={dialog}
+	on_open={() => {
+		name = '';
+	}}
+>
 	<form class="flex flex-col gap-4" {onsubmit}>
 		<label>
 			<span class="label-text">Name</span>
@@ -50,7 +51,7 @@
 			<input
 				class="input ring-surface-500 bg-surface-200-800"
 				name="name"
-				{oninput}
+				bind:value={name}
 				autofocus
 			/>
 			{#if is_duplicate_name}
