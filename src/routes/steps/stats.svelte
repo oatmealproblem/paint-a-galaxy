@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Info from '$lib/components/info.svelte';
+	import { Icons } from '$lib/components/icons';
 	import SectionHeader from '$lib/components/section_header.svelte';
 	import {
 		CANVAS_HEIGHT,
@@ -283,6 +284,7 @@
 			onmouseout={() => (editor().warned_solar_system_ids = [])}
 		>
 			<td class="align-top">
+				<Icons.TriangleAlert class="text-warning-50-950 inline" />
 				{label}
 				<Info class="text-warning-50-950 relative top-0.5">
 					Some unique systems require others to be present.
@@ -302,11 +304,21 @@
 	<table class="table">
 		<tbody>
 			<tr class={{ [WARNING_STYLE]: num_solar_systems === 0 }}>
-				<td>Solar Systems</td>
+				<td>
+					{#if num_solar_systems === 0}
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
+					{/if}
+					Solar Systems
+				</td>
 				<td class="text-end">{num_solar_systems}</td>
 			</tr>
 			<tr class={{ [WARNING_STYLE]: num_spawns === 0 }}>
-				<td>Spawns</td>
+				<td>
+					{#if num_spawns === 0}
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
+					{/if}
+					Spawns
+				</td>
 				<td class="text-end">{num_spawns}</td>
 			</tr>
 			<tr>
@@ -364,6 +376,7 @@
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
 					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
 						Duplicate Unique Systems
 						<Info class="text-warning-50-950 relative top-0.5">
 							Multiple systems are set to the same unique system initializer.
@@ -386,6 +399,7 @@
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
 					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
 						Duplicate Names
 						<Info class="text-warning-50-950 relative top-0.5">
 							Multiple systems share the same name. This won't cause any bugs,
@@ -421,6 +435,7 @@
 					onmouseout={() => (editor().warned_fallen_empire_zone_ids = [])}
 				>
 					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
 						Overlapping Fallen Empire Zones
 						<Info class="text-warning-50-950 relative top-0.5">
 							Fallen Empire zones should not overlap. Fallen Empire systems may
@@ -440,6 +455,7 @@
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
 					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
 						Systems in Fallen Empire Zones
 						<Info class="text-warning-50-950 relative top-0.5">
 							Fallen Empire zones should be empty. Solar systems inside a zone
@@ -459,7 +475,10 @@
 						(editor().warned_solar_system_ids = out_of_bounds_system_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>Out-of-Bounds Solar Systems</td>
+					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
+						Out-of-Bounds Solar Systems
+					</td>
 					<td class="text-end">{out_of_bounds_system_ids.length}</td>
 				</tr>
 			{/if}
@@ -471,7 +490,10 @@
 						(editor().warned_solar_system_ids = systems_in_l_cluster_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>Systems in L-Cluster</td>
+					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
+						Systems in L-Cluster
+					</td>
 					<td class="text-end">{systems_in_l_cluster_ids.length}</td>
 				</tr>
 			{/if}
@@ -483,7 +505,10 @@
 						(editor().warned_solar_system_ids = systems_in_core_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>Systems in Core Zone</td>
+					<td>
+						<Icons.TriangleAlert class="text-warning-50-950 inline" />
+						Systems in Core Zone
+					</td>
 					<td class="text-end">{systems_in_core_ids.length}</td>
 				</tr>
 			{/if}

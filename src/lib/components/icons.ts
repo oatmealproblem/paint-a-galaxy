@@ -24,6 +24,7 @@ import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 import Sparkle from '@lucide/svelte/icons/sparkle';
 import Square from '@lucide/svelte/icons/square';
 import Sun from '@lucide/svelte/icons/sun';
+import TriangleAlert from '@lucide/svelte/icons/triangle-alert';
 import Waypoints from '@lucide/svelte/icons/waypoints';
 import X from '@lucide/svelte/icons/x';
 
@@ -54,6 +55,7 @@ export const Icons = {
 	Sparkle,
 	Square,
 	Sun,
+	TriangleAlert,
 	Waypoints,
 	X,
 };
