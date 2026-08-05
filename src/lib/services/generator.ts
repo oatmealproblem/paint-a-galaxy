@@ -4,8 +4,10 @@ import {
 	Effect,
 	Iterable,
 	Layer,
+	Number,
 	Option,
 	pipe,
+	Random,
 	Record,
 	Struct,
 } from 'effect';
@@ -463,15 +465,31 @@ export class Generator extends Context.Tag('Generator')<
 
 			// find home stars
 			// 6 per 200 is the vanilla num_empires max
-			const num_spawns = Math.round((project.solar_systems.length / 200) * 6);
-			const new_spawns: SolarSystem[] = [];
-			const start_index = Math.floor(
-				Math.random() * (project.solar_systems.length - num_spawns),
+			const total_spawns_target = Math.round(
+				(project.solar_systems.length / 200) * 6,
 			);
-			for (let i = start_index; i < start_index + num_spawns; i++) {
-				const solar_system = project.solar_systems[i];
-				if (solar_system) new_spawns.push(solar_system);
-			}
+			const locked_spawns = project.solar_systems.filter(
+				(solar_system) =>
+					solar_system.locked && solar_system.spawn_type !== 'disabled',
+			).length;
+			const unlocked_systems = project.solar_systems.filter(
+				(solar_system) => !solar_system.locked,
+			);
+			const num_spawns_to_generate = Number.clamp(
+				total_spawns_target - locked_spawns,
+				{
+					minimum: 0,
+					maximum: unlocked_systems.length,
+				},
+			);
+			// start by selecting randomly
+			const new_spawns = pipe(
+				unlocked_systems,
+				Random.shuffle,
+				Effect.runSync,
+				Iterable.take(num_spawns_to_generate),
+				Array.fromIterable,
+			);
 			// move each to the spawn furthest from all other spawns
 			// a single iteration of this seems to be good enough
 			new_spawns.forEach((star, index) => {
@@ -488,8 +506,8 @@ export class Generator extends Context.Tag('Generator')<
 						node!.data.d = 0;
 						edge.push(other);
 					});
-				let non_dead_end_max_distance = 0;
-				let non_dead_end_max_distance_stars: SolarSystem[] = [];
+				let valid_spawn_max_distance = 0;
+				let valid_spawn_max_distance_systems: SolarSystem[] = [];
 				// modified Dijkstra's to find stars furthest from other home systems
 				// (simplified since all edge weights are 1)
 				while (edge.length) {
@@ -500,12 +518,12 @@ export class Generator extends Context.Tag('Generator')<
 							if (node.data.d === Infinity) {
 								node.data.d = graph.getNode(s.id)!.data.d + 1;
 								edge.unshift(node.data.solar_system);
-								if (!node.data.is_dead_end) {
-									if (node.data.d > non_dead_end_max_distance) {
-										non_dead_end_max_distance = node.data.d;
-										non_dead_end_max_distance_stars = [node.data.solar_system];
-									} else if (node.data.d === non_dead_end_max_distance) {
-										non_dead_end_max_distance_stars.push(
+								if (!node.data.is_dead_end && !node.data.solar_system.locked) {
+									if (node.data.d > valid_spawn_max_distance) {
+										valid_spawn_max_distance = node.data.d;
+										valid_spawn_max_distance_systems = [node.data.solar_system];
+									} else if (node.data.d === valid_spawn_max_distance) {
+										valid_spawn_max_distance_systems.push(
 											node.data.solar_system,
 										);
 									}
@@ -517,28 +535,27 @@ export class Generator extends Context.Tag('Generator')<
 				}
 				// move this starting system to the farthest star (random for tie)
 				if (
-					non_dead_end_max_distance > 0 &&
-					non_dead_end_max_distance_stars.length > 0
+					valid_spawn_max_distance > 0 &&
+					valid_spawn_max_distance_systems.length > 0
 				) {
 					const new_solar_system =
-						non_dead_end_max_distance_stars[
-							Math.floor(Math.random() * non_dead_end_max_distance_stars.length)
+						valid_spawn_max_distance_systems[
+							Math.floor(
+								Math.random() * valid_spawn_max_distance_systems.length,
+							)
 						];
 					if (new_solar_system) new_spawns[index] = new_solar_system;
 				}
 			});
-
-			// new_spawns.length = 0;
-			// graph.forEachNode((node) => {
-			// 	if (node.data.is_dead_end) new_spawns.push(node.data.solar_system);
-			// });
 
 			return Effect.succeed(
 				pipe(
 					project.solar_systems,
 					Array.filterMap((solar_system) => {
 						const is_new_spawn = new_spawns.includes(solar_system);
-						if (is_new_spawn && solar_system.spawn_type !== 'enabled') {
+						if (solar_system.locked) {
+							return Option.none();
+						} else if (is_new_spawn && solar_system.spawn_type !== 'enabled') {
 							return Option.some(
 								Action.UpdateSolarSystemAction.make({
 									old_value: solar_system,
