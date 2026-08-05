@@ -65,6 +65,22 @@
 	}}
 >
 	<form class="flex flex-col gap-4" {onsubmit}>
+		<label>
+			<span class="label-text">Name</span>
+			<!-- svelte-ignore a11y_autofocus -->
+			<input
+				class="input ring-surface-500 bg-surface-200-800"
+				name="name"
+				bind:value={name}
+				autofocus
+			/>
+			{#if is_duplicate_name}
+				<small class="text-warning-500">
+					Name already used by another project.
+				</small>
+			{/if}
+		</label>
+
 		<FileUpload
 			accept=".txt,.json"
 			maxFiles={1}
@@ -103,19 +119,6 @@
 		{#if parse_failed}
 			<small class="text-warning-500">Failed to parse uploaded file.</small>
 		{/if}
-		<label>
-			<span class="label-text">Name</span>
-			<input
-				class="input ring-surface-500 bg-surface-200-800"
-				name="name"
-				bind:value={name}
-			/>
-			{#if is_duplicate_name}
-				<small class="text-warning-500">
-					Name already used by another project.
-				</small>
-			{/if}
-		</label>
 		<div class="flex justify-end gap-2">
 			<button
 				class="btn preset-outlined-primary-500 w-auto"
@@ -128,7 +131,9 @@
 			<button
 				class="btn preset-filled-primary-500 w-auto"
 				type="submit"
-				disabled={is_duplicate_name || files[0] == null}
+				disabled={clean_name(name) === '' ||
+					is_duplicate_name ||
+					files[0] == null}
 			>
 				Import
 			</button>
