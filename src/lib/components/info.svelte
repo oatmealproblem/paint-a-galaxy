@@ -9,6 +9,7 @@
 	}: { children: Snippet; class?: string } = $props();
 </script>
 
+<!-- note: styles here intentionally do not use light/dark color pairs -->
 <Tooltip positioning={{ placement: 'top' }}>
 	<Tooltip.Trigger class={['cursor-help', class_]}>
 		<Icons.Info size={16} />
@@ -16,11 +17,11 @@
 	<Portal>
 		<Tooltip.Positioner class="z-100!">
 			<Tooltip.Content
-				class="card p-2 preset-filled-surface-950-50 text-sm max-w-xs"
+				class="card p-2 bg-surface-50 text-surface-950 text-sm max-w-xs shadow-sm shadow-black/50"
 			>
 				{@render children()}
 				<Tooltip.Arrow
-					class="[--arrow-size:--spacing(2)] [--arrow-background:var(--color-surface-950-50)]"
+					class="[--arrow-size:--spacing(2)] [--arrow-background:var(--color-surface-50)]"
 				>
 					<Tooltip.ArrowTip />
 				</Tooltip.Arrow>
