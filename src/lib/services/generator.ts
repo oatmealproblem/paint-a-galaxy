@@ -31,10 +31,20 @@ import { Connection } from '$lib/models/connection';
 import { Nebula } from '$lib/models/nebula';
 import { generate_grid_points } from '$lib/grid';
 
+interface GenerateSolarSystemsResult {
+	actions: Action[];
+	/** total solar systems after generation, including locked ones kept from before */
+	generated_count: number;
+	/** target number of solar systems from generator settings */
+	requested_count: number;
+}
+
 export class Generator extends Context.Tag('Generator')<
 	Generator,
 	{
-		generate_solar_systems(project: Project): Effect.Effect<Action[]>;
+		generate_solar_systems(
+			project: Project,
+		): Effect.Effect<GenerateSolarSystemsResult>;
 
 		generate_hyperlanes(project: Project): Effect.Effect<Action[]>;
 
@@ -214,9 +224,6 @@ export class Generator extends Context.Tag('Generator')<
 				) {
 					if (total === 0) {
 						// we've used all pixels with nonzero alpha
-						console.warn(
-							`Generated ${i} solar systems; no more valid locations`,
-						);
 						break;
 					}
 					const random = Math.floor(Math.random() * total);
@@ -253,13 +260,18 @@ export class Generator extends Context.Tag('Generator')<
 						}
 					}
 				}
-				return [
-					...delete_hyperlanes(project),
-					...delete_wormholes(project),
-					...delete_fallen_empire_zones(project),
-					...delete_solar_systems(project),
-					...create_solar_system_actions,
-				];
+				return {
+					actions: [
+						...delete_hyperlanes(project),
+						...delete_wormholes(project),
+						...delete_fallen_empire_zones(project),
+						...delete_solar_systems(project),
+						...create_solar_system_actions,
+					],
+					generated_count:
+						locked_solar_systems.length + create_solar_system_actions.length,
+					requested_count: number_of_systems,
+				};
 			});
 
 		function generate_hyperlanes(project: Project): Effect.Effect<Action[]> {

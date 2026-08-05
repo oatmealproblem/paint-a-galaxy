@@ -53,6 +53,54 @@ class ToolsPersistenceError extends Schema.TaggedError<ToolsPersistenceError>(
 	cause: Schema.Unknown,
 }) {}
 
+const ToolMessageType = Schema.Literal('info', 'warning', 'success', 'error');
+type ToolMessageType = typeof ToolMessageType.Type;
+
+class ApplyToolResult extends Schema.Class<ApplyToolResult>('ApplyToolResult')({
+	actions: Schema.Array(Action),
+	message: Schema.optionalWith(
+		Schema.OptionFromSelf(
+			Schema.Struct({
+				type: ToolMessageType,
+				text: Schema.String,
+			}),
+		),
+		{ default: () => Option.none() },
+	),
+}) {
+	static info(text: string, actions: Action[]): ApplyToolResult {
+		return ApplyToolResult.make({
+			actions,
+			message: Option.some({ type: 'info' as const, text }),
+		});
+	}
+
+	static success(text: string, actions: Action[]): ApplyToolResult {
+		return ApplyToolResult.make({
+			actions,
+			message: Option.some({ type: 'success' as const, text }),
+		});
+	}
+
+	static warning(text: string, actions: Action[]): ApplyToolResult {
+		return ApplyToolResult.make({
+			actions,
+			message: Option.some({ type: 'warning' as const, text }),
+		});
+	}
+
+	static error(text: string, actions: Action[]): ApplyToolResult {
+		return ApplyToolResult.make({
+			actions,
+			message: Option.some({ type: 'error' as const, text }),
+		});
+	}
+
+	static noop(text: string): ApplyToolResult {
+		return ApplyToolResult.warning(text, []);
+	}
+}
+
 export class Tools extends Context.Tag('Tools')<
 	Tools,
 	{
@@ -72,7 +120,7 @@ export class Tools extends Context.Tag('Tools')<
 			settings: Record<ToolSettingId, number>,
 			payload: ToolActionTypePayload[(typeof tools)[Id]['action_type']],
 			ctx: CanvasRenderingContext2D,
-		): Effect.Effect<Action[]>;
+		): Effect.Effect<ApplyToolResult>;
 
 		calculate_path<Id extends ToolId>(
 			tool_id: Id,
@@ -478,12 +526,14 @@ export class Tools extends Context.Tag('Tools')<
 									type: 'image/jpeg',
 									quality: 1,
 								});
-								return [
-									Action.SetCanvasAction.make({
-										new_value: blob,
-										old_value: project.canvas,
-									}),
-								];
+								return ApplyToolResult.make({
+									actions: [
+										Action.SetCanvasAction.make({
+											new_value: blob,
+											old_value: project.canvas,
+										}),
+									],
+								});
 							}),
 					),
 					Match.when('hyperlane_toggle', () => {
@@ -500,16 +550,22 @@ export class Tools extends Context.Tag('Tools')<
 								b: b_solar_system.id,
 							});
 							if (project.hyperlanes.some(Equal.equals(connection))) {
-								return Effect.succeed([
-									new Action.DeleteHyperlaneAction({ connection }),
-								]);
+								return Effect.succeed(
+									ApplyToolResult.make({
+										actions: [new Action.DeleteHyperlaneAction({ connection })],
+									}),
+								);
 							} else {
-								return Effect.succeed([
-									new Action.CreateHyperlaneAction({ connection }),
-								]);
+								return Effect.succeed(
+									ApplyToolResult.make({
+										actions: [new Action.CreateHyperlaneAction({ connection })],
+									}),
+								);
 							}
 						} else {
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop('Both endpoints must be solar systems.'),
+							);
 						}
 					}),
 					Match.when('nebula_create', () => {
@@ -519,7 +575,11 @@ export class Tools extends Context.Tag('Tools')<
 							coordinate: center.to_rounded(),
 							radius,
 						});
-						return Effect.succeed([new Action.CreateNebulaAction({ nebula })]);
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: [new Action.CreateNebulaAction({ nebula })],
+							}),
+						);
 					}),
 					Match.when('nebula_delete', () => {
 						const coordinate = get_single_payload(payload);
@@ -538,8 +598,15 @@ export class Tools extends Context.Tag('Tools')<
 						);
 						return Option.match(nebula, {
 							onSome: (nebula) =>
-								Effect.succeed([new Action.DeleteNebulaAction({ nebula })]),
-							onNone: () => Effect.succeed([]),
+								Effect.succeed(
+									ApplyToolResult.make({
+										actions: [new Action.DeleteNebulaAction({ nebula })],
+									}),
+								),
+							onNone: () =>
+								Effect.succeed(
+									ApplyToolResult.noop('No nebula at this location.'),
+								),
 						});
 					}),
 					Match.when('solar_system_create', () => {
@@ -549,7 +616,11 @@ export class Tools extends Context.Tag('Tools')<
 								Equal.equals(solar_system.coordinate, coordinate),
 							)
 						) {
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'A solar system already exists at this location.',
+								),
+							);
 						} else {
 							const id = pipe(
 								project.solar_systems,
@@ -562,9 +633,13 @@ export class Tools extends Context.Tag('Tools')<
 								id,
 								coordinate,
 							});
-							return Effect.succeed([
-								new Action.CreateSolarSystemAction({ solar_system }),
-							]);
+							return Effect.succeed(
+								ApplyToolResult.make({
+									actions: [
+										new Action.CreateSolarSystemAction({ solar_system }),
+									],
+								}),
+							);
 						}
 					}),
 					Match.when('solar_system_delete', () => {
@@ -573,6 +648,13 @@ export class Tools extends Context.Tag('Tools')<
 							settings,
 							project,
 						).filter((solar_system) => !solar_system.locked);
+						if (solar_systems.length === 0) {
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'No unlocked solar systems at this location.',
+								),
+							);
+						}
 						const solar_system_ids = new Set(
 							solar_systems.map((solar_system) => solar_system.id),
 						);
@@ -617,7 +699,7 @@ export class Tools extends Context.Tag('Tools')<
 								);
 							}
 						}
-						return Effect.succeed([
+						const delete_actions: Action[] = [
 							...hyperlanes.map(
 								(connection) =>
 									new Action.DeleteHyperlaneAction({ connection }),
@@ -630,7 +712,17 @@ export class Tools extends Context.Tag('Tools')<
 								(solar_system) =>
 									new Action.DeleteSolarSystemAction({ solar_system }),
 							),
-						]);
+						];
+						return Effect.succeed(
+							settings.bulk !== 0 ?
+								ApplyToolResult.info(
+									`Deleted ${solar_systems.length} solar ${
+										solar_systems.length === 1 ? 'system' : 'systems'
+									}`,
+									delete_actions,
+								)
+							:	ApplyToolResult.make({ actions: delete_actions }),
+						);
 					}),
 					Match.when('solar_system_lock', () => {
 						const solar_systems = get_solar_systems_payload(
@@ -638,17 +730,32 @@ export class Tools extends Context.Tag('Tools')<
 							settings,
 							project,
 						).filter((solar_system) => !solar_system.locked);
+						if (solar_systems.length === 0) {
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'No unlocked solar systems at this location.',
+								),
+							);
+						}
+						const update_actions = solar_systems.map((solar_system) => {
+							const updated_solar_system = new SolarSystem({
+								...solar_system,
+								locked: true,
+							});
+							return new Action.UpdateSolarSystemAction({
+								old_value: solar_system,
+								new_value: updated_solar_system,
+							});
+						});
 						return Effect.succeed(
-							solar_systems.map((solar_system) => {
-								const updated_solar_system = new SolarSystem({
-									...solar_system,
-									locked: true,
-								});
-								return new Action.UpdateSolarSystemAction({
-									old_value: solar_system,
-									new_value: updated_solar_system,
-								});
-							}),
+							settings.bulk !== 0 ?
+								ApplyToolResult.info(
+									`Locked ${solar_systems.length} solar ${
+										solar_systems.length === 1 ? 'system' : 'systems'
+									}`,
+									update_actions,
+								)
+							:	ApplyToolResult.make({ actions: update_actions }),
 						);
 					}),
 					Match.when('solar_system_unlock', () => {
@@ -657,17 +764,32 @@ export class Tools extends Context.Tag('Tools')<
 							settings,
 							project,
 						).filter((solar_system) => solar_system.locked);
+						if (solar_systems.length === 0) {
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'No locked solar systems at this location.',
+								),
+							);
+						}
+						const update_actions = solar_systems.map((solar_system) => {
+							const updated_solar_system = new SolarSystem({
+								...solar_system,
+								locked: false,
+							});
+							return new Action.UpdateSolarSystemAction({
+								old_value: solar_system,
+								new_value: updated_solar_system,
+							});
+						});
 						return Effect.succeed(
-							solar_systems.map((solar_system) => {
-								const updated_solar_system = new SolarSystem({
-									...solar_system,
-									locked: false,
-								});
-								return new Action.UpdateSolarSystemAction({
-									old_value: solar_system,
-									new_value: updated_solar_system,
-								});
-							}),
+							settings.bulk !== 0 ?
+								ApplyToolResult.info(
+									`Unlocked ${solar_systems.length} solar ${
+										solar_systems.length === 1 ? 'system' : 'systems'
+									}`,
+									update_actions,
+								)
+							:	ApplyToolResult.make({ actions: update_actions }),
 						);
 					}),
 					Match.when('spawn_preferred_toggle', () => {
@@ -683,14 +805,20 @@ export class Tools extends Context.Tag('Tools')<
 										'disabled'
 									:	'preferred',
 							});
-							return Effect.succeed([
-								new Action.UpdateSolarSystemAction({
-									old_value: solar_system,
-									new_value: updated_solar_system,
+							return Effect.succeed(
+								ApplyToolResult.make({
+									actions: [
+										new Action.UpdateSolarSystemAction({
+											old_value: solar_system,
+											new_value: updated_solar_system,
+										}),
+									],
 								}),
-							]);
+							);
 						} else {
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop('No solar system at this location.'),
+							);
 						}
 					}),
 					Match.when('spawn_toggle', () => {
@@ -706,14 +834,20 @@ export class Tools extends Context.Tag('Tools')<
 										'enabled'
 									:	'disabled',
 							});
-							return Effect.succeed([
-								new Action.UpdateSolarSystemAction({
-									old_value: solar_system,
-									new_value: updated_solar_system,
+							return Effect.succeed(
+								ApplyToolResult.make({
+									actions: [
+										new Action.UpdateSolarSystemAction({
+											old_value: solar_system,
+											new_value: updated_solar_system,
+										}),
+									],
 								}),
-							]);
+							);
 						} else {
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop('No solar system at this location.'),
+							);
 						}
 					}),
 					Match.when('wormhole_toggle', () => {
@@ -730,9 +864,11 @@ export class Tools extends Context.Tag('Tools')<
 								b: b_solar_system.id,
 							});
 							if (project.wormholes.some(Equal.equals(connection))) {
-								return Effect.succeed([
-									new Action.DeleteWormholeAction({ connection }),
-								]);
+								return Effect.succeed(
+									ApplyToolResult.make({
+										actions: [new Action.DeleteWormholeAction({ connection })],
+									}),
+								);
 							} else {
 								// each system can only have 1 wormhole, so remove any wormholes that share a system with the new wormhole
 								const overlapping_wormholes = project.wormholes.filter(
@@ -742,16 +878,24 @@ export class Tools extends Context.Tag('Tools')<
 										wormhole.b === connection.a ||
 										wormhole.b === connection.b,
 								);
-								return Effect.succeed([
-									...overlapping_wormholes.map(
-										(wormhole) =>
-											new Action.DeleteWormholeAction({ connection: wormhole }),
-									),
-									new Action.CreateWormholeAction({ connection }),
-								]);
+								return Effect.succeed(
+									ApplyToolResult.make({
+										actions: [
+											...overlapping_wormholes.map(
+												(wormhole) =>
+													new Action.DeleteWormholeAction({
+														connection: wormhole,
+													}),
+											),
+											new Action.CreateWormholeAction({ connection }),
+										],
+									}),
+								);
 							}
 						} else {
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop('Both endpoints must be solar systems.'),
+							);
 						}
 					}),
 					Match.when('fallen_empire_zone_create', () => {
@@ -760,7 +904,12 @@ export class Tools extends Context.Tag('Tools')<
 							project,
 							target,
 						});
-						if (Option.isNone(placement)) return Effect.succeed([]);
+						if (Option.isNone(placement))
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'No solar system available to anchor a Fallen Empire zone.',
+								),
+							);
 						const zone = new FallenEmpireZone({
 							id: FallenEmpireZoneId.make(crypto.randomUUID()),
 							type: 'random',
@@ -768,9 +917,11 @@ export class Tools extends Context.Tag('Tools')<
 							fallback_to_random: false,
 							...placement.value,
 						});
-						return Effect.succeed([
-							new Action.CreateFallenEmpireZoneAction({ zone }),
-						]);
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: [new Action.CreateFallenEmpireZoneAction({ zone })],
+							}),
+						);
 					}),
 					Match.when('fallen_empire_zone_delete', () => {
 						const coordinate = get_single_payload(payload);
@@ -781,12 +932,18 @@ export class Tools extends Context.Tag('Tools')<
 								Math.hypot(center.x - coordinate.x, center.y - coordinate.y) <=
 								FALLEN_EMPIRE_ZONE_RADIUS
 							) {
-								return Effect.succeed([
-									new Action.DeleteFallenEmpireZoneAction({ zone }),
-								]);
+								return Effect.succeed(
+									ApplyToolResult.make({
+										actions: [
+											new Action.DeleteFallenEmpireZoneAction({ zone }),
+										],
+									}),
+								);
 							}
 						}
-						return Effect.succeed([]);
+						return Effect.succeed(
+							ApplyToolResult.noop('No Fallen Empire zone at this location.'),
+						);
 					}),
 					Match.when('solar_system_move', () => {
 						const [origin, dest] = get_double_payload(payload);
@@ -794,16 +951,26 @@ export class Tools extends Context.Tag('Tools')<
 							Equal.equals(s.coordinate, origin),
 						);
 
-						// TODO: toast for noops
 						// noop if locked
-						if (!solar_system || solar_system.locked) return Effect.succeed([]);
+						if (!solar_system)
+							return Effect.succeed(
+								ApplyToolResult.noop('No solar system at this location.'),
+							);
+						if (solar_system.locked)
+							return Effect.succeed(
+								ApplyToolResult.noop('This solar system is locked.'),
+							);
 						// noop if not actually moved
 						const new_coordinate = Coordinate.make({
 							x: dest.x,
 							y: dest.y,
 						}).to_rounded();
 						if (Equal.equals(solar_system.coordinate, new_coordinate))
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'Solar system is already at this location.',
+								),
+							);
 						// noop if the destination is occupied by another system
 						if (
 							project.solar_systems.some(
@@ -812,7 +979,11 @@ export class Tools extends Context.Tag('Tools')<
 									Equal.equals(s.coordinate, new_coordinate),
 							)
 						)
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'Another solar system is already at this location.',
+								),
+							);
 
 						const updated_solar_system = new SolarSystem({
 							...solar_system,
@@ -824,7 +995,6 @@ export class Tools extends Context.Tag('Tools')<
 								new_value: updated_solar_system,
 							}),
 						];
-
 						// update FallenEmpireZone originating from moved system
 						const fallen_empire_zone = Iterable.findFirst(
 							project.fallen_empire_zones,
@@ -855,7 +1025,7 @@ export class Tools extends Context.Tag('Tools')<
 							}
 						}
 
-						return Effect.succeed(actions);
+						return Effect.succeed(ApplyToolResult.make({ actions }));
 					}),
 					Match.when('cluster_move', () => {
 						const [origin, dest] = get_double_payload(payload);
@@ -863,11 +1033,19 @@ export class Tools extends Context.Tag('Tools')<
 							Equal.equals(s.coordinate, origin),
 						);
 
-						if (!start_system || start_system.locked) return Effect.succeed([]);
+						if (!start_system)
+							return Effect.succeed(
+								ApplyToolResult.noop('No solar system at this location.'),
+							);
+						if (start_system.locked)
+							return Effect.succeed(
+								ApplyToolResult.noop('This solar system is locked.'),
+							);
 
 						const delta_x = dest.x - origin.x;
 						const delta_y = dest.y - origin.y;
-						if (delta_x === 0 && delta_y === 0) return Effect.succeed([]);
+						if (delta_x === 0 && delta_y === 0)
+							return Effect.succeed(ApplyToolResult.noop('No movement.'));
 
 						const cluster_ids = new Set<SolarSystemId>();
 						const queue: SolarSystemId[] = [start_system.id];
@@ -903,7 +1081,11 @@ export class Tools extends Context.Tag('Tools')<
 							cluster_ids.has(s.id),
 						);
 						if (cluster_systems.some((s) => s.locked))
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'This cluster contains a locked solar system.',
+								),
+							);
 						const new_coordinate_by_id = new Map<SolarSystemId, Coordinate>(
 							cluster_systems.map((system) => [
 								system.id,
@@ -915,7 +1097,6 @@ export class Tools extends Context.Tag('Tools')<
 						);
 
 						// noop if any cluster system would land on a non-cluster system
-						// TODO: show a warning toast once toasts are implemented
 						const occupied_coordinates = HashSet.fromIterable(
 							project.solar_systems
 								.filter((s) => !cluster_ids.has(s.id))
@@ -926,7 +1107,11 @@ export class Tools extends Context.Tag('Tools')<
 								HashSet.has(occupied_coordinates, coordinate),
 							)
 						)
-							return Effect.succeed([]);
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'The cluster would collide with another solar system.',
+								),
+							);
 
 						const solar_system_actions = cluster_systems.map(
 							(system) =>
@@ -1041,11 +1226,15 @@ export class Tools extends Context.Tag('Tools')<
 							}),
 							Array.fromIterable,
 						);
-						return Effect.succeed([
-							...solar_system_actions,
-							...fallen_empire_zone_actions,
-							...nebula_actions,
-						]);
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: [
+									...solar_system_actions,
+									...fallen_empire_zone_actions,
+									...nebula_actions,
+								],
+							}),
+						);
 					}),
 					Match.exhaustive,
 				);

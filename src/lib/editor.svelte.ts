@@ -8,18 +8,19 @@ import {
 	type ToolSettingId,
 } from './models/tool';
 import { Project, ProjectListing } from './models/project';
-import { Effect, Layer, Match, pipe, Record } from 'effect';
+import { Effect, Layer, Match, Option, pipe, Record } from 'effect';
 import { Projects } from './services/projects';
 import { KeyVal } from './services/key_val';
 import { Tools } from './services/tools';
 import { Actions } from './services/actions';
-import type { Action } from './models/action';
+import { Action } from './models/action';
 import { ViewSettings } from './models/view_settings';
 import { View } from './services/view';
 import { GeneratorSettings } from './models/generator_settings';
 import { Generator } from './services/generator';
 import { SolarSystemId } from './models/solar_system';
 import type { FallenEmpireZoneId } from './models/fallen_empire_zone';
+import { toaster } from './toaster';
 
 type EditorLayer = Layer.Layer<Actions | Generator | Projects | Tools | View>;
 
@@ -202,20 +203,33 @@ export class Editor {
 		if (solar_systems) {
 			const effect = Effect.gen(function* () {
 				const generator_service = yield* Generator;
-				const actions =
-					yield* generator_service.generate_solar_systems(project);
+				const result = yield* generator_service.generate_solar_systems(project);
 				const actions_service = yield* Actions;
 				const updated_project = yield* actions_service.apply_actions(
 					project,
-					actions,
+					result.actions,
 				);
-				return [updated_project, actions] as const;
+				return [updated_project, result] as const;
 			});
-			const [updated_project, additional_actions] = await Effect.runPromise(
+			const [updated_project, solar_systems_result] = await Effect.runPromise(
 				Effect.provide(effect, this.#layer),
 			);
 			project = updated_project;
-			all_generator_actions.push(...additional_actions);
+			all_generator_actions.push(...solar_systems_result.actions);
+			const { generated_count, requested_count } = solar_systems_result;
+			if (generated_count < requested_count) {
+				const hints: string[] = [];
+				if (project.generator_settings.min_distance_between_systems > 0)
+					hints.push('decreasing Min Distance');
+				if (project.grid_config.snap)
+					hints.push('disabling Snap to Grid', 'using a smaller grid');
+				toaster.warning({
+					title: 'Not Enough Room',
+					description:
+						`Generated ${generated_count} of ${requested_count} solar systems; no more valid locations.` +
+						(hints.length > 0 ? ` Try ${hints.join(' or ')}.` : ''),
+				});
+			}
 		}
 
 		if (hyperlanes) {
@@ -287,18 +301,27 @@ export class Editor {
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;
-			const actions = yield* tools_service.apply_tool(
+			const result = yield* tools_service.apply_tool(
 				project,
 				tool_id,
 				settings,
 				payload,
 				ctx,
 			);
-			return actions;
+			return result;
 		});
 		return Effect.runPromise(Effect.provide(effect, this.#layer)).then(
-			(actions) => {
-				this.apply_actions(actions);
+			({ actions, message }) => {
+				Option.match(message, {
+					onSome: ({ type, text }) =>
+						toaster.create({
+							type,
+							title: tools[tool_id].name,
+							description: text,
+						}),
+					onNone: () => {},
+				});
+				this.apply_actions([...actions]);
 			},
 		);
 	}
@@ -394,6 +417,10 @@ export class Editor {
 				this.#select_tool_pair_for_step();
 				this.#done_stack = [];
 				this.#undone_stack = [];
+				toaster.success({
+					title: 'Project Deleted',
+					description: `"${project.name}" has been deleted.`,
+				});
 			},
 		);
 	}
