@@ -139,7 +139,8 @@
 							<input
 								class="input ring-surface-300-700 bg-surface-200-800"
 								placeholder="Random"
-								disabled={Option.isSome(initializer_name)}
+								disabled={Option.isSome(initializer_name) ||
+									solar_system.value.locked}
 								{@attach debounced_value(
 									() =>
 										solar_system.value
@@ -202,6 +203,7 @@
 							<select
 								class="select ring-surface-300-700 bg-surface-200-800"
 								value={solar_system.value.spawn_type}
+								disabled={solar_system.value.locked}
 								onchange={(e) =>
 									editor().apply_actions([
 										new Action.UpdateSolarSystemAction({
@@ -245,7 +247,10 @@
 								<option value="reserved_z">Reserved Z</option>
 							</select>
 						</label>
-						<InitializerCombobox solar_system={solar_system.value} />
+						<InitializerCombobox
+							solar_system={solar_system.value}
+							disabled={solar_system.value.locked}
+						/>
 					{/if}
 				</FloatingPanel.Body>
 				<FloatingPanel.ResizeTrigger axis="se" />

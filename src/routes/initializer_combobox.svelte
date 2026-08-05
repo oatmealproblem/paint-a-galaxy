@@ -26,8 +26,9 @@
 
 	type Props = {
 		solar_system: SolarSystem;
+		disabled?: boolean;
 	};
-	const { solar_system }: Props = $props();
+	const { solar_system, disabled = false }: Props = $props();
 
 	const editor = get_editor();
 
@@ -134,6 +135,7 @@
 	class="gap-0"
 	placeholder="Search..."
 	{collection}
+	{disabled}
 	onOpenChange={on_open_change}
 	inputValue={input}
 	onInputValueChange={on_input_value_change}

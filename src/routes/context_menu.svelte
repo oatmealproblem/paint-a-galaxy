@@ -153,7 +153,10 @@
 							<Menu.Item value="open_solar_system_details|{solar_system.id}">
 								<Menu.ItemText>Open System Details</Menu.ItemText>
 							</Menu.Item>
-							<Menu.Item value="delete_solar_system|{solar_system.id}">
+							<Menu.Item
+								value="delete_solar_system|{solar_system.id}"
+								disabled={solar_system.locked}
+							>
 								<Menu.ItemText>Delete System</Menu.ItemText>
 							</Menu.Item>
 							{#if project.fallen_empire_zones.length > 0}
@@ -168,7 +171,10 @@
 									),
 								)}
 								<Menu positioning={{ offset: { mainAxis: 8, crossAxis: -8 } }}>
-									<Menu.TriggerItem value="connect_to_fallen_empire">
+									<Menu.TriggerItem
+										value="connect_to_fallen_empire"
+										disabled={solar_system.locked}
+									>
 										<Menu.ItemText>Connect to Fallen Empire</Menu.ItemText>
 										<Menu.ItemIndicator>
 											<Icons.ChevronRight class="size-4" />
@@ -186,6 +192,7 @@
 														<Menu.OptionItem
 															type="checkbox"
 															value={zone.id}
+															disabled={solar_system.locked}
 															checked={zone.connections.includes(
 																solar_system.id,
 															)}
