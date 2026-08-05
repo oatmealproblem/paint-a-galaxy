@@ -213,10 +213,12 @@
 			pipe(
 				solar_systems,
 				Iterable.filter((solar_system) => {
-					const dist = solar_system.coordinate.distance_to(new Coordinate({
-						x: CANVAS_WIDTH / 2,
-						y: CANVAS_HEIGHT / 2,
-					}));
+					const dist = solar_system.coordinate.distance_to(
+						new Coordinate({
+							x: CANVAS_WIDTH / 2,
+							y: CANVAS_HEIGHT / 2,
+						}),
+					);
 					return (
 						(editor().view_settings.show_giga_core &&
 							dist < GIGA_RANDOM_CORE_RADIUS) ||
@@ -457,9 +459,7 @@
 						(editor().warned_solar_system_ids = out_of_bounds_system_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>
-						Out-of-Bounds Solar Systems
-					</td>
+					<td>Out-of-Bounds Solar Systems</td>
 					<td class="text-end">{out_of_bounds_system_ids.length}</td>
 				</tr>
 			{/if}
@@ -471,9 +471,7 @@
 						(editor().warned_solar_system_ids = systems_in_l_cluster_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>
-						Systems in L-Cluster
-					</td>
+					<td>Systems in L-Cluster</td>
 					<td class="text-end">{systems_in_l_cluster_ids.length}</td>
 				</tr>
 			{/if}
@@ -485,9 +483,7 @@
 						(editor().warned_solar_system_ids = systems_in_core_ids)}
 					onmouseout={() => (editor().warned_solar_system_ids = [])}
 				>
-					<td>
-						Systems in Core Zone
-					</td>
+					<td>Systems in Core Zone</td>
 					<td class="text-end">{systems_in_core_ids.length}</td>
 				</tr>
 			{/if}
