@@ -133,6 +133,12 @@
 		}
 	}}
 >
+	<Menu.Context>
+		{#snippet children(menu)}
+			<!-- hack: a bug in zag causes the initial open to be at 0,0 instead of the proper point, this fixes it -->
+			{menu().reposition()}
+		{/snippet}
+	</Menu.Context>
 	<Portal>
 		<Menu.Positioner class="z-10!">
 			<Menu.Content class="bg-surface-100-900 border-surface-300-700">
