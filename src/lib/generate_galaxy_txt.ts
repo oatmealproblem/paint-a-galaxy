@@ -1,4 +1,4 @@
-import { Array, Iterable, Option, Order, pipe } from 'effect';
+import { Array, Effect, Iterable, Option, Order, pipe } from 'effect';
 
 import {
 	FALLEN_EMPIRE_ZONE_RADIUS,
@@ -24,6 +24,7 @@ import {
 	FallenEmpireZoneId,
 } from './models/fallen_empire_zone';
 import { convert_degrees_to_radians } from './math';
+import { Random } from 'effect';
 
 const DIRECTIONS = {
 	0: 'e',
@@ -207,6 +208,10 @@ export function generate_stellaris_galaxy(project: Project): string {
 
 	const systems_entries = pipe(
 		project.solar_systems,
+		// stellaris assigns initializers in the order the systems are listed, so the first systems get all the high-weight (ie guaranteed) initializers
+		// shuffle the order so the distribution is more even, esp for projects with many hand-placed systems
+		Random.shuffle,
+		Effect.runSync,
 		// sort systems with initializers to the top, otherwise random systems might use unique initializers first
 		Array.sortBy(
 			Order.mapInput(Order.number, (solar_system) =>
