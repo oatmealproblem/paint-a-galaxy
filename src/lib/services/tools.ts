@@ -658,53 +658,69 @@ export class Tools extends Context.Tag('Tools')<
 						const solar_system_ids = new Set(
 							solar_systems.map((solar_system) => solar_system.id),
 						);
-						const hyperlanes = project.hyperlanes.filter(
+						const is_not_deleted = (id: SolarSystemId) => !solar_system_ids.has(id);
+						const deleted_hyperlanes = project.hyperlanes.filter(
 							(connection) =>
 								solar_system_ids.has(connection.a) ||
 								solar_system_ids.has(connection.b),
 						);
-						const wormholes = project.wormholes.filter(
+						const deleted_wormholes = project.wormholes.filter(
 							(connection) =>
 								solar_system_ids.has(connection.a) ||
 								solar_system_ids.has(connection.b),
 						);
 						// fallen empire zones whose origin is deleted are re-homed to
 						// a new origin that best preserves their location; if no valid
-						// new origin exists, they are deleted
+						// new origin exists, they are deleted; connections to deleted
+						// solar systems are removed
 						const fallen_empire_zone_actions: Action[] = [];
 						const denied_origin_ids = new Set<SolarSystemId>(solar_system_ids);
 						for (const zone of project.fallen_empire_zones) {
-							if (!solar_system_ids.has(zone.origin)) continue;
-							const target =
-								project.get_fallen_empire_zone_coordinate_unsafe(zone);
-							const placement = find_best_fallen_empire_zone_placement({
-								project,
-								target,
-								denied_origin_ids,
-							});
-							if (Option.isNone(placement)) {
-								fallen_empire_zone_actions.push(
-									new Action.DeleteFallenEmpireZoneAction({ zone }),
-								);
-							} else {
-								denied_origin_ids.add(placement.value.origin);
-								fallen_empire_zone_actions.push(
-									new Action.UpdateFallenEmpireZoneAction({
-										old_value: zone,
-										new_value: new FallenEmpireZone({
-											...zone,
-											...placement.value,
+							if (!solar_system_ids.has(zone.origin)) {
+								if (!solar_system_ids.isDisjointFrom(new Set(zone.connections))) {
+									fallen_empire_zone_actions.push(
+										new Action.UpdateFallenEmpireZoneAction({
+											old_value: zone,
+											new_value: new FallenEmpireZone({
+												...zone,
+												connections: zone.connections.filter(is_not_deleted),
+											}),
 										}),
-									}),
-								);
+									);
+								}
+							} else {
+								const target =
+									project.get_fallen_empire_zone_coordinate_unsafe(zone);
+								const placement = find_best_fallen_empire_zone_placement({
+									project,
+									target,
+									denied_origin_ids,
+								});
+								if (Option.isNone(placement)) {
+									fallen_empire_zone_actions.push(
+										new Action.DeleteFallenEmpireZoneAction({ zone }),
+									);
+								} else {
+									denied_origin_ids.add(placement.value.origin);
+									fallen_empire_zone_actions.push(
+										new Action.UpdateFallenEmpireZoneAction({
+											old_value: zone,
+											new_value: new FallenEmpireZone({
+												...zone,
+												...placement.value,
+												connections: zone.connections.filter(is_not_deleted),
+											}),
+										}),
+									);
+								}
 							}
 						}
 						const delete_actions: Action[] = [
-							...hyperlanes.map(
+							...deleted_hyperlanes.map(
 								(connection) =>
 									new Action.DeleteHyperlaneAction({ connection }),
 							),
-							...wormholes.map(
+							...deleted_wormholes.map(
 								(connection) => new Action.DeleteWormholeAction({ connection }),
 							),
 							...fallen_empire_zone_actions,

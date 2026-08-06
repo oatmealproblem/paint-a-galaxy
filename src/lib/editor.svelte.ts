@@ -351,7 +351,6 @@ export class Editor {
 	undo() {
 		const actions = this.#done_stack.pop();
 		if (actions == null) throw new Error('No actions to undo.');
-		this.#undone_stack.push(actions);
 		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const actions_service = yield* Actions;
@@ -363,7 +362,13 @@ export class Editor {
 		});
 		return Effect.runPromise(Effect.provide(effect, this.#layer)).then(
 			(updated_project) => {
+				this.#undone_stack.push(actions);
 				this.project = updated_project;
+			},
+			(reason: unknown) => {
+				// undo failed; restore the history stack
+				this.#done_stack.push(actions);
+				throw reason;
 			},
 		);
 	}
@@ -371,8 +376,16 @@ export class Editor {
 	redo() {
 		const actions = this.#undone_stack.pop();
 		if (actions == null) throw new Error('No actions to redo.');
-		this.#done_stack.push(actions);
-		this.apply_actions(actions, { is_redo: true });
+		return this.apply_actions(actions, { is_redo: true }).then(
+			() => {
+				this.#done_stack.push(actions);
+			},
+			(reason: unknown) => {
+				// redo failed; restore the history stack
+				this.#undone_stack.push(actions);
+				throw reason;
+			},
+		);
 	}
 
 	async create_project(name: string, defaults?: Project): Promise<void> {
