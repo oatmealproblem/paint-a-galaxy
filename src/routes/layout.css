@@ -7,10 +7,14 @@
 
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
-:disabled,
-[data-disabled] {
+:disabled {
 	cursor: not-allowed;
 	opacity: 0.5;
+	pointer-events: initial;
+}
+
+[data-disabled] {
+	cursor: not-allowed;
 	pointer-events: initial;
 }
 
