@@ -213,7 +213,7 @@ function validate_project_state(
 		Array.dedupe,
 		Iterable.map((validation) => validation(project)),
 		Effect.all,
-		Effect.as(project)
+		Effect.as(project),
 	);
 }
 
@@ -427,7 +427,7 @@ export class Actions extends Context.Tag('Actions')<
 						}),
 					);
 				}
-				return validate_project_state(updated_project, action_tags)
+				return validate_project_state(updated_project, action_tags);
 			},
 
 			undo_actions(project, actions) {

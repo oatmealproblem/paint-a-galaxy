@@ -22,7 +22,6 @@ import {
 	Iterable,
 	Array,
 	Order,
-	Number,
 	HashSet,
 } from 'effect';
 import { Action, type UpdateFallenEmpireZoneAction } from '$lib/models/action';
@@ -622,11 +621,11 @@ export class Tools extends Context.Tag('Tools')<
 								),
 							);
 						} else {
+							const ids = new Set(project.solar_systems.map(Struct.get('id')));
 							const id = pipe(
-								project.solar_systems,
-								Iterable.map((solar_system) => solar_system.id),
-								Iterable.reduce(-1, Number.max),
-								Number.increment,
+								Iterable.range(0),
+								Iterable.findFirst((id) => !ids.has(SolarSystemId.make(id))),
+								Option.getOrThrow,
 								SolarSystemId.make,
 							);
 							const solar_system = new SolarSystem({
