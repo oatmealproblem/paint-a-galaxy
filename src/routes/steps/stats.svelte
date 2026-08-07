@@ -108,28 +108,45 @@
 		),
 	);
 	const missing_marauder_1 = $derived(
-		check_for_missing_associated_systems(
-			['marauder_1_1', 'marauder_1_2', 'marauder_1_3'],
+		check_for_missing_associated_systems({
+			required: ['marauder_1_1', 'marauder_1_2', 'marauder_1_3'],
 			systems_by_initializer,
-		),
+		}),
 	);
 	const missing_marauder_2 = $derived(
-		check_for_missing_associated_systems(
-			['marauder_2_1', 'marauder_2_2', 'marauder_2_3'],
+		check_for_missing_associated_systems({
+			required: ['marauder_2_1', 'marauder_2_2', 'marauder_2_3'],
 			systems_by_initializer,
-		),
+		}),
 	);
 	const missing_marauder_3 = $derived(
-		check_for_missing_associated_systems(
-			['marauder_3_1', 'marauder_3_2', 'marauder_3_3'],
+		check_for_missing_associated_systems({
+			required: ['marauder_3_1', 'marauder_3_2', 'marauder_3_3'],
 			systems_by_initializer,
-		),
+		}),
 	);
 	const missing_ratling = $derived(
-		check_for_missing_associated_systems(
-			['ratling_1_1', 'ratling_1_2', 'ratling_1_3'],
+		check_for_missing_associated_systems({
+			required: ['ratling_1_1', 'ratling_1_2', 'ratling_1_3'],
 			systems_by_initializer,
-		),
+		}),
+	);
+	const missing_imperial_fiefdom = $derived(
+		check_for_missing_associated_systems({
+			required: [
+				'overlord_system_init',
+				'overlord_system_2_init',
+				'overlord_system_3_init',
+			],
+			optional: [
+				'overlord_system_4_init',
+				'overlord_system_5_init',
+				'overlord_system_6_init',
+				'overlord_system_7_init',
+				'overlord_system_8_init',
+			],
+			systems_by_initializer,
+		}),
 	);
 	const fallen_empire_zones = $derived(editor().project.fallen_empire_zones);
 	const fallen_empire_zone_centers = $derived(
@@ -238,14 +255,19 @@
 		missing_initializers: InitializerKey[];
 		system_ids: SolarSystemId[];
 	};
-	function check_for_missing_associated_systems(
-		initializers: InitializerKey[],
-		systems_by_initializer: Record<string, SolarSystem[]>,
-	): Option.Option<MissingSystemsWarning> {
-		const has_initializers = initializers.filter(
-			(initializer) => initializer in systems_by_initializer,
-		);
-		const missing_initializers = initializers.filter(
+	function check_for_missing_associated_systems({
+		required,
+		optional = [],
+		systems_by_initializer,
+	}: {
+		required: InitializerKey[];
+		optional?: InitializerKey[];
+		systems_by_initializer: Record<string, SolarSystem[]>;
+	}): Option.Option<MissingSystemsWarning> {
+		const has_initializers = required
+			.concat(optional)
+			.filter((initializer) => initializer in systems_by_initializer);
+		const missing_initializers = required.filter(
 			(initializer) => !(initializer in systems_by_initializer),
 		);
 		if (has_initializers.length > 0 && missing_initializers.length > 0) {
@@ -424,6 +446,10 @@
 			{@render missing_systems_warning(
 				missing_ratling,
 				'Missing Ketling Systems',
+			)}
+			{@render missing_systems_warning(
+				missing_imperial_fiefdom,
+				'Missing Fiefdom Systems',
 			)}
 			{#if overlapping_fallen_empire_zone_ids.length > 0}
 				<!-- svelte-ignore a11y_mouse_events_have_key_events -->

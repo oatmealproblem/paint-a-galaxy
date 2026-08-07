@@ -1383,14 +1383,62 @@ export const initializer_metadata: Record<
 		description: 'Ruined Orbital Ring',
 		dlc: ['Overlord'],
 	},
-	overlord_system_init: null, // event
-	overlord_system_2_init: null, // event
-	overlord_system_3_init: null, // event
-	overlord_system_4_init: null, // event
-	overlord_system_5_init: null, // event
-	overlord_system_6_init: null, // event
-	overlord_system_7_init: null, // event
-	overlord_system_8_init: null, // event
+	overlord_system_init: {
+		unique: true,
+		name: 'Aix',
+		description: 'Imperial Fiefdom Liege Capital',
+		dlc: ['Overlord'],
+		before: ['overlord_system_2_init', 'overlord_system_3_init', 'overlord_system_4_init', 'overlord_system_5_init', 'overlord_system_6_init', 'overlord_system_7_init', 'overlord_system_8_init'],
+	},
+	overlord_system_2_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Liege 2',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_3_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Liege 3',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_4_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Vassal 1 (Kingdom)',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_5_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Vassal 2 (Prince-Electorate)',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_6_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Vassal 3 (Palatinate)',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_7_init: {
+		unique: true,
+		name: null,
+		description: 'Imperial Fiefdom Vassal 4 (League)',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
+	overlord_system_8_init: {
+		unique: false,
+		name: null,
+		description: 'Imperial Fiefdom Liege Gateway',
+		dlc: ['Overlord'],
+		after: 'overlord_system_init',
+	},
 
 	// paragon_initializers.txt
 	legendary_leader_start_site: {
