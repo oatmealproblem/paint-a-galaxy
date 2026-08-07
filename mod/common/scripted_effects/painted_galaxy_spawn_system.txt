@@ -1,4 +1,5 @@
 painted_galaxy_spawn_connected_system = {
+	optimize_memory
 	# set max_distance (for spawning systems) to 60 (halved later on)
 	set_variable = {
 		which = painted_galaxy_max_distance
@@ -99,6 +100,7 @@ painted_galaxy_spawn_connected_system = {
 }
 
 painted_galaxy_spawn_system_at_distance = {
+	optimize_memory
 	spawn_system = {
 		initializer = $INITIALIZER$
 		max_distance = $DISTANCE$

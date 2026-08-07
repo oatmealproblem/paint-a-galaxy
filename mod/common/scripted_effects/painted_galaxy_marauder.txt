@@ -1,4 +1,5 @@
 painted_galaxy_spawn_marauder_systems_2_and_3 = {
+	optimize_memory
 	random_system = {
 		limit = {
 			has_star_flag = marauder_capital_$NUMBER$
