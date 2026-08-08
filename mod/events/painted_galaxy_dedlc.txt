@@ -117,6 +117,7 @@ event = {
 							has_star_flag = salvager_enclave_system
 							has_star_flag = ruined_catapult_system
 							has_star_flag = ruined_orbital_ring_system
+							has_star_flag = overlord_empire_flag
 						}
 					}
 					AND = {

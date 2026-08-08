@@ -17,6 +17,7 @@ event = {
 					# exceptions
 					has_star_flag = chosen_system
 					has_star_flag = starlit_sealed_system
+					has_star_flag = overlord_empire_flag # imperial fiefdom liege and AI vassals
 				}
 			}
 		}
