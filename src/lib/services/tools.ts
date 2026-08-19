@@ -4,9 +4,11 @@ import {
 	tools,
 	ToolSettingId,
 	ToolSettings,
+	type Tool,
 	type ToolActionTypePayload,
 	type ToolId,
 } from '$lib/models/tool';
+import * as turf from '@turf/turf';
 import { Project } from '$lib/models/project';
 import {
 	Context,
@@ -21,8 +23,11 @@ import {
 	Equal,
 	Iterable,
 	Array,
-	Order,
 	HashSet,
+	flow,
+	String,
+	Tuple,
+	Boolean,
 } from 'effect';
 import { Action, type UpdateFallenEmpireZoneAction } from '$lib/models/action';
 import { KeyVal } from './key_val';
@@ -34,6 +39,7 @@ import {
 	FALLEN_EMPIRE_ZONE_ANGLES,
 	FALLEN_EMPIRE_ZONE_DISTANCES,
 	FALLEN_EMPIRE_ZONE_RADIUS,
+	MAX_SYMMETRY_MATCH_DISTANCE,
 } from '$lib/constants';
 import { draw_stroke } from '$lib/canvas';
 import { Connection } from '$lib/models/connection';
@@ -125,6 +131,7 @@ export class Tools extends Context.Tag('Tools')<
 			tool_id: Id,
 			settings: Record<ToolSettingId, number>,
 			payload: ToolActionTypePayload[(typeof tools)[Id]['action_type']],
+			project: Project,
 		): string;
 	}
 >() {
@@ -225,19 +232,21 @@ export class Tools extends Context.Tag('Tools')<
 					.join('');
 			}
 
-			function get_solar_systems_payload(
+			function get_bulkable_solar_systems_payload(
 				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 				settings: Record<ToolSettingId, number>,
 				project: Project,
 			): SolarSystem[] {
 				if (settings.bulk == 0) {
 					const coordinate = get_single_payload(payload);
-					return project.solar_systems.filter((solar_system) =>
-						Equal.equals(solar_system.coordinate, coordinate),
-					);
+					return project
+						.find_closest_solar_system(coordinate, {
+							max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+						})
+						.pipe(Option.match({ onSome: Array.of, onNone: Array.empty }));
 				} else {
 					const path = calculate_freehand_path(
-						get_multi_payload(payload),
+						payload,
 						settings.bulk_brush_size,
 					);
 					const canvas = new OffscreenCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -264,26 +273,75 @@ export class Tools extends Context.Tag('Tools')<
 				}
 			}
 
-			function get_single_payload(
-				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
-			) {
-				if (!Array.isArray(payload)) return payload;
-				throw Error('Unexpected array tool payload');
+			function get_single_payload<T>(payload: T[]): T {
+				if (Array.isArray(payload) && payload.length === 1) return payload[0]!;
+				throw Error('Unexpected non-1-element-array tool payload');
 			}
 
-			function get_double_payload(
-				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
-			) {
+			function get_double_payload<T>(payload: T[]): [T, T] {
 				if (Array.isArray(payload) && payload.length === 2)
-					return payload as [Coordinate, Coordinate];
+					return payload as [T, T];
 				throw Error('Unexpected non-2-element-array tool payload');
 			}
 
-			function get_multi_payload(
-				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
-			) {
-				if (Array.isArray(payload)) return payload;
-				throw Error('Unexpected non-array tool payload');
+			function get_quadruple_payload<T>(payload: T[]): [T, T, T, T] {
+				if (Array.isArray(payload) && payload.length === 4)
+					return payload as [T, T, T, T];
+				throw Error('Unexpected non-4-element-array tool payload');
+			}
+
+			function snap_to_systems(
+				project: Project,
+				{ allow_partial = false } = {},
+			): (payload: Coordinate[]) => Option.Option<SolarSystem[]> {
+				return (payload) => {
+					const solar_systems = pipe(
+						payload,
+						Iterable.map((coordinate) =>
+							project.find_closest_solar_system(coordinate, {
+								max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+							}),
+						),
+						Array.fromIterable,
+					);
+					if (allow_partial) {
+						const values = Array.getSomes(solar_systems);
+						if (values.length) {
+							return Option.some(values);
+						} else {
+							return Option.none();
+						}
+					} else if (Array.every(solar_systems, Option.isSome)) {
+						return Option.some(Array.map(solar_systems, (s) => s.value));
+					} else {
+						return Option.none();
+					}
+				};
+			}
+
+			// expands a tool's base payload into its symmetric copies; the tool
+			// decides how snapped points resolve (via find_closest_solar_system),
+			// and its payload_transformer runs first (e.g. rectangles expand to
+			// their full 4 corners so symmetric copies transform the whole
+			// quadrilateral rather than just two opposite corners)
+			function get_symmetric_payloads_for_tool(
+				project: Project,
+				tool: Tool,
+				settings: Record<ToolSettingId, number>,
+				payload: Coordinate[],
+			): Iterable<Coordinate[]> {
+				const base_payload: ToolActionTypePayload[keyof ToolActionTypePayload] =
+					tool.payload_transformer != null ?
+						tool.payload_transformer(payload)
+					:	payload;
+				return pipe(
+					Iterable.of(base_payload),
+					Iterable.appendAll(
+						project.symmetry_config.calculate_symmetric_coordinates(
+							base_payload,
+						),
+					),
+				);
 			}
 
 			// find the origin system, angle, and distance that gets a fallen
@@ -369,17 +427,15 @@ export class Tools extends Context.Tag('Tools')<
 				return best;
 			}
 
-			const calculate_path: (typeof Tools)['Service']['calculate_path'] = (
-				tool_id,
-				settings,
-				payload,
-			) =>
-				Match.value(tool_id as ToolId).pipe(
+			// builds the path for a single payload (no symmetry)
+			const calculate_single_path: (
+				tool_id: ToolId,
+				settings: Record<ToolSettingId, number>,
+				payload: ToolActionTypePayload[keyof ToolActionTypePayload],
+			) => string = (tool_id, settings, payload) =>
+				Match.value(tool_id).pipe(
 					Match.when(Match.is('freehand_draw', 'freehand_erase'), () => {
-						return calculate_freehand_path(
-							get_multi_payload(payload),
-							settings.size,
-						);
+						return calculate_freehand_path(payload, settings.size);
 					}),
 					Match.when(
 						Match.is(
@@ -389,10 +445,7 @@ export class Tools extends Context.Tag('Tools')<
 						),
 						() => {
 							if (settings.bulk === 0) return '';
-							return calculate_freehand_path(
-								get_multi_payload(payload),
-								settings.bulk_brush_size,
-							);
+							return calculate_freehand_path(payload, settings.bulk_brush_size);
 						},
 					),
 					Match.when(
@@ -411,12 +464,35 @@ export class Tools extends Context.Tag('Tools')<
 						return `M ${a.x} ${a.y} A ${r1} ${r2} ${(angle / Math.PI) * 180} 0 0 ${b.x} ${b.y} A ${r1} ${r2} ${(angle / Math.PI) * 180} 0 0 ${a.x} ${a.y} Z`;
 					}),
 					Match.when(Match.is('rectangle_draw', 'rectangle_erase'), () => {
-						const [a, b] = get_double_payload(payload);
-						const x_min = Math.min(a.x, b.x);
-						const x_max = Math.max(a.x, b.x);
-						const y_min = Math.min(a.y, b.y);
-						const y_max = Math.max(a.y, b.y);
-						return `M ${x_min} ${y_min} L ${x_max} ${y_min} L ${x_max} ${y_max} L ${x_min} ${y_max} Z`;
+						// rectangle payloads arrive already expanded to their 4
+						// corners (see get_symmetric_payloads_for_tool). The base
+						// payload is normalized to a consistent vertex order, but
+						// a bilateral mirror reflects a copy without reordering,
+						// flipping its winding; under the nonzero fill rule an
+						// overlap with the base rectangle would then punch a hole,
+						// so keep the winding consistent by reversing the order
+						// when the ring is clockwise
+						const corners = get_quadruple_payload(payload);
+						const [c1, c2, c3, c4] = corners;
+						const ordered =
+							(
+								turf.booleanClockwise(
+									[...corners, corners[0]].map((corner) => [
+										corner.x,
+										corner.y,
+									]),
+								)
+							) ?
+								[c1, c4, c3, c2]
+							:	corners;
+						return (
+							ordered
+								.map(
+									(corner, i) =>
+										`${i === 0 ? 'M' : 'L'} ${corner.x} ${corner.y}`,
+								)
+								.join(' ') + ' Z'
+						);
 					}),
 					Match.when(Match.is('line_draw', 'line_erase'), () => {
 						const [a, b] = get_double_payload(payload);
@@ -472,6 +548,30 @@ export class Tools extends Context.Tag('Tools')<
 					Match.exhaustive,
 				);
 
+			// expands the payload to its symmetric copies and joins their paths,
+			// base first, into a single path string so the caller doesn't need
+			// to handle symmetry itself
+			const calculate_path: (typeof Tools)['Service']['calculate_path'] = (
+				tool_id,
+				settings,
+				payload,
+				project,
+			) =>
+				pipe(
+					get_symmetric_payloads_for_tool(
+						project,
+						tools[tool_id],
+						settings,
+						payload,
+					),
+					Iterable.map((payload) =>
+						calculate_single_path(tool_id, settings, payload),
+					),
+					Iterable.filter(String.isNonEmpty),
+					Array.fromIterable,
+					Array.join(' '),
+				);
+
 			const apply_tool: (typeof Tools)['Service']['apply_tool'] = (
 				project,
 				tool_id,
@@ -495,7 +595,12 @@ export class Tools extends Context.Tag('Tools')<
 						),
 						(value) =>
 							Effect.promise(async () => {
-								const path = calculate_path(tool_id, settings, payload);
+								const path = calculate_path(
+									tool_id as ToolId,
+									settings,
+									payload,
+									project,
+								);
 								const size = Match.value(value).pipe(
 									Match.when(Match.is('circle_draw', 'circle_erase'), () => {
 										const [center, edge] = get_double_payload(payload);
@@ -536,117 +641,156 @@ export class Tools extends Context.Tag('Tools')<
 							}),
 					),
 					Match.when('hyperlane_toggle', () => {
-						const [a_coordinate, b_coordinate] = get_double_payload(payload);
-						const a_solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, a_coordinate),
+						const connections = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.filterMap(snap_to_systems(project)),
+							Iterable.map(get_double_payload),
+							Iterable.map(Tuple.map(Struct.get('id'))),
+							Iterable.map(([a, b]) => new Connection({ a, b })),
+							Array.fromIterable,
+							Array.dedupe,
 						);
-						const b_solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, b_coordinate),
-						);
-						if (a_solar_system && b_solar_system) {
-							const connection = Connection.make({
-								a: a_solar_system.id,
-								b: b_solar_system.id,
-							});
-							if (project.hyperlanes.some(Equal.equals(connection))) {
-								return Effect.succeed(
-									ApplyToolResult.make({
-										actions: [new Action.DeleteHyperlaneAction({ connection })],
-									}),
-								);
-							} else {
-								return Effect.succeed(
-									ApplyToolResult.make({
-										actions: [new Action.CreateHyperlaneAction({ connection })],
-									}),
-								);
-							}
-						} else {
+						if (connections.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop('Both endpoints must be solar systems.'),
 							);
 						}
-					}),
-					Match.when('nebula_create', () => {
-						const [center, edge] = get_double_payload(payload);
-						const radius = Math.round(center.distance_to(edge));
-						const nebula = new Nebula({
-							coordinate: center.to_rounded(),
-							radius,
-						});
 						return Effect.succeed(
 							ApplyToolResult.make({
-								actions: [new Action.CreateNebulaAction({ nebula })],
+								actions: connections.map((connection) =>
+									project.hyperlanes.some(Equal.equals(connection)) ?
+										new Action.DeleteHyperlaneAction({ connection })
+									:	new Action.CreateHyperlaneAction({ connection }),
+								),
+							}),
+						);
+					}),
+					Match.when('nebula_create', () => {
+						const nebulas = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_double_payload),
+							Iterable.map(([center, edge]) => {
+								const radius = Math.round(center.distance_to(edge));
+								return new Nebula({
+									coordinate: center.to_rounded(),
+									radius,
+								});
+							}),
+							Array.fromIterable,
+							Array.dedupe,
+						);
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: nebulas.map(
+									(nebula) => new Action.CreateNebulaAction({ nebula }),
+								),
 							}),
 						);
 					}),
 					Match.when('nebula_delete', () => {
-						const coordinate = get_single_payload(payload);
-						const nebula = pipe(
-							project.nebulas,
-							Iterable.filter(
-								(nebula) =>
-									nebula.coordinate.distance_to(coordinate) <= nebula.radius,
+						const nebulas = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
 							),
-							Array.sortBy(
-								Order.mapInput(Order.number, (nebula) =>
-									nebula.coordinate.distance_to(coordinate),
+							Iterable.map(get_single_payload),
+							(coordinates) =>
+								project.nebulas.filter((nebula) =>
+									Iterable.some(
+										coordinates,
+										(coordinate) =>
+											nebula.coordinate.distance_to(coordinate) <=
+											nebula.radius,
+									),
 								),
-							),
-							Array.get(0),
 						);
-						return Option.match(nebula, {
-							onSome: (nebula) =>
-								Effect.succeed(
-									ApplyToolResult.make({
-										actions: [new Action.DeleteNebulaAction({ nebula })],
-									}),
+						if (nebulas.length === 0) {
+							return Effect.succeed(
+								ApplyToolResult.noop('No nebula at this location.'),
+							);
+						}
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: nebulas.map(
+									(nebula) => new Action.DeleteNebulaAction({ nebula }),
 								),
-							onNone: () =>
-								Effect.succeed(
-									ApplyToolResult.noop('No nebula at this location.'),
-								),
-						});
+							}),
+						);
 					}),
 					Match.when('solar_system_create', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						if (
-							project.solar_systems.some((solar_system) =>
-								Equal.equals(solar_system.coordinate, coordinate),
-							)
-						) {
+						const id_iterator = project.make_new_solar_system_id_iterator();
+						const occupied_coordinates = pipe(
+							project.solar_systems,
+							Iterable.map(Struct.get('coordinate')),
+							HashSet.fromIterable,
+						);
+						const is_unoccuped = (coordinate: Coordinate) =>
+							!HashSet.has(occupied_coordinates, coordinate);
+						const solar_systems = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_single_payload),
+							Iterable.map(Coordinate.to_rounded),
+							Iterable.filter(is_unoccuped),
+							Array.fromIterable,
+							Array.dedupe,
+							Iterable.map(
+								(coordinate) =>
+									new SolarSystem({ coordinate, id: id_iterator.next().value }),
+							),
+							Array.fromIterable,
+						);
+						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'A solar system already exists at this location.',
 								),
 							);
-						} else {
-							const ids = new Set(project.solar_systems.map(Struct.get('id')));
-							const id = pipe(
-								Iterable.range(0),
-								Iterable.findFirst((id) => !ids.has(SolarSystemId.make(id))),
-								Option.getOrThrow,
-								SolarSystemId.make,
-							);
-							const solar_system = new SolarSystem({
-								id,
-								coordinate,
-							});
-							return Effect.succeed(
-								ApplyToolResult.make({
-									actions: [
-										new Action.CreateSolarSystemAction({ solar_system }),
-									],
-								}),
-							);
 						}
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: solar_systems.map(
+									(solar_system) =>
+										new Action.CreateSolarSystemAction({ solar_system }),
+								),
+							}),
+						);
 					}),
 					Match.when('solar_system_delete', () => {
-						const solar_systems = get_solar_systems_payload(
-							payload,
-							settings,
-							project,
-						).filter((solar_system) => !solar_system.locked);
+						const solar_systems = pipe(
+							get_bulkable_solar_systems_payload(payload, settings, project),
+							Array.map(Struct.get('coordinate')),
+							(coordinates) =>
+								get_symmetric_payloads_for_tool(
+									project,
+									tools[tool_id],
+									settings,
+									coordinates,
+								),
+							Iterable.filterMap(
+								snap_to_systems(project, { allow_partial: true }),
+							),
+							Iterable.flatten,
+							Iterable.filter(flow(Struct.get('locked'), Boolean.not)),
+							Array.fromIterable,
+							Array.dedupe,
+						);
 						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
@@ -657,7 +801,8 @@ export class Tools extends Context.Tag('Tools')<
 						const solar_system_ids = new Set(
 							solar_systems.map((solar_system) => solar_system.id),
 						);
-						const is_not_deleted = (id: SolarSystemId) => !solar_system_ids.has(id);
+						const is_not_deleted = (id: SolarSystemId) =>
+							!solar_system_ids.has(id);
 						const deleted_hyperlanes = project.hyperlanes.filter(
 							(connection) =>
 								solar_system_ids.has(connection.a) ||
@@ -676,7 +821,9 @@ export class Tools extends Context.Tag('Tools')<
 						const denied_origin_ids = new Set<SolarSystemId>(solar_system_ids);
 						for (const zone of project.fallen_empire_zones) {
 							if (!solar_system_ids.has(zone.origin)) {
-								if (!solar_system_ids.isDisjointFrom(new Set(zone.connections))) {
+								if (
+									!solar_system_ids.isDisjointFrom(new Set(zone.connections))
+								) {
 									fallen_empire_zone_actions.push(
 										new Action.UpdateFallenEmpireZoneAction({
 											old_value: zone,
@@ -740,11 +887,24 @@ export class Tools extends Context.Tag('Tools')<
 						);
 					}),
 					Match.when('solar_system_lock', () => {
-						const solar_systems = get_solar_systems_payload(
-							payload,
-							settings,
-							project,
-						).filter((solar_system) => !solar_system.locked);
+						const solar_systems = pipe(
+							get_bulkable_solar_systems_payload(payload, settings, project),
+							Array.map(Struct.get('coordinate')),
+							(coordinates) =>
+								get_symmetric_payloads_for_tool(
+									project,
+									tools[tool_id],
+									settings,
+									coordinates,
+								),
+							Iterable.filterMap(
+								snap_to_systems(project, { allow_partial: true }),
+							),
+							Iterable.flatten,
+							Iterable.filter(flow(Struct.get('locked'), Boolean.not)),
+							Array.fromIterable,
+							Array.dedupe,
+						);
 						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
@@ -774,11 +934,24 @@ export class Tools extends Context.Tag('Tools')<
 						);
 					}),
 					Match.when('solar_system_unlock', () => {
-						const solar_systems = get_solar_systems_payload(
-							payload,
-							settings,
-							project,
-						).filter((solar_system) => solar_system.locked);
+						const solar_systems = pipe(
+							get_bulkable_solar_systems_payload(payload, settings, project),
+							Array.map(Struct.get('coordinate')),
+							(coordinates) =>
+								get_symmetric_payloads_for_tool(
+									project,
+									tools[tool_id],
+									settings,
+									coordinates,
+								),
+							Iterable.filterMap(
+								snap_to_systems(project, { allow_partial: true }),
+							),
+							Iterable.flatten,
+							Iterable.filter(Struct.get('locked')),
+							Array.fromIterable,
+							Array.dedupe,
+						);
 						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
@@ -808,335 +981,576 @@ export class Tools extends Context.Tag('Tools')<
 						);
 					}),
 					Match.when('spawn_preferred_toggle', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						const solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, coordinate),
+						const solar_systems = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.filterMap(snap_to_systems(project)),
+							Iterable.map(get_single_payload),
+							Array.fromIterable,
+							Array.dedupe,
 						);
-						if (solar_system) {
-							const updated_solar_system = new SolarSystem({
-								...solar_system,
-								spawn_type:
-									solar_system.spawn_type === 'preferred' ?
-										'disabled'
-									:	'preferred',
-							});
-							return Effect.succeed(
-								ApplyToolResult.make({
-									actions: [
-										new Action.UpdateSolarSystemAction({
-											old_value: solar_system,
-											new_value: updated_solar_system,
-										}),
-									],
-								}),
-							);
-						} else {
+						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop('No solar system at this location.'),
 							);
 						}
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: solar_systems.map((solar_system) => {
+									const updated_solar_system = new SolarSystem({
+										...solar_system,
+										spawn_type:
+											solar_system.spawn_type === 'preferred' ?
+												'disabled'
+											:	'preferred',
+									});
+									return new Action.UpdateSolarSystemAction({
+										old_value: solar_system,
+										new_value: updated_solar_system,
+									});
+								}),
+							}),
+						);
 					}),
 					Match.when('spawn_toggle', () => {
-						const coordinate = get_single_payload(payload).to_rounded();
-						const solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, coordinate),
+						const solar_systems = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.filterMap(snap_to_systems(project)),
+							Iterable.map(get_single_payload),
+							Array.fromIterable,
+							Array.dedupe,
 						);
-						if (solar_system) {
-							const updated_solar_system = new SolarSystem({
-								...solar_system,
-								spawn_type:
-									solar_system.spawn_type === 'disabled' ?
-										'enabled'
-									:	'disabled',
-							});
-							return Effect.succeed(
-								ApplyToolResult.make({
-									actions: [
-										new Action.UpdateSolarSystemAction({
-											old_value: solar_system,
-											new_value: updated_solar_system,
-										}),
-									],
-								}),
-							);
-						} else {
+						if (solar_systems.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop('No solar system at this location.'),
 							);
 						}
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: solar_systems.map((solar_system) => {
+									const updated_solar_system = new SolarSystem({
+										...solar_system,
+										spawn_type:
+											solar_system.spawn_type === 'disabled' ?
+												'enabled'
+											:	'disabled',
+									});
+									return new Action.UpdateSolarSystemAction({
+										old_value: solar_system,
+										new_value: updated_solar_system,
+									});
+								}),
+							}),
+						);
 					}),
 					Match.when('wormhole_toggle', () => {
-						const [a_coordinate, b_coordinate] = get_double_payload(payload);
-						const a_solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, a_coordinate),
+						const connections = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.filterMap(snap_to_systems(project)),
+							Iterable.map(get_double_payload),
+							Iterable.map(Tuple.map(Struct.get('id'))),
+							Iterable.map(([a, b]) => new Connection({ a, b })),
+							Array.fromIterable,
+							Array.dedupe,
 						);
-						const b_solar_system = project.solar_systems.find((solar_system) =>
-							Equal.equals(solar_system.coordinate, b_coordinate),
-						);
-						if (a_solar_system && b_solar_system) {
-							const connection = Connection.make({
-								a: a_solar_system.id,
-								b: b_solar_system.id,
-							});
-							if (project.wormholes.some(Equal.equals(connection))) {
-								return Effect.succeed(
-									ApplyToolResult.make({
-										actions: [new Action.DeleteWormholeAction({ connection })],
-									}),
-								);
-							} else {
-								// each system can only have 1 wormhole, so remove any wormholes that share a system with the new wormhole
-								const overlapping_wormholes = project.wormholes.filter(
-									(wormhole) =>
-										wormhole.a === connection.a ||
-										wormhole.a === connection.b ||
-										wormhole.b === connection.a ||
-										wormhole.b === connection.b,
-								);
-								return Effect.succeed(
-									ApplyToolResult.make({
-										actions: [
-											...overlapping_wormholes.map(
-												(wormhole) =>
-													new Action.DeleteWormholeAction({
-														connection: wormhole,
-													}),
-											),
-											new Action.CreateWormholeAction({ connection }),
-										],
-									}),
-								);
-							}
-						} else {
+						if (connections.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop('Both endpoints must be solar systems.'),
 							);
 						}
+						const to_delete = connections.filter((connection) =>
+							project.wormholes.some(Equal.equals(connection)),
+						);
+						const to_create = connections.filter(
+							(connection) => !project.wormholes.some(Equal.equals(connection)),
+						);
+						// each system can only have 1 wormhole, so when multiple
+						// symmetric copies would create wormholes sharing a system,
+						// return a noop
+						if (
+							to_create.some((connection) =>
+								to_create.some(
+									(other) =>
+										connection !== other &&
+										(connection.a === other.a ||
+											connection.a === other.b ||
+											connection.b === other.a ||
+											connection.b === other.b),
+								),
+							)
+						) {
+							return Effect.succeed(
+								ApplyToolResult.noop(
+									'Cannot create wormholes connecting to each other.',
+								),
+							);
+						}
+						const used_endpoints = new Set(
+							to_create.flatMap((connection) => [connection.a, connection.b]),
+						);
+						// remove any existing wormholes that share a system with a
+						// newly created wormhole, unless already being deleted
+						const overlapping = project.wormholes.filter(
+							(wormhole) =>
+								(used_endpoints.has(wormhole.a) ||
+									used_endpoints.has(wormhole.b)) &&
+								!to_delete.some(Equal.equals(wormhole)),
+						);
+						return Effect.succeed(
+							ApplyToolResult.make({
+								actions: [
+									...to_delete.map(
+										(connection) =>
+											new Action.DeleteWormholeAction({ connection }),
+									),
+									...overlapping.map(
+										(wormhole) =>
+											new Action.DeleteWormholeAction({
+												connection: wormhole,
+											}),
+									),
+									...to_create.map(
+										(connection) =>
+											new Action.CreateWormholeAction({ connection }),
+									),
+								],
+							}),
+						);
 					}),
 					Match.when('fallen_empire_zone_create', () => {
-						const target = get_single_payload(payload);
-						const placement = find_best_fallen_empire_zone_placement({
-							project,
-							target,
-						});
-						if (Option.isNone(placement))
+						const targets = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_single_payload),
+						);
+						const created: FallenEmpireZone[] = [];
+						const denied_origin_ids = new Set<SolarSystemId>();
+						for (const target of targets) {
+							const placement = find_best_fallen_empire_zone_placement({
+								project,
+								target,
+								denied_origin_ids,
+							});
+							if (Option.isNone(placement)) continue;
+							denied_origin_ids.add(placement.value.origin);
+							created.push(
+								new FallenEmpireZone({
+									id: FallenEmpireZoneId.make(crypto.randomUUID()),
+									type: 'random',
+									connections: [],
+									fallback_to_random: false,
+									...placement.value,
+								}),
+							);
+						}
+						if (created.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'No solar system available to anchor a Fallen Empire zone.',
 								),
 							);
-						const zone = new FallenEmpireZone({
-							id: FallenEmpireZoneId.make(crypto.randomUUID()),
-							type: 'random',
-							connections: [],
-							fallback_to_random: false,
-							...placement.value,
-						});
+						}
 						return Effect.succeed(
 							ApplyToolResult.make({
-								actions: [new Action.CreateFallenEmpireZoneAction({ zone })],
+								actions: created.map(
+									(zone) => new Action.CreateFallenEmpireZoneAction({ zone }),
+								),
 							}),
 						);
 					}),
 					Match.when('fallen_empire_zone_delete', () => {
-						const coordinate = get_single_payload(payload);
-						for (const zone of project.fallen_empire_zones) {
-							const center =
-								project.get_fallen_empire_zone_coordinate_unsafe(zone);
-							if (
-								Math.hypot(center.x - coordinate.x, center.y - coordinate.y) <=
-								FALLEN_EMPIRE_ZONE_RADIUS
-							) {
-								return Effect.succeed(
-									ApplyToolResult.make({
-										actions: [
-											new Action.DeleteFallenEmpireZoneAction({ zone }),
-										],
-									}),
-								);
+						const coordinates = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_single_payload),
+						);
+						const deleted: FallenEmpireZone[] = [];
+						for (const coordinate of coordinates) {
+							for (const zone of project.fallen_empire_zones) {
+								if (deleted.some((z) => Equal.equals(z.id, zone.id))) continue;
+								const center =
+									project.get_fallen_empire_zone_coordinate_unsafe(zone);
+								if (
+									Math.hypot(
+										center.x - coordinate.x,
+										center.y - coordinate.y,
+									) <= FALLEN_EMPIRE_ZONE_RADIUS
+								) {
+									deleted.push(zone);
+									break;
+								}
 							}
 						}
+						if (deleted.length === 0) {
+							return Effect.succeed(
+								ApplyToolResult.noop('No Fallen Empire zone at this location.'),
+							);
+						}
 						return Effect.succeed(
-							ApplyToolResult.noop('No Fallen Empire zone at this location.'),
+							ApplyToolResult.make({
+								actions: deleted.map(
+									(zone) => new Action.DeleteFallenEmpireZoneAction({ zone }),
+								),
+							}),
 						);
 					}),
 					Match.when('solar_system_move', () => {
-						const [origin, dest] = get_double_payload(payload);
-						const solar_system = project.solar_systems.find((s) =>
-							Equal.equals(s.coordinate, origin),
+						const payloads = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_double_payload),
 						);
 
-						// noop if locked
-						if (!solar_system)
+						// a system claimed by two payloads is only ok if both would
+						// move it to the same place; otherwise the same system is
+						// being symmetrically moved in multiple directions at once
+						// (e.g. a system on the mirror line dragged to an off-line
+						// spot), which is ambiguous, so noop
+						const new_coordinate_by_id = new Map<SolarSystemId, Coordinate>();
+						for (const p of payloads) {
+							const [origin, dest] = get_double_payload(p);
+							const solar_system = project
+								.find_closest_solar_system(origin, {
+									max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+								})
+								.pipe(Option.getOrNull);
+							if (!solar_system) continue;
+							const new_coordinate = Coordinate.make({
+								x: dest.x,
+								y: dest.y,
+							}).to_rounded();
+							const existing = new_coordinate_by_id.get(solar_system.id);
+							if (existing != null) {
+								if (!Equal.equals(existing, new_coordinate)) {
+									return Effect.succeed(
+										ApplyToolResult.noop(
+											'The solar system would be moved in conflicting directions.',
+										),
+									);
+								}
+								continue;
+							}
+							new_coordinate_by_id.set(solar_system.id, new_coordinate);
+						}
+
+						const moves: {
+							solar_system: SolarSystem;
+							new_coordinate: Coordinate;
+						}[] = [...new_coordinate_by_id].map(([id, new_coordinate]) => ({
+							solar_system: project.solar_systems.find((s) => s.id === id)!,
+							new_coordinate,
+						}));
+						if (moves.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop('No solar system at this location.'),
 							);
-						if (solar_system.locked)
+						}
+
+						// noop if any of the moved systems is locked
+						if (moves.some((move) => move.solar_system.locked)) {
 							return Effect.succeed(
 								ApplyToolResult.noop('This solar system is locked.'),
 							);
+						}
+
 						// noop if not actually moved
-						const new_coordinate = Coordinate.make({
-							x: dest.x,
-							y: dest.y,
-						}).to_rounded();
-						if (Equal.equals(solar_system.coordinate, new_coordinate))
+						const actual_moves = moves.filter(
+							(move) =>
+								!Equal.equals(
+									move.solar_system.coordinate,
+									move.new_coordinate,
+								),
+						);
+						if (actual_moves.length === 0) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'Solar system is already at this location.',
 								),
 							);
-						// noop if the destination is occupied by another system
-						if (
-							project.solar_systems.some(
+						}
+
+						// a destination is only free if it isn't occupied by a system
+						// that isn't also being moved (systems being moved may swap)
+						const actually_moved_ids = new Set(
+							actual_moves.map((move) => move.solar_system.id),
+						);
+						for (const move of actual_moves) {
+							const occupied = project.solar_systems.some(
 								(s) =>
-									s.id !== solar_system.id &&
-									Equal.equals(s.coordinate, new_coordinate),
-							)
-						)
+									!actually_moved_ids.has(s.id) &&
+									Equal.equals(s.coordinate, move.new_coordinate),
+							);
+							if (occupied) {
+								return Effect.succeed(
+									ApplyToolResult.noop(
+										'Another solar system is already at this location.',
+									),
+								);
+							}
+						}
+
+						// noop if two moved systems would land on the same coordinate
+						const destination_keys = new Set(
+							actual_moves.map((move) => move.new_coordinate.key),
+						);
+						if (destination_keys.size !== actual_moves.length) {
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'Another solar system is already at this location.',
 								),
 							);
-
-						const updated_solar_system = new SolarSystem({
-							...solar_system,
-							coordinate: new_coordinate,
-						});
-						const actions: Action[] = [
-							new Action.UpdateSolarSystemAction({
-								old_value: solar_system,
-								new_value: updated_solar_system,
-							}),
-						];
-						// update FallenEmpireZone originating from moved system
-						const fallen_empire_zone = Iterable.findFirst(
-							project.fallen_empire_zones,
-							(zone) => zone.origin === solar_system.id,
-						);
-						if (Option.isSome(fallen_empire_zone)) {
-							const zone = fallen_empire_zone.value;
-							const target =
-								project.get_fallen_empire_zone_coordinate_unsafe(zone);
-							const placement = find_best_fallen_empire_zone_placement({
-								project,
-								target,
-								allowed_origin_ids: new Set([solar_system.id]),
-								solar_system_coordinate_overrides: new Map([
-									[solar_system.id, new_coordinate],
-								]),
-							});
-							if (Option.isSome(placement)) {
-								actions.push(
-									new Action.UpdateFallenEmpireZoneAction({
-										old_value: zone,
-										new_value: new FallenEmpireZone({
-											...zone,
-											...placement.value,
-										}),
-									}),
-								);
-							}
 						}
 
+						// finally, apply the actual moves and update fallen empire positions
+						const solar_system_coordinate_overrides = new Map(
+							actual_moves.map((move) => [
+								move.solar_system.id,
+								move.new_coordinate,
+							]),
+						);
+						const allowed_origin_ids = new Set<SolarSystemId>(
+							actual_moves.map((move) => move.solar_system.id),
+						);
+						const denied_origin_ids = new Set<SolarSystemId>();
+						const actions: Action[] = [];
+						for (const move of actual_moves) {
+							const updated_solar_system = new SolarSystem({
+								...move.solar_system,
+								coordinate: move.new_coordinate,
+							});
+							actions.push(
+								new Action.UpdateSolarSystemAction({
+									old_value: move.solar_system,
+									new_value: updated_solar_system,
+								}),
+							);
+							// update FallenEmpireZone originating from moved system
+							const fallen_empire_zone = Iterable.findFirst(
+								project.fallen_empire_zones,
+								(zone) => zone.origin === move.solar_system.id,
+							);
+							if (Option.isSome(fallen_empire_zone)) {
+								const zone = fallen_empire_zone.value;
+								const target =
+									project.get_fallen_empire_zone_coordinate_unsafe(zone);
+								const placement = find_best_fallen_empire_zone_placement({
+									project,
+									target,
+									allowed_origin_ids,
+									denied_origin_ids,
+									solar_system_coordinate_overrides,
+								});
+								if (Option.isSome(placement)) {
+									denied_origin_ids.add(placement.value.origin);
+									actions.push(
+										new Action.UpdateFallenEmpireZoneAction({
+											old_value: zone,
+											new_value: new FallenEmpireZone({
+												...zone,
+												...placement.value,
+											}),
+										}),
+									);
+								}
+							}
+						}
 						return Effect.succeed(ApplyToolResult.make({ actions }));
 					}),
 					Match.when('cluster_move', () => {
-						const [origin, dest] = get_double_payload(payload);
-						const start_system = project.solar_systems.find((s) =>
-							Equal.equals(s.coordinate, origin),
+						const payloads = pipe(
+							get_symmetric_payloads_for_tool(
+								project,
+								tools[tool_id],
+								settings,
+								payload,
+							),
+							Iterable.map(get_double_payload),
 						);
-
-						if (!start_system)
-							return Effect.succeed(
-								ApplyToolResult.noop('No solar system at this location.'),
-							);
-						if (start_system.locked)
-							return Effect.succeed(
-								ApplyToolResult.noop('This solar system is locked.'),
-							);
-
-						const delta_x = dest.x - origin.x;
-						const delta_y = dest.y - origin.y;
-						if (delta_x === 0 && delta_y === 0)
-							return Effect.succeed(ApplyToolResult.noop('No movement.'));
-
-						const cluster_ids = new Set<SolarSystemId>();
-						const queue: SolarSystemId[] = [start_system.id];
-						cluster_ids.add(start_system.id);
+						const delta_by_id = new Map<
+							SolarSystemId,
+							{ x: number; y: number }
+						>();
+						const solar_system_by_id = new Map(
+							project.solar_systems.map((system) => [system.id, system]),
+						);
 						const connected_fe_zone_ids = new Set<FallenEmpireZoneId>();
-
-						while (queue.length > 0) {
-							const current_id = queue.shift()!;
-							for (const hyperlane of project.hyperlanes) {
-								let neighbor_id: SolarSystemId | undefined;
-								if (hyperlane.a === current_id) neighbor_id = hyperlane.b;
-								else if (hyperlane.b === current_id) neighbor_id = hyperlane.a;
-								if (neighbor_id != null && !cluster_ids.has(neighbor_id)) {
-									cluster_ids.add(neighbor_id);
-									queue.push(neighbor_id);
-								}
+						for (const p of payloads) {
+							const [origin, dest] = get_double_payload(p);
+							const start_system = project
+								.find_closest_solar_system(origin, {
+									max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+								})
+								.pipe(Option.getOrNull);
+							if (!start_system) {
+								continue;
 							}
-							for (const zone of project.fallen_empire_zones) {
-								if (connected_fe_zone_ids.has(zone.id)) continue;
-								if (zone.connections.includes(current_id)) {
-									connected_fe_zone_ids.add(zone.id);
-									for (const id of zone.connections) {
-										if (!cluster_ids.has(id)) {
-											cluster_ids.add(id);
-											queue.push(id);
+							if (start_system.locked) {
+								return Effect.succeed(
+									ApplyToolResult.noop('This solar system is locked.'),
+								);
+							}
+
+							const delta_x = dest.x - origin.x;
+							const delta_y = dest.y - origin.y;
+							if (delta_x === 0 && delta_y === 0) {
+								return Effect.succeed(ApplyToolResult.noop('No movement.'));
+							}
+
+							const cluster_ids = new Set<SolarSystemId>();
+							const queue: SolarSystemId[] = [start_system.id];
+							cluster_ids.add(start_system.id);
+							const zone_ids = new Set<FallenEmpireZoneId>();
+
+							while (queue.length > 0) {
+								const current_id = queue.shift()!;
+								for (const hyperlane of project.hyperlanes) {
+									let neighbor_id: SolarSystemId | undefined;
+									if (hyperlane.a === current_id) neighbor_id = hyperlane.b;
+									else if (hyperlane.b === current_id)
+										neighbor_id = hyperlane.a;
+									if (neighbor_id != null && !cluster_ids.has(neighbor_id)) {
+										cluster_ids.add(neighbor_id);
+										queue.push(neighbor_id);
+									}
+								}
+								for (const zone of project.fallen_empire_zones) {
+									if (zone_ids.has(zone.id)) continue;
+									if (zone.connections.includes(current_id)) {
+										zone_ids.add(zone.id);
+										for (const id of zone.connections) {
+											if (!cluster_ids.has(id)) {
+												cluster_ids.add(id);
+												queue.push(id);
+											}
 										}
 									}
 								}
 							}
+
+							// a system claimed by two payloads is only ok if both would
+							// move it to the same place (e.g. a symmetric cluster dragged
+							// parallel to the mirror line); otherwise the same cluster is
+							// being symmetrically moved in multiple directions at once,
+							// which is ambiguous, so noop
+							for (const id of cluster_ids) {
+								const existing = delta_by_id.get(id);
+								if (existing != null) {
+									const system = solar_system_by_id.get(id)!;
+									const destination = Coordinate.make({
+										x: system.coordinate.x + delta_x,
+										y: system.coordinate.y + delta_y,
+									}).to_rounded();
+									const existing_destination = Coordinate.make({
+										x: system.coordinate.x + existing.x,
+										y: system.coordinate.y + existing.y,
+									}).to_rounded();
+									if (!Equal.equals(destination, existing_destination)) {
+										return Effect.succeed(
+											ApplyToolResult.noop(
+												'The cluster would be moved in conflicting directions.',
+											),
+										);
+									}
+									continue;
+								}
+								delta_by_id.set(id, { x: delta_x, y: delta_y });
+							}
+							for (const id of zone_ids) connected_fe_zone_ids.add(id);
 						}
 
-						const cluster_systems = project.solar_systems.filter((s) =>
-							cluster_ids.has(s.id),
-						);
-						if (cluster_systems.some((s) => s.locked))
+						const moved_ids = new Set(delta_by_id.keys());
+						if (moved_ids.size === 0)
+							return Effect.succeed(
+								ApplyToolResult.noop('No solar system at this location.'),
+							);
+						// noop if any moved system is locked
+						if (
+							project.solar_systems.some((s) => moved_ids.has(s.id) && s.locked)
+						)
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'This cluster contains a locked solar system.',
 								),
 							);
+
 						const new_coordinate_by_id = new Map<SolarSystemId, Coordinate>(
-							cluster_systems.map((system) => [
-								system.id,
-								Coordinate.make({
-									x: system.coordinate.x + delta_x,
-									y: system.coordinate.y + delta_y,
-								}).to_rounded(),
-							]),
+							project.solar_systems
+								.filter((s) => moved_ids.has(s.id))
+								.map((system) => {
+									const delta = delta_by_id.get(system.id)!;
+									return [
+										system.id,
+										Coordinate.make({
+											x: system.coordinate.x + delta.x,
+											y: system.coordinate.y + delta.y,
+										}).to_rounded(),
+									];
+								}),
 						);
 
-						// noop if any cluster system would land on a non-cluster system
+						// noop if any moved system would land on a non-moved system
 						const occupied_coordinates = HashSet.fromIterable(
 							project.solar_systems
-								.filter((s) => !cluster_ids.has(s.id))
+								.filter((s) => !moved_ids.has(s.id))
 								.map((s) => s.coordinate),
 						);
-						if (
-							Iterable.some(new_coordinate_by_id.values(), (coordinate) =>
-								HashSet.has(occupied_coordinates, coordinate),
-							)
-						)
+						for (const coordinate of new_coordinate_by_id.values()) {
+							if (HashSet.has(occupied_coordinates, coordinate))
+								return Effect.succeed(
+									ApplyToolResult.noop(
+										'The cluster would collide with another solar system.',
+									),
+								);
+						}
+
+						// noop if two moved systems would land on the same coordinate
+						const destination_keys = new Set(
+							[...new_coordinate_by_id.values()].map((c) => c.key),
+						);
+						if (destination_keys.size !== new_coordinate_by_id.size)
 							return Effect.succeed(
 								ApplyToolResult.noop(
 									'The cluster would collide with another solar system.',
 								),
 							);
 
-						const solar_system_actions = cluster_systems.map(
-							(system) =>
-								new Action.UpdateSolarSystemAction({
+						const solar_system_actions = [...new_coordinate_by_id].map(
+							([id, coordinate]) => {
+								const system = project.solar_systems.find((s) => s.id === id)!;
+								return new Action.UpdateSolarSystemAction({
 									old_value: system,
 									new_value: new SolarSystem({
 										...system,
-										coordinate: new_coordinate_by_id.get(system.id)!,
+										coordinate,
 									}),
-								}),
+								});
+							},
 						);
 
 						const fallen_empire_zone_actions: UpdateFallenEmpireZoneAction[] =
@@ -1149,9 +1563,9 @@ export class Tools extends Context.Tag('Tools')<
 						// one direction
 						for (const zone of project.fallen_empire_zones) {
 							const has_connection_in_cluster = zone.connections.some((id) =>
-								cluster_ids.has(id),
+								moved_ids.has(id),
 							);
-							const origin_in_cluster = cluster_ids.has(zone.origin);
+							const origin_in_cluster = moved_ids.has(zone.origin);
 							// 4 cases to consider
 							// - connected to cluster and origin in cluster: it will move with its origin, no update needed
 							// - not connected to cluster and origin not in cluster: won't move, as desired, no update needed
@@ -1160,13 +1574,20 @@ export class Tools extends Context.Tag('Tools')<
 							if (has_connection_in_cluster !== origin_in_cluster) {
 								const zone_center =
 									project.get_fallen_empire_zone_coordinate_unsafe(zone);
-								const target =
-									has_connection_in_cluster ?
-										new Coordinate({
-											x: zone_center.x + delta_x,
-											y: zone_center.y + delta_y,
-										})
-									:	zone_center;
+								let target = zone_center;
+								if (has_connection_in_cluster) {
+									const connected_id = zone.connections.find((id) =>
+										delta_by_id.has(id),
+									);
+									const delta =
+										connected_id != null ?
+											delta_by_id.get(connected_id)!
+										:	{ x: 0, y: 0 };
+									target = new Coordinate({
+										x: zone_center.x + delta.x,
+										y: zone_center.y + delta.y,
+									});
+								}
 								const placement = find_best_fallen_empire_zone_placement({
 									project,
 									target,
@@ -1199,45 +1620,57 @@ export class Tools extends Context.Tag('Tools')<
 							}
 						}
 
+						const moved_systems = project.solar_systems.filter((s) =>
+							moved_ids.has(s.id),
+						);
 						const nebula_actions = pipe(
 							project.nebulas,
 							Iterable.filterMap((nebula) => {
-								const overlaps_system = cluster_systems.some(
+								const overlapping_system = moved_systems.find(
 									(s) =>
 										s.coordinate.distance_to(nebula.coordinate) <=
 										nebula.radius,
 								);
-								const overlaps_zone = [...connected_fe_zone_ids].some(
-									(zone_id) => {
+								let delta =
+									overlapping_system != null ?
+										delta_by_id.get(overlapping_system.id)
+									:	undefined;
+								if (delta == null) {
+									for (const zone_id of connected_fe_zone_ids) {
 										const zone = project.fallen_empire_zones.find(
 											(z) => z.id === zone_id,
 										);
-										if (!zone) return false;
+										if (!zone) continue;
 										const zone_center =
 											project.get_fallen_empire_zone_coordinate_unsafe(zone);
-										return (
+										if (
 											zone_center.distance_to(nebula.coordinate) <
 											nebula.radius + FALLEN_EMPIRE_ZONE_RADIUS
-										);
-									},
-								);
-								if (overlaps_system || overlaps_zone) {
-									const new_coordinate = Coordinate.make({
-										x: nebula.coordinate.x + delta_x,
-										y: nebula.coordinate.y + delta_y,
-									}).to_rounded();
-									return Option.some(
-										new Action.UpdateNebulaAction({
-											old_value: nebula,
-											new_value: new Nebula({
-												...nebula,
-												coordinate: new_coordinate,
-											}),
-										}),
-									);
-								} else {
-									return Option.none();
+										) {
+											const connected_id = zone.connections.find((id) =>
+												delta_by_id.has(id),
+											);
+											if (connected_id != null) {
+												delta = delta_by_id.get(connected_id);
+												break;
+											}
+										}
+									}
 								}
+								if (delta == null) return Option.none();
+								const new_coordinate = Coordinate.make({
+									x: nebula.coordinate.x + delta.x,
+									y: nebula.coordinate.y + delta.y,
+								}).to_rounded();
+								return Option.some(
+									new Action.UpdateNebulaAction({
+										old_value: nebula,
+										new_value: new Nebula({
+											...nebula,
+											coordinate: new_coordinate,
+										}),
+									}),
+								);
 							}),
 							Array.fromIterable,
 						);

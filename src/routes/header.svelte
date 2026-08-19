@@ -7,6 +7,7 @@
 	import { Action } from '$lib/models/action';
 	import { Project } from '$lib/models/project';
 	import { GridConfig } from '$lib/models/grid_config';
+	import { SymmetryConfig } from '$lib/models/symmetry_config';
 	import { download_blob } from '$lib/blob';
 	import ModeToggle from './mode_toggle.svelte';
 	import { Icons } from '$lib/components/icons';
@@ -249,6 +250,33 @@
 						'Configure Grid...',
 						'show-modal',
 						ID.configure_grid_dialog,
+					)}
+					<Menu.Separator class="border-surface-300-700" />
+					<Menu.OptionItem
+						type="checkbox"
+						value="symmetry"
+						closeOnSelect={false}
+						checked={editor().project.symmetry_config.enabled}
+						onCheckedChange={(checked) => {
+							editor().project = new Project({
+								...editor().project,
+								symmetry_config: new SymmetryConfig({
+									...editor().project.symmetry_config,
+									enabled: checked,
+								}),
+							});
+						}}
+					>
+						<Menu.ItemText>Symmetry</Menu.ItemText>
+						<Menu.ItemIndicator class="hidden data-[state=checked]:block ms-2">
+							<Icons.Check class="size-4" />
+						</Menu.ItemIndicator>
+					</Menu.OptionItem>
+					{@render menu_item_command(
+						'configure_symmetry',
+						'Configure Symmetry...',
+						'show-modal',
+						ID.configure_symmetry_dialog,
 					)}
 				</Menu.Content>
 			</Menu.Positioner>

@@ -30,7 +30,15 @@ export const NUM_RANDOM_NEBULAS = 6;
 export const RANDOM_NEBULA_MIN_RADIUS = 40;
 export const RANDOM_NEBULA_MAX_RADIUS = 60;
 // minimum distance between random nebulas (center to center)
-export const RANDOM_NEBULA_MIN_DISTANCE = 150;
+export const RANDOM_NEBULA_MIN_DISTANCE = RANDOM_NEBULA_MAX_RADIUS * 2 + 10;
+
+// solar systems are stored at rounded integer coordinates, but a symmetry
+// transform applied to a snapped (already rounded) point can land up to ~1.4
+// away from the actual symmetric system, so the transformed coordinate is
+// matched against the Delaunay triangulation instead of exact coordinates.
+// The distance cap (2) means an intentionally-asymmetrically-deleted system
+// probably doesn't get a symmetric match.
+export const MAX_SYMMETRY_MATCH_DISTANCE = 2;
 
 export const ID = {
 	new_project_dialog: 'new_project_dialog',
@@ -40,6 +48,7 @@ export const ID = {
 	import_project_dialog: 'import_project_dialog',
 	upload_image_dialog: 'upload_image_dialog',
 	configure_grid_dialog: 'configure_grid_dialog',
+	configure_symmetry_dialog: 'configure_symmetry_dialog',
 	canvas: 'canvas',
 } as const;
 

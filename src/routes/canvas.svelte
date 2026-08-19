@@ -14,6 +14,7 @@
 		L_CLUSTER_CX,
 		L_CLUSTER_CY,
 		L_CLUSTER_RADIUS,
+		MAX_SYMMETRY_MATCH_DISTANCE,
 	} from '$lib/constants';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
@@ -22,7 +23,17 @@
 	import { Delaunay } from 'd3-delaunay';
 	import { select } from 'd3-selection';
 	import { zoom, zoomIdentity, type D3ZoomEvent } from 'd3-zoom';
-	import { Boolean, Equal, Match, Option, pipe } from 'effect';
+	import {
+		Array,
+		Boolean,
+		Equal,
+		Function,
+		Iterable,
+		Match,
+		Option,
+		pipe,
+		Struct,
+	} from 'effect';
 	import custom_crosshair from './crosshair.svg?inline';
 	import type { Nebula } from '$lib/models/nebula';
 	import type { Project } from '$lib/models/project';
@@ -87,6 +98,9 @@
 		),
 	);
 
+	const symmetry_config = $derived(project.symmetry_config);
+	const symmetry_transforms = $derived(symmetry_config.transforms);
+
 	let mouse_coordinates = $state.raw<
 		Option.Option<{
 			container: Coordinate;
@@ -114,6 +128,7 @@
 		),
 	);
 	let tool_points = $state<Coordinate[]>([]);
+
 	let stroke_path = $derived(
 		pipe(
 			active_tool,
@@ -146,16 +161,53 @@
 		),
 	);
 
-	const solar_system_delaunay = $derived(
-		solar_systems.length > 0 ?
-			new Delaunay(
-				solar_systems.flatMap((system) => [
-					system.coordinate.x,
-					system.coordinate.y,
-				]),
-			)
-		:	null,
-	);
+	function get_symmetric_cursors() {
+		if (symmetry_transforms.length === 0 || Option.isNone(mouse_coordinates)) {
+			return [];
+		}
+		const base = mouse_coordinates.value.canvas;
+		return pipe(symmetry_transforms, Iterable.map(Function.apply(base)));
+	}
+
+	function get_line_previews(tool_points: Coordinate[], tool: Tool) {
+		const base_a = Array.head(tool_points).pipe(Option.getOrThrow);
+		const base_b = Array.last(tool_points).pipe(Option.getOrThrow);
+		const transforms = [Function.identity, ...symmetry_transforms];
+		return pipe(
+			transforms,
+			Iterable.filterMap((transform) => {
+				let a = Option.some(transform(base_a));
+				let b = Option.some(transform(base_b));
+				if (tool.snap_to_solar_system !== 'none') {
+					a = a.pipe(
+						Option.flatMap((coordinate) =>
+							project.find_closest_solar_system(coordinate, {
+								max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+							}),
+						),
+						Option.map(Struct.get('coordinate')),
+					);
+				}
+				if (tool.snap_to_solar_system === 'all') {
+					b = b.pipe(
+						Option.flatMap((coordinate) =>
+							project.find_closest_solar_system(coordinate, {
+								max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+							}),
+						),
+						Option.map(Struct.get('coordinate')),
+					);
+				}
+				if (Option.isNone(a) || Option.isNone(b)) return Option.none();
+				return Option.some({
+					x1: a.value.x,
+					y1: a.value.y,
+					x2: b.value.x,
+					y2: b.value.y,
+				});
+			}),
+		);
+	}
 
 	let canvas = $state<HTMLCanvasElement>();
 	let ctx = $derived(canvas?.getContext('2d'));
@@ -303,16 +355,8 @@
 			(solar_system) =>
 				Equal.equals(solar_system.coordinate, coordinate.to_rounded()),
 		);
-		let solar_system: Option.Option<SolarSystem> = Option.none();
-		if (solar_system_delaunay) {
-			const solar_system_index = solar_system_delaunay.find(
-				coordinate.x,
-				coordinate.y,
-			);
-			solar_system = Option.fromNullable(
-				project.solar_systems[solar_system_index],
-			);
-		}
+		let solar_system: Option.Option<SolarSystem> =
+			project.find_closest_solar_system(coordinate);
 		const nebulas = project.nebulas.filter(
 			(nebula) => nebula.coordinate.distance_to(coordinate) <= nebula.radius,
 		);
@@ -389,7 +433,7 @@
 				active_tool_settings.value.bulk === 0 &&
 				tool_points[0]
 			) {
-				editor().apply_tool(active_tool.value.id, tool_points[0], ctx);
+				editor().apply_tool(active_tool.value.id, [tool_points[0]], ctx);
 			} else {
 				editor().apply_tool(active_tool.value.id, tool_points, ctx);
 			}
@@ -580,14 +624,9 @@
 			}),
 			Option.getOrElse(() => false),
 		);
-		if (solar_system_delaunay) {
-			const solar_system_index = solar_system_delaunay.find(
-				coordinates.canvas.x,
-				coordinates.canvas.y,
-			);
-			const solar_system = solar_systems[solar_system_index];
-			snapped_solar_system_id = Option.fromNullable(solar_system?.id);
-		}
+		snapped_solar_system_id = project
+			.find_closest_solar_system(coordinates.canvas)
+			.pipe(Option.map(Struct.get('id')));
 		const point =
 			snap_to_solar_system ?
 				Option.flatMap(snapped_solar_system, (solar_system) =>
@@ -1082,13 +1121,15 @@
 					{/if}
 				{/each}
 				{#if Option.isSome(active_tool) && active_tool.value.render.type === 'line' && tool_points.length > 1}
-					<line
-						x1={tool_points.at(0)?.x}
-						y1={tool_points.at(0)?.y}
-						x2={tool_points.at(-1)?.x}
-						y2={tool_points.at(-1)?.y}
-						stroke={active_tool.value.render.color}
-					/>
+					{#each get_line_previews(tool_points, active_tool.value) as ln (`${ln.x1},${ln.y1},${ln.x2},${ln.y2}`)}
+						<line
+							x1={ln.x1}
+							y1={ln.y1}
+							x2={ln.x2}
+							y2={ln.y2}
+							stroke={active_tool.value.render.color}
+						/>
+					{/each}
 				{/if}
 				{#if editor().project.grid_config.snap}
 					{@const grid_config = editor().project.grid_config}
@@ -1129,6 +1170,25 @@
 							</g>
 						</g>
 					{/if}
+				{/if}
+				{#if symmetry_config.enabled}
+					{#each symmetry_config.calculate_guide_lines() as line (`${line.x1},${line.y1},${line.x2},${line.y2}`)}
+						<line {...line} class="stroke-tertiary-500/50" />
+					{/each}
+					{#each get_symmetric_cursors() as coordinate (coordinate.key)}
+						<g
+							transform="translate({coordinate.x},{coordinate.y}) scale({1 /
+								transform.k})"
+							transform-origin="{coordinate.x},{coordinate.y}"
+						>
+							<g class="stroke-tertiary-500" stroke-width="2">
+								<line x1="10" x2="4" y1="0" y2="0" />
+								<line x1="-4" x2="-10" y1="0" y2="0" />
+								<line x1="0" x2="0" y1="-4" y2="-10" />
+								<line x1="0" x2="0" y1="10" y2="4" />
+							</g>
+						</g>
+					{/each}
 				{/if}
 			</g>
 		</svg>

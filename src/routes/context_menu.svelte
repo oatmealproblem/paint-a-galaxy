@@ -84,10 +84,10 @@
 			);
 			const solar_system = editor().project.get_solar_system_unsafe(id);
 			// apply the 'solar_system_delete' tool instead of creating the DeleteSolarSystemAction manually, so hyperlanes etc are also deleted
-			// force bulk off so exactly this system is deleted, regardless of the persisted tool settings
+			// force bulk off so exactly this system (and symmetric copies) is deleted, regardless of the persisted tool settings
 			editor().apply_tool(
 				'solar_system_delete',
-				solar_system.coordinate,
+				[solar_system.coordinate],
 				ctx,
 				EMPTY_TOOL_SETTINGS,
 			);
@@ -129,7 +129,11 @@
 			editor().apply_actions([new Action.DeleteNebulaAction({ nebula })]);
 		} else if (details.value === 'create_solar_system') {
 			if (Option.isSome(data))
-				editor().apply_tool('solar_system_create', data.value.coordinate, ctx);
+				editor().apply_tool(
+					'solar_system_create',
+					[data.value.coordinate],
+					ctx,
+				);
 		}
 	}}
 >

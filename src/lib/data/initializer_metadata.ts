@@ -1388,7 +1388,15 @@ export const initializer_metadata: Record<
 		name: 'Aix',
 		description: 'Imperial Fiefdom Liege Capital',
 		dlc: ['Overlord'],
-		before: ['overlord_system_2_init', 'overlord_system_3_init', 'overlord_system_4_init', 'overlord_system_5_init', 'overlord_system_6_init', 'overlord_system_7_init', 'overlord_system_8_init'],
+		before: [
+			'overlord_system_2_init',
+			'overlord_system_3_init',
+			'overlord_system_4_init',
+			'overlord_system_5_init',
+			'overlord_system_6_init',
+			'overlord_system_7_init',
+			'overlord_system_8_init',
+		],
 	},
 	overlord_system_2_init: {
 		unique: true,

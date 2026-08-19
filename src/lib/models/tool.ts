@@ -1,6 +1,7 @@
 import { Schema, Record } from 'effect';
 import type { Step } from './step';
 import type { Coordinate } from './coordinate';
+import { expand_rectangle_corners } from '$lib/math';
 import { CANVAS_BACKGROUND } from '$lib/constants';
 import type { Icons } from '$lib/components/icons';
 
@@ -81,6 +82,11 @@ interface _Tool<
 	can_snap_to_grid: boolean;
 	invert_lock_behavior: boolean;
 	show_preview: boolean;
+	// transforms the tool's raw payload before symmetry expansion
+	// (e.g. rectangles expand to their full 4 corners)
+	payload_transformer?: (
+		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
+	) => ToolActionTypePayload[keyof ToolActionTypePayload];
 	render: {
 		type: 'line' | 'stroke' | 'none';
 		color: string;
@@ -244,6 +250,7 @@ const rectangle_draw: _Tool<
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	show_preview: false,
+	payload_transformer: expand_rectangle_corners,
 	render: {
 		type: 'stroke',
 		color: 'white',
@@ -267,6 +274,7 @@ const rectangle_erase: _Tool<
 	can_snap_to_grid: true,
 	invert_lock_behavior: false,
 	show_preview: false,
+	payload_transformer: expand_rectangle_corners,
 	render: {
 		type: 'stroke',
 		color: CANVAS_BACKGROUND,
@@ -643,7 +651,7 @@ const fallen_empire_zone_delete: _Tool<
 
 export type ToolActionTypePayload = {
 	multi_point: Coordinate[];
-	single_point: Coordinate;
+	single_point: [Coordinate];
 	double_point: [Coordinate, Coordinate];
 };
 

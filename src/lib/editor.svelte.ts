@@ -184,9 +184,10 @@ export class Editor {
 		payload: ToolActionTypePayload[keyof ToolActionTypePayload],
 	): string {
 		const settings = this.tool_settings[tool_id];
+		const project = this.project;
 		const effect = Effect.gen(function* () {
 			const tools_service = yield* Tools;
-			return tools_service.calculate_path(tool_id, settings, payload);
+			return tools_service.calculate_path(tool_id, settings, payload, project);
 		});
 		return Effect.runSync(Effect.provide(effect, this.#layer));
 	}

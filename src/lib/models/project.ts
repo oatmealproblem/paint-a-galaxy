@@ -1,10 +1,21 @@
-import { Array, Iterable, Option, Order, pipe, Record, Schema } from 'effect';
+import {
+	Array,
+	Iterable,
+	Option,
+	Order,
+	pipe,
+	Record,
+	Schema,
+	Struct,
+} from 'effect';
+import { Delaunay } from 'd3-delaunay';
 import { Connection } from './connection';
 import { Nebula } from './nebula';
 import { SolarSystem, SolarSystemId } from './solar_system';
 import { GeneratorSettings } from './generator_settings';
 import { make_blank_image } from '$lib/canvas';
 import { GridConfig } from './grid_config';
+import { SymmetryConfig } from './symmetry_config';
 import { convert_blob_to_data_url, convert_data_url_to_blob } from '$lib/blob';
 import {
 	filter_object_entries,
@@ -70,7 +81,34 @@ export class Project extends Schema.Class<Project>('Project')({
 			decoding: () => GridConfig.default(),
 		}),
 	),
+	symmetry_config: SymmetryConfig.pipe(
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => SymmetryConfig.default(),
+			decoding: () => SymmetryConfig.default(),
+		}),
+	),
 }) {
+	#delaunay: Option.Option<Delaunay<unknown>> = Option.none();
+
+	// triangulation of the solar systems, computed lazily and cached
+	// (Project is immutable, so a new instance always starts with a fresh cache)
+	// TODO cache by solar_systems?
+	get delaunay(): Delaunay<unknown> {
+		if (Option.isNone(this.#delaunay)) {
+			const delaunay = new Delaunay(
+				this.solar_systems.flatMap((solar_system) => [
+					solar_system.coordinate.x,
+					solar_system.coordinate.y,
+				]),
+			);
+			this.#delaunay = Option.some(delaunay);
+			return delaunay;
+		} else {
+			return this.#delaunay.value;
+		}
+	}
+
 	get_solar_system(id: SolarSystemId): Option.Option<SolarSystem> {
 		return pipe(
 			this.solar_systems,
@@ -95,6 +133,31 @@ export class Project extends Schema.Class<Project>('Project')({
 
 	get_fallen_empire_zone_coordinate_unsafe(zone: FallenEmpireZone) {
 		return Option.getOrThrow(this.get_fallen_empire_zone_coordinate(zone));
+	}
+
+	// finds the solar system nearest to a coordinate, if within max_distance
+	find_closest_solar_system(
+		coordinate: Coordinate,
+		options: { max_distance?: number } = {},
+	): Option.Option<SolarSystem> {
+		if (this.solar_systems.length === 0) return Option.none();
+		const max_distance = options.max_distance ?? Infinity;
+		const index = this.delaunay.find(coordinate.x, coordinate.y);
+		if (index < 0 || index >= this.solar_systems.length) return Option.none();
+		const solar_system = this.solar_systems[index];
+		if (solar_system == null) return Option.none();
+		if (solar_system.coordinate.distance_to(coordinate) > max_distance)
+			return Option.none();
+		return Option.some(solar_system);
+	}
+
+	make_new_solar_system_id_iterator() {
+		const used_ids = new Set(this.solar_systems.map(Struct.get('id')));
+		return pipe(
+			Iterable.range(0),
+			Iterable.map((id) => SolarSystemId.make(id)),
+			Iterable.filter((id) => !used_ids.has(id)),
+		)[Symbol.iterator]() as Iterator<SolarSystemId, never, SolarSystemId>;
 	}
 
 	static async make_empty(name: string) {

@@ -23,6 +23,10 @@ export class Coordinate extends Schema.Class<Coordinate>('Coordinate')({
 		});
 	}
 
+	static to_rounded(coordinate: Coordinate) {
+		return coordinate.to_rounded();
+	}
+
 	distance_to(coordinate: Coordinate): number {
 		return Math.hypot(this.x - coordinate.x, this.y - coordinate.y);
 	}
@@ -32,6 +36,15 @@ export class Coordinate extends Schema.Class<Coordinate>('Coordinate')({
 			x: this.x + Math.cos(radians) * distance,
 			y: this.y + Math.sin(radians) * distance,
 		});
+	}
+
+	is_in_canvas_bounds(): boolean {
+		return (
+			this.x >= 0 &&
+			this.y >= 0 &&
+			this.x < CANVAS_WIDTH &&
+			this.y < CANVAS_HEIGHT
+		);
 	}
 
 	static from_stellaris_coordinate(
