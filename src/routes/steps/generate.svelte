@@ -118,7 +118,7 @@
 		step={1}
 		value={settings.max_cluster_size}
 		on_value_change={(value) =>
-			editor().update_generator_settings({ target_cluster_size: value })}
+			editor().update_generator_settings({ max_cluster_size: value })}
 	>
 		{#snippet label()}
 			Max Cluster Size
