@@ -27,6 +27,7 @@ import {
 } from '$lib/parse_txt';
 import { Coordinate } from './coordinate';
 import { FallenEmpireZone, FallenEmpireZoneId } from './fallen_empire_zone';
+import { MAX_SYMMETRY_MATCH_DISTANCE } from '$lib/constants';
 
 export class ProjectListing extends Schema.Class<ProjectListing>(
 	'ProjectListing',
@@ -149,6 +150,14 @@ export class Project extends Schema.Class<Project>('Project')({
 		if (solar_system.coordinate.distance_to(coordinate) > max_distance)
 			return Option.none();
 		return Option.some(solar_system);
+	}
+
+	is_solar_system_self_symmetric(solar_system: SolarSystem) {
+		return this.symmetry_config.transforms.some((transform) =>
+			this.find_closest_solar_system(transform(solar_system.coordinate), {
+				max_distance: MAX_SYMMETRY_MATCH_DISTANCE,
+			}).pipe(Option.contains(solar_system)),
+		);
 	}
 
 	make_new_solar_system_id_iterator() {

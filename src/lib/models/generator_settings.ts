@@ -23,6 +23,14 @@ export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
 		Schema.clamp(0, 1),
 		Schema.optional,
 		Schema.withDefaults({
+			constructor: () => 0.75,
+			decoding: () => 0.75,
+		}),
+	),
+	inter_cluster_connectivity: Schema.Number.pipe(
+		Schema.clamp(0, 1),
+		Schema.optional,
+		Schema.withDefaults({
 			constructor: () => 0.5,
 			decoding: () => 0.5,
 		}),
@@ -40,6 +48,14 @@ export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
 		Schema.withDefaults({
 			constructor: () => false,
 			decoding: () => false,
+		}),
+	),
+	max_cluster_size: Schema.Int.pipe(
+		Schema.greaterThanOrEqualTo(1),
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 10,
+			decoding: () => 10,
 		}),
 	),
 }) {

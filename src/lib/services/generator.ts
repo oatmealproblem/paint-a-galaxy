@@ -2,11 +2,14 @@ import {
 	Array,
 	Context,
 	Effect,
+	Equal,
 	Function,
 	Iterable,
 	Layer,
 	Option,
+	Order,
 	pipe,
+	Random,
 	Record,
 	Struct,
 } from 'effect';
@@ -25,7 +28,12 @@ import {
 } from '$lib/constants';
 import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 import { Coordinate } from '$lib/models/coordinate';
-import createGraph, { type Link, type Node } from 'ngraph.graph';
+import createGraph, {
+	type Graph,
+	type Link,
+	type Node,
+	type NodeId,
+} from 'ngraph.graph';
 // @ts-expect-error -- no 1st or 3rd party type available
 import kruskal from 'ngraph.kruskal';
 import { Delaunay } from 'd3-delaunay';
@@ -56,6 +64,59 @@ export class Generator extends Context.Tag('Generator')<
 	}
 >() {
 	static layer = (() => {
+		// multi-source BFS that returns the valid systems furthest from the given origins
+		// Unreached systems are preferred, so we don't pile everything into one component (also covers the no-origins case)
+		function find_furthest_systems<
+			NodeData extends { d: number; solar_system: SolarSystem },
+		>(
+			graph: Graph<NodeData>,
+			origin_ids: Iterable<SolarSystemId>,
+			is_valid: (system: SolarSystem) => boolean,
+		): SolarSystem[] {
+			graph.forEachNode((node) => {
+				node.data.d = Infinity;
+			});
+			const edge: NodeId[] = [];
+			for (const id of origin_ids) {
+				const node = graph.getNode(id);
+				if (node == null) continue;
+				node.data.d = 0;
+				edge.push(id);
+			}
+			let furthest_distance = 0;
+			let furthest_systems: SolarSystem[] = [];
+			while (edge.length) {
+				const s = edge.pop()!;
+				const source_distance = graph.getNode(s)!.data.d;
+				graph.forEachLinkedNode(
+					s,
+					(node) => {
+						if (node.data.d === Infinity) {
+							node.data.d = source_distance + 1;
+							edge.unshift(node.id);
+							if (is_valid(node.data.solar_system)) {
+								if (node.data.d > furthest_distance) {
+									furthest_distance = node.data.d;
+									furthest_systems = [node.data.solar_system];
+								} else if (node.data.d === furthest_distance) {
+									furthest_systems.push(node.data.solar_system);
+								}
+							}
+						}
+					},
+					false,
+				);
+			}
+			const unreached: SolarSystem[] = [];
+			graph.forEachNode((node) => {
+				if (node.data.d === Infinity) {
+					if (is_valid(node.data.solar_system))
+						unreached.push(node.data.solar_system);
+				}
+			});
+			return unreached.length > 0 ? unreached : furthest_systems;
+		}
+
 		function delete_solar_systems(project: Project): Action[] {
 			return project.solar_systems
 				.filter((solar_system) => !solar_system.locked)
@@ -368,19 +429,41 @@ export class Generator extends Context.Tag('Generator')<
 			const {
 				hyperlane_connectivity,
 				hyperlane_max_distance,
+				inter_cluster_connectivity,
 				allow_disconnected,
+				max_cluster_size: target_cluster_size,
 			} = project.generator_settings;
+
+			type NodeData = {
+				solar_system: SolarSystem;
+				d: number;
+				cluster_id?: SolarSystemId; // clusters are IDed by their "seed" system
+			};
+
 			type LinkData = {
 				distance: number;
 				is_mst?: boolean;
+				is_cluster_bridge?: boolean;
 				checked_for_removal?: boolean;
 				a: SolarSystem;
 				b: SolarSystem;
 			};
-			const g = createGraph<
-				{ coords: [number, number]; d: number },
-				LinkData
-			>();
+
+			function mark_link_is_mst(link: Link<LinkData>): void {
+				link.data.is_mst = true;
+				for (const symmetric_link of find_symmetric_links(link)) {
+					symmetric_link.data.is_mst = true;
+				}
+			}
+
+			function mark_link_as_bridge(link: Link<LinkData>): void {
+				link.data.is_cluster_bridge = true;
+				for (const symmetric_link of find_symmetric_links(link)) {
+					symmetric_link.data.is_cluster_bridge = true;
+				}
+			}
+
+			const main_graph = createGraph<NodeData, LinkData>();
 			// generate triangulation
 			const delaunay = new Delaunay(
 				project.solar_systems.flatMap((system) => [
@@ -404,11 +487,11 @@ export class Generator extends Context.Tag('Generator')<
 					const b = coordinate_to_solar_system[`${x},${y}`];
 					if (a == null || b == null) return;
 					const distance = Math.hypot(this.x - x, this.y - y);
-					if (!g.hasNode(a.id))
-						g.addNode(a.id, { coords: [this.x, this.y], d: Infinity });
-					if (!g.hasNode(b.id))
-						g.addNode(b.id, { coords: [x, y], d: Infinity });
-					g.addLink(a.id, b.id, {
+					if (!main_graph.hasNode(a.id))
+						main_graph.addNode(a.id, { solar_system: a, d: Infinity });
+					if (!main_graph.hasNode(b.id))
+						main_graph.addNode(b.id, { solar_system: b, d: Infinity });
+					main_graph.addLink(a.id, b.id, {
 						distance,
 						a,
 						b,
@@ -441,8 +524,8 @@ export class Generator extends Context.Tag('Generator')<
 					if (Option.isNone(b)) continue;
 					// ngraph link keys are ordered, so check both orientations
 					const symmetric_link =
-						g.getLink(a.value.id, b.value.id) ??
-						g.getLink(b.value.id, a.value.id);
+						main_graph.getLink(a.value.id, b.value.id) ??
+						main_graph.getLink(b.value.id, a.value.id);
 					if (symmetric_link != null) {
 						symmetric_links.push(symmetric_link);
 					}
@@ -452,28 +535,380 @@ export class Generator extends Context.Tag('Generator')<
 
 			// find minimum spanning tree
 			const mst: { fromId: number; toId: number }[] = kruskal(
-				g,
+				main_graph,
 				(link: Link<{ distance: number; is_mst?: boolean }>) =>
 					link.data.distance,
 			);
 			for (const tree_link of mst) {
-				const link = g.getLink(tree_link.fromId, tree_link.toId);
-				if (link) {
-					link.data.is_mst = true;
-					// symmetric copies of MST links are marked too, to ensure symmetry is maintained
+				const link = main_graph.getLink(tree_link.fromId, tree_link.toId);
+				if (link) mark_link_is_mst(link);
+			}
+
+			// remove links longer than the max distance that aren't part of the MST (or, when allow_disconnected, even MST links).
+			// This happens before clustering so clusters only form from plausible links.
+			main_graph.forEachLink((link) => {
+				if (
+					(link.data.distance > hyperlane_max_distance &&
+						(!link.data.is_mst || allow_disconnected)) ||
+					(!link.data.is_mst &&
+						intersects_with_locked_hyperlane(link.data.a, link.data.b))
+				) {
+					// link is over max distance and either allow_disconnected or not in MST
+					main_graph.removeLink(link);
 					for (const symmetric_link of find_symmetric_links(link)) {
-						symmetric_link.data.is_mst = true;
+						main_graph.removeLink(symmetric_link);
 					}
+				}
+			});
+
+			// make clusters and cluster-aware MST if target_cluster_size is at least 2
+			let clustering_active = false;
+			if (target_cluster_size > 1) {
+				let connected_count = 0;
+				main_graph.forEachNode((node) => {
+					if (node.links != null && node.links.size >= 1) connected_count++;
+				});
+				const target_clusters = Math.round(
+					connected_count / target_cluster_size,
+				);
+
+				type Cluster = {
+					seed_id: SolarSystemId;
+					member_ids: Set<SolarSystemId>;
+					frontier_ids: Set<SolarSystemId>;
+					symmetric_clusters: {
+						cluster: Cluster;
+						transform: (coordinate: Coordinate) => Coordinate;
+					}[];
+					is_self_symmetric: boolean; // seed is on point/line of symmetry
+					is_subordinate: boolean; // is subordinate symmetric match of another cluster
+				};
+				const clusters = new Map<SolarSystemId, Cluster>();
+
+				function count_mst_connections(solar_system: SolarSystem): number {
+					return pipe(
+						main_graph.getLinks(solar_system.id),
+						Option.fromNullable,
+						Option.getOrElse(() => new Set<Link<LinkData>>()),
+						Iterable.countBy((link) => link.data.is_mst ?? false),
+					);
+				}
+				function is_valid_seed(solar_system: SolarSystem): boolean {
+					return (
+						!clusters.has(solar_system.id) &&
+						count_mst_connections(solar_system) >= 3
+					);
+				}
+
+				// find cluster seeds, similar to how spawns are found: each iteration
+				// places a seed at the valid system furthest from all current seeds
+				// (via a single multi-source BFS), then also seeds its symmetric copies.
+				while (clusters.size < target_clusters) {
+					// no valid (not clustered, has a connection) systems left
+					const furthest_systems = find_furthest_systems(
+						main_graph,
+						clusters.keys(),
+						is_valid_seed,
+					);
+					if (furthest_systems.length === 0) break;
+					const chosen = Effect.runSync(Random.choice(furthest_systems));
+					const symmetric_clusters = pipe(
+						symmetry_transforms,
+						Iterable.filterMap((transform) => {
+							const system = project.find_closest_solar_system(
+								transform(chosen.coordinate),
+								{ max_distance: MAX_SYMMETRY_MATCH_DISTANCE },
+							);
+							if (Option.isNone(system)) return Option.none();
+							if (Equal.equals(system.value, chosen)) return Option.none();
+							const cluster: Cluster = {
+								seed_id: system.value.id,
+								member_ids: new Set(),
+								frontier_ids: new Set(),
+								symmetric_clusters: [],
+								is_self_symmetric: false,
+								is_subordinate: true,
+							};
+							return Option.some({ cluster, transform });
+						}),
+						Array.fromIterable,
+					);
+					const cluster: Cluster = {
+						seed_id: chosen.id,
+						member_ids: new Set(),
+						frontier_ids: new Set(),
+						symmetric_clusters: symmetric_clusters,
+						is_self_symmetric: project.is_solar_system_self_symmetric(chosen),
+						is_subordinate: false,
+					};
+					clusters.set(chosen.id, cluster);
+					cluster.symmetric_clusters.forEach(({ cluster }) => {
+						clusters.set(cluster.seed_id, cluster);
+					});
+				}
+				clustering_active = clusters.size > 0;
+
+				function find_best_expansion(
+					cluster: Cluster,
+				): Option.Option<SolarSystem> {
+					// stop growing once the cluster reaches the target size
+					if (cluster.member_ids.size >= target_cluster_size)
+						return Option.none();
+
+					// find the closest system in the frontier
+					const seed = pipe(
+						main_graph.getNode(cluster.seed_id),
+						Option.fromNullable,
+						Option.getOrThrow,
+						(node) => node.data.solar_system,
+					);
+					return pipe(
+						cluster.frontier_ids,
+						Iterable.filterMap((id) =>
+							Option.fromNullable(main_graph.getNode(id)),
+						),
+						// skip systems already claimed by another cluster
+						Iterable.filter((node) => node.data.cluster_id == null),
+						Iterable.map((node) => node.data.solar_system),
+						Array.sortWith(
+							(solar_system) =>
+								solar_system.coordinate.distance_to(seed.coordinate),
+							Order.number,
+						),
+						Array.get(0),
+					);
+				}
+
+				function expand_cluster(cluster: Cluster, system: SolarSystem) {
+					const node = main_graph.getNode(system.id);
+					// mirrored expansions can match a system already claimed by
+					// another cluster (or a seed); don't steal it
+					if (
+						node?.data.cluster_id != null &&
+						node.data.cluster_id !== cluster.seed_id
+					)
+						return;
+					cluster.member_ids.add(system.id);
+					clusters.forEach((cluster) => cluster.frontier_ids.delete(system.id));
+					if (node) node.data.cluster_id = cluster.seed_id;
+					main_graph.forEachLinkedNode(system.id, (neighbor) => {
+						// only add unclustered neighbors to frontier
+						// only add self-symmetric systems if the cluster is also self-symmetric
+						if (
+							neighbor.data.cluster_id == null &&
+							(cluster.is_self_symmetric ||
+								!project.is_solar_system_self_symmetric(
+									neighbor.data.solar_system,
+								))
+						) {
+							cluster.frontier_ids.add(neighbor.data.solar_system.id);
+						}
+					});
+				}
+
+				// initialize the members and frontiers of clusters
+				for (const cluster of clusters.values()) {
+					expand_cluster(
+						cluster,
+						project.get_solar_system_unsafe(cluster.seed_id),
+					);
+				}
+
+				// expand clusters 1 system at a time; stop when no cluster has expanded;
+				while (true) {
+					let added_any = false;
+					for (const cluster of clusters
+						.values()
+						.filter((cluster) => !cluster.is_subordinate)) {
+						const expansion = find_best_expansion(cluster);
+						if (Option.isNone(expansion)) continue;
+
+						expand_cluster(cluster, expansion.value);
+						added_any = true;
+
+						if (
+							cluster.is_self_symmetric &&
+							!project.is_solar_system_self_symmetric(expansion.value)
+						) {
+							symmetry_transforms.forEach((transform) => {
+								const symmetric_expansion = project.find_closest_solar_system(
+									transform(expansion.value.coordinate),
+									{ max_distance: MAX_SYMMETRY_MATCH_DISTANCE },
+								);
+								if (Option.isSome(symmetric_expansion)) {
+									expand_cluster(cluster, symmetric_expansion.value);
+								}
+							});
+						}
+
+						cluster.symmetric_clusters.forEach((symmetric_cluster) => {
+							const symmetric_expansion = project.find_closest_solar_system(
+								symmetric_cluster.transform(expansion.value.coordinate),
+								{ max_distance: MAX_SYMMETRY_MATCH_DISTANCE },
+							);
+							if (Option.isSome(symmetric_expansion)) {
+								expand_cluster(
+									symmetric_cluster.cluster,
+									symmetric_expansion.value,
+								);
+							}
+						});
+					}
+					if (!added_any) break;
+				}
+
+				// rebuild cluster-aware MST
+				// - reset MST data
+				// - find and mark intra-cluster MSTs for each cluster
+				// - find and mark inter-cluster MST
+
+				// reset all MST data
+				main_graph.forEachLink((link) => {
+					link.data.is_mst = false;
+				});
+
+				// find the MST within each cluster so clusters stay internally connected
+				for (const cluster of clusters.values()) {
+					if (cluster.member_ids.size < 2) continue;
+					const intra_cluster_graph = createGraph<never, LinkData>();
+					for (const id of cluster.member_ids) intra_cluster_graph.addNode(id);
+					for (const id of cluster.member_ids) {
+						main_graph.forEachLinkedNode(
+							id,
+							(neighbor, link) => {
+								if (intra_cluster_graph.hasNode(neighbor.id)) {
+									intra_cluster_graph.addLink(id, neighbor.id, link.data);
+								}
+							},
+							true,
+						);
+					}
+					const intra_cluster_mst = kruskal(
+						intra_cluster_graph,
+						(link: Link<LinkData>) => link.data.distance,
+					);
+					for (const tree_link of intra_cluster_mst) {
+						const link = main_graph.getLink(tree_link.fromId, tree_link.toId);
+						if (link) mark_link_is_mst(link);
+					}
+				}
+
+				// build a cluster-level graph: each real cluster is represented by the
+				// center of its bounding box, and each unclustered system is a
+				// single-system cluster
+				const inter_cluster_links: {
+					from: Node<NodeData>;
+					to: Node<NodeData>;
+					link: Link<LinkData>;
+				}[] = [];
+				main_graph.forEachLink((link) => {
+					const from = pipe(
+						main_graph.getNode(link.fromId),
+						Option.fromNullable,
+						Option.getOrThrow,
+					);
+					const to = pipe(
+						main_graph.getNode(link.toId),
+						Option.fromNullable,
+						Option.getOrThrow,
+					);
+					if (
+						from.data.cluster_id == null ||
+						to.data.cluster_id == null ||
+						from.data.cluster_id !== to.data.cluster_id
+					) {
+						inter_cluster_links.push({ from, to, link });
+					}
+				});
+
+				const get_inter_cluster_link_key = (from: NodeId, to: NodeId) =>
+					[from, to].toSorted().toString();
+				const shortest_inter_cluster_links = pipe(
+					inter_cluster_links,
+					Array.groupBy(({ from, to }) =>
+						get_inter_cluster_link_key(
+							from.data.cluster_id ?? from.id,
+							to.data.cluster_id ?? to.id,
+						),
+					),
+					Record.values,
+					Iterable.map(
+						Array.sortBy(
+							Order.mapInput(Order.number, (link) => link.link.data.distance),
+						),
+					),
+					Iterable.map(Array.headNonEmpty),
+					Iterable.map(
+						(link) =>
+							[
+								get_inter_cluster_link_key(
+									link.from.data.cluster_id ?? link.from.id,
+									link.to.data.cluster_id ?? link.to.id,
+								),
+								link,
+							] as const,
+					),
+					Record.fromEntries,
+				);
+				for (const { link } of Record.values(shortest_inter_cluster_links)) {
+					mark_link_as_bridge(link);
+				}
+
+				// find cluster seeds and non-clustered systems
+				const inter_cluster_graph_systems = pipe(
+					project.solar_systems,
+					Array.filterMap((system) => {
+						if (
+							clusters.has(system.id) ||
+							main_graph.getNode(system.id)?.data.cluster_id == null
+						) {
+							return Option.some(system);
+						} else {
+							return Option.none();
+						}
+					}),
+				);
+
+				const inter_cluster_graph = createGraph<NodeData, LinkData>();
+				for (const system of inter_cluster_graph_systems) {
+					inter_cluster_graph.addNode(system.id, {
+						solar_system: system,
+						d: Infinity,
+					});
+				}
+				for (const link of Record.values(shortest_inter_cluster_links)) {
+					inter_cluster_graph.addLink(
+						link.from.data.cluster_id ?? link.from.id,
+						link.to.data.cluster_id ?? link.to.id,
+						link.link.data,
+					);
+				}
+
+				const inter_cluster_mst = kruskal(
+					inter_cluster_graph,
+					(link: Link<LinkData>) => link.data.distance,
+				);
+				for (const tree_link of inter_cluster_mst) {
+					const shortest_link_key = get_inter_cluster_link_key(
+						tree_link.fromId,
+						tree_link.toId,
+					);
+					const shortest_link = Record.get(
+						shortest_inter_cluster_links,
+						shortest_link_key,
+					);
+					if (Option.isSome(shortest_link))
+						mark_link_is_mst(shortest_link.value.link);
 				}
 			}
 
 			// remove links
-			// - greater than maxConnectionLength (MST allowed if allowDisconnected)
-			// - non-MST removed randomly based on connectedness
 			// - between locked systems
 			// - crossing locked hyperlanes and not part of MST
+			// - within a cluster, non-MST removed randomly based on connectivity
+			// - between clusters, only cluster bridges are kept, and non-MST bridges removed randomly
 			const links: Link<LinkData>[] = [];
-			g.forEachLink((link) => {
+			main_graph.forEachLink((link) => {
 				links.push(link);
 			});
 			for (const link of links) {
@@ -481,7 +916,7 @@ export class Generator extends Context.Tag('Generator')<
 					// both ends are locked; remove this link so it's not duplicated
 					// don't do anything with symmetric links; they might not be locked
 					// intentionally done before skipping checked_for_removal
-					g.removeLink(link);
+					main_graph.removeLink(link);
 					continue;
 				}
 
@@ -490,34 +925,42 @@ export class Generator extends Context.Tag('Generator')<
 				if (link.data.checked_for_removal) continue;
 
 				const symmetric_links = find_symmetric_links(link);
-				const remove_group = () => {
-					g.removeLink(link);
+				const remove_this_and_symmetric_links = () => {
+					main_graph.removeLink(link);
 					for (const symmetric_link of symmetric_links) {
 						symmetric_link.data.checked_for_removal = true;
-						g.removeLink(symmetric_link);
+						main_graph.removeLink(symmetric_link);
 					}
 				};
 
-				if (
-					link.data.distance > hyperlane_max_distance &&
-					(!link.data.is_mst || allow_disconnected)
-				) {
-					// link is over max distance and either allow_disconnected or not in MST
-					remove_group();
-				} else if (
-					!link.data.is_mst &&
-					intersects_with_locked_hyperlane(link.data.a, link.data.b)
-				) {
-					// intersects with locked hyperlane and is not part of MST; remove
-					remove_group();
-				} else if (
-					Math.random() > hyperlane_connectivity &&
-					!link.data.is_mst
-				) {
-					// randomly remove non-MST links based on connectivity
-					remove_group();
+				// systems in the same cluster connect based on connectivity
+				// systems in different clusters only connect via a cluster bridge
+				const from = pipe(
+					main_graph.getNode(link.fromId),
+					Option.fromNullable,
+					Option.getOrThrow,
+				);
+				const to = pipe(
+					main_graph.getNode(link.toId),
+					Option.fromNullable,
+					Option.getOrThrow,
+				);
+				const same_cluster =
+					!clustering_active ||
+					(from.data.cluster_id != null &&
+						to.data.cluster_id != null &&
+						from.data.cluster_id === to.data.cluster_id);
+				if (link.data.is_mst) continue;
+				if (!same_cluster && !link.data.is_cluster_bridge) {
+					remove_this_and_symmetric_links();
+					continue;
+				}
+				const connectivity =
+					same_cluster ? hyperlane_connectivity : inter_cluster_connectivity;
+				if (Math.random() > connectivity) {
+					remove_this_and_symmetric_links();
 				} else {
-					// the random check kept this link; mark the symmetric copies as checked, so the chance isn't rerolled (reducing connectivity)
+					// mark symmetric links as checked so they don't "rerolled"
 					for (const symmetric_link of symmetric_links) {
 						symmetric_link.data.checked_for_removal = true;
 					}
@@ -527,7 +970,7 @@ export class Generator extends Context.Tag('Generator')<
 			// make CreateHyperlane actions
 			const create_hyperlane_actions: Action[] = [];
 			const added = new Set<string>();
-			g.forEachLink((link) => {
+			main_graph.forEachLink((link) => {
 				const connection = Connection.make({
 					a: link.data.a.id,
 					b: link.data.b.id,
@@ -667,61 +1110,11 @@ export class Generator extends Context.Tag('Generator')<
 				locked_spawn_systems.length + new_spawns.size <
 				total_spawns_target
 			) {
-				// reset distance to inf
-				graph.forEachNode((node) => {
-					node.data.d = Infinity;
-				});
-				const edge: SolarSystem[] = [];
-				// seed the search from every current spawn
-				for (const spawn of [...locked_spawn_systems, ...new_spawns]) {
-					const node = graph.getNode(spawn.id);
-					if (node == null) continue;
-					node.data.d = 0;
-					edge.push(spawn);
-				}
-				let furthest_distance = 0;
-				let furthest_systems: SolarSystem[] = [];
-				if (edge.length > 0) {
-					// modified Dijkstra's to find stars furthest from the spawns
-					// (simplified since all edge weights are 1)
-					while (edge.length) {
-						const s = edge.pop()!;
-						graph.forEachLinkedNode(
-							s.id,
-							(node) => {
-								if (node.data.d === Infinity) {
-									node.data.d = graph.getNode(s.id)!.data.d + 1;
-									edge.unshift(node.data.solar_system);
-									if (is_valid_spawn(node.data.solar_system)) {
-										if (node.data.d > furthest_distance) {
-											furthest_distance = node.data.d;
-											furthest_systems = [node.data.solar_system];
-										} else if (node.data.d === furthest_distance) {
-											furthest_systems.push(node.data.solar_system);
-										}
-									}
-								}
-							},
-							false,
-						);
-					}
-				}
-				// disconnected clusters are never reached by the Dijkstra search
-				// (their distance stays Infinity), so pick from those instead of
-				// letting the spawns pile up in one cluster. This also covers the
-				// "no spawns yet" case, where every system stays unreached.
-				const unreached_systems: SolarSystem[] = [];
-				graph.forEachNode((node) => {
-					if (
-						node.data.d === Infinity &&
-						is_valid_spawn(node.data.solar_system)
-					) {
-						unreached_systems.push(node.data.solar_system);
-					}
-				});
-				if (unreached_systems.length > 0) {
-					furthest_systems = unreached_systems;
-				}
+				const furthest_systems = find_furthest_systems(
+					graph,
+					[...locked_spawn_systems, ...new_spawns].map((s) => s.id),
+					is_valid_spawn,
+				);
 				// no valid (not locked, not spawn, not dead end) systems left
 				if (furthest_systems.length === 0) break;
 				const chosen =

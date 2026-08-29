@@ -113,6 +113,23 @@
 	</Slider>
 	<SectionHeader>Hyperlanes</SectionHeader>
 	<Slider
+		min={1}
+		max={50}
+		step={1}
+		value={settings.max_cluster_size}
+		on_value_change={(value) =>
+			editor().update_generator_settings({ target_cluster_size: value })}
+	>
+		{#snippet label()}
+			Max Cluster Size
+			<Info>
+				Maximum number of solar systems per cluster. Systems within a cluster
+				will be more densely connected than systems in different clusters. Set
+				to 0 to disable clustering.
+			</Info>
+		{/snippet}
+	</Slider>
+	<Slider
 		min={0}
 		max={1}
 		step={0.01}
@@ -121,11 +138,27 @@
 			editor().update_generator_settings({ hyperlane_connectivity: value })}
 	>
 		{#snippet label()}
-			Connectivity
+			Same-Cluster Connectivity
 			<Info>
-				Density of hyperlanes. At 100%, all potential non-crossing hyperlanes
-				are created. At 0%, only the minimum number to connect all solar systems
-				are created.
+				Likelihood of hyperlane connections between systems in the same cluster.
+				At 0%, systems will be minimally connected but still reachable.
+			</Info>
+		{/snippet}
+		{#snippet output(value)}{Math.round(value * 100)}%{/snippet}
+	</Slider>
+	<Slider
+		min={0}
+		max={1}
+		step={0.01}
+		value={settings.inter_cluster_connectivity}
+		on_value_change={(value) =>
+			editor().update_generator_settings({ inter_cluster_connectivity: value })}
+	>
+		{#snippet label()}
+			Cross-Cluster Connectivity
+			<Info>
+				Likelihood for 2 neighboring clusters to have a hyperlane connection. At
+				0%, clusters will be minimally connected but still reachable.
 			</Info>
 		{/snippet}
 		{#snippet output(value)}{Math.round(value * 100)}%{/snippet}
