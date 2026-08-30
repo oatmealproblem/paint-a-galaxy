@@ -10,9 +10,17 @@
 	const editor = get_editor();
 	const settings = $derived(editor().project.generator_settings);
 
+	let free_inputs: Partial<Record<keyof typeof settings, HTMLInputElement>> =
+		$state({});
+
 	function on_generate_option_selected({ value }: { value: string }) {
 		if (value === 'reset') {
 			editor().update_generator_settings(GeneratorSettings.default());
+			for (const key of Object.keys(
+				free_inputs,
+			) as (keyof typeof free_inputs)[]) {
+				free_inputs[key]!.value = settings[key].toString();
+			}
 		} else {
 			editor().generate({
 				solar_systems: value === 'all' || value === 'solar_systems',
@@ -82,15 +90,23 @@
 			</Info>
 		</span>
 		<input
+			bind:this={free_inputs.number_of_systems}
 			class="input ring-surface-300-700 bg-surface-100-900"
 			type="number"
 			min={0}
 			step={1}
-			bind:value={
-				() => settings.number_of_systems,
-				(value) =>
-					editor().update_generator_settings({ number_of_systems: value })
-			}
+			defaultValue={settings.number_of_systems}
+			onchange={(e) => {
+				const value = e.currentTarget.valueAsNumber;
+				if (!Number.isNaN(value) && value >= 0) {
+					editor().update_generator_settings({
+						number_of_systems: value,
+					});
+				}
+			}}
+			onblur={(e) => {
+				e.currentTarget.value = settings.number_of_systems.toString();
+			}}
 		/>
 	</label>
 	<Slider
@@ -198,4 +214,34 @@
 		</Switch.Label>
 		<Switch.HiddenInput />
 	</Switch>
+	<SectionHeader>Spawns</SectionHeader>
+	<label class="label">
+		<span class="label-text flex gap-1">
+			Spawns per 100 Systems
+			<Info>
+				Target number of potential empire home systems, per 100 solar systems.
+			</Info>
+		</span>
+		<input
+			bind:this={free_inputs.spawns_per_100_solar_systems}
+			class="input ring-surface-300-700 bg-surface-100-900"
+			type="number"
+			min={0}
+			step={1}
+			defaultValue={settings.spawns_per_100_solar_systems}
+			onchange={(e) => {
+				const value = e.currentTarget.valueAsNumber;
+				if (!Number.isNaN(value) && value >= 0) {
+					editor().update_generator_settings({
+						spawns_per_100_solar_systems: value,
+					});
+				}
+			}}
+			onblur={(e) => {
+				e.currentTarget.value =
+					settings.spawns_per_100_solar_systems.toString();
+			}}
+		/>
+		<small>{Math.round(settings.number_of_systems * settings.spawns_per_100_solar_systems / 100)} total spawns</small>
+	</label>
 </form>

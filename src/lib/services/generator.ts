@@ -1078,9 +1078,9 @@ export class Generator extends Context.Tag('Generator')<
 			}
 
 			// find home stars
-			// 6 per 200 is the vanilla num_empires max
 			const total_spawns_target = Math.round(
-				(project.solar_systems.length / 200) * 6,
+				(project.solar_systems.length / 100) *
+					project.generator_settings.spawns_per_100_solar_systems,
 			);
 			// locked systems with a spawn count towards the target
 			const locked_spawn_systems = project.solar_systems.filter(

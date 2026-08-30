@@ -11,6 +11,14 @@ export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
 			decoding: () => 600,
 		}),
 	),
+	spawns_per_100_solar_systems: Schema.Int.pipe(
+		Schema.greaterThanOrEqualTo(0),
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => 3,
+			decoding: () => 3,
+		}),
+	),
 	min_distance_between_systems: Schema.Number.pipe(
 		Schema.greaterThanOrEqualTo(0),
 		Schema.optional,
