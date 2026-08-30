@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Icons } from '$lib/components/icons';
 	import Info from '$lib/components/info.svelte';
+	import RangeSlider from '$lib/components/range_slider.svelte';
 	import SectionHeader from '$lib/components/section_header.svelte';
 	import Slider from '$lib/components/slider.svelte';
 	import { get_editor } from '$lib/editor.svelte';
@@ -242,6 +243,56 @@
 					settings.spawns_per_100_solar_systems.toString();
 			}}
 		/>
-		<small>{Math.round(settings.number_of_systems * settings.spawns_per_100_solar_systems / 100)} total spawns</small>
+		<small>
+			{Math.round(
+				(settings.number_of_systems * settings.spawns_per_100_solar_systems) /
+					100,
+			)} total spawns
+		</small>
 	</label>
+	<SectionHeader>Nebulas</SectionHeader>
+	<label class="label">
+		<span class="label-text flex gap-1">
+			Number of Nebulas
+			<Info>Target number of nebulas to generate.</Info>
+		</span>
+		<input
+			bind:this={free_inputs.number_of_nebulas}
+			class="input ring-surface-300-700 bg-surface-100-900"
+			type="number"
+			min={0}
+			step={1}
+			defaultValue={settings.number_of_nebulas}
+			onchange={(e) => {
+				const value = e.currentTarget.valueAsNumber;
+				if (!Number.isNaN(value) && value >= 0) {
+					editor().update_generator_settings({
+						number_of_nebulas: value,
+					});
+				}
+			}}
+			onblur={(e) => {
+				e.currentTarget.value = settings.number_of_nebulas.toString();
+			}}
+		/>
+	</label>
+	<RangeSlider
+		min={0}
+		max={100}
+		step={1}
+		value={[settings.nebula_min_size, settings.nebula_max_size]}
+		on_value_change={([nebula_min_size, nebula_max_size]) =>
+			editor().update_generator_settings({
+				nebula_min_size,
+				nebula_max_size,
+			})}
+	>
+		{#snippet label()}
+			Nebula Size
+			<Info>
+				Radius of generated nebulas. Each nebula will use a random value in the
+				specified range.
+			</Info>
+		{/snippet}
+	</RangeSlider>
 </form>

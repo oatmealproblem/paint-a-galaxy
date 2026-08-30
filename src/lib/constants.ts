@@ -29,8 +29,6 @@ export const NUM_RANDOM_NEBULAS = 6;
 // min and max radius of random nebulas
 export const RANDOM_NEBULA_MIN_RADIUS = 40;
 export const RANDOM_NEBULA_MAX_RADIUS = 60;
-// minimum distance between random nebulas (center to center)
-export const RANDOM_NEBULA_MIN_DISTANCE = RANDOM_NEBULA_MAX_RADIUS * 2 + 10;
 
 // solar systems are stored at rounded integer coordinates, but a symmetry
 // transform applied to a snapped (already rounded) point can land up to ~1.4

@@ -21,10 +21,6 @@ import {
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
 	MAX_SYMMETRY_MATCH_DISTANCE,
-	NUM_RANDOM_NEBULAS,
-	RANDOM_NEBULA_MAX_RADIUS,
-	RANDOM_NEBULA_MIN_DISTANCE,
-	RANDOM_NEBULA_MIN_RADIUS,
 } from '$lib/constants';
 import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 import { Coordinate } from '$lib/models/coordinate';
@@ -1195,11 +1191,14 @@ export class Generator extends Context.Tag('Generator')<
 			const create_nebula_actions: Action[] = [];
 			const { symmetry_config } = project;
 			const symmetry_transforms = symmetry_config.transforms;
+			const { number_of_nebulas, nebula_min_size, nebula_max_size } =
+				project.generator_settings;
+			const nebula_min_distance = nebula_max_size * 2 + 10;
 			let potential_solar_systems = project.solar_systems.slice();
 			// each iteration places a nebula on a random system and one on each
 			// of its symmetric copies, so the total can slightly exceed the
 			// requested number
-			while (create_nebula_actions.length < NUM_RANDOM_NEBULAS) {
+			while (create_nebula_actions.length < number_of_nebulas) {
 				if (potential_solar_systems.length === 0) break;
 				const random_index = Math.floor(
 					Math.random() * potential_solar_systems.length,
@@ -1214,8 +1213,7 @@ export class Generator extends Context.Tag('Generator')<
 				const too_close_to_each_other = coordinates.some(
 					(coordinate) =>
 						coordinate !== chosen.coordinate &&
-						coordinate.distance_to(chosen.coordinate) <
-							RANDOM_NEBULA_MIN_DISTANCE,
+						coordinate.distance_to(chosen.coordinate) < nebula_min_distance,
 				);
 				if (too_close_to_each_other) {
 					// remove the chosen system so it can't be picked again
@@ -1224,11 +1222,8 @@ export class Generator extends Context.Tag('Generator')<
 					);
 				} else {
 					const radius =
-						RANDOM_NEBULA_MIN_RADIUS +
-						Math.floor(
-							Math.random() *
-								(RANDOM_NEBULA_MAX_RADIUS - RANDOM_NEBULA_MIN_RADIUS),
-						);
+						nebula_min_size +
+						Math.floor(Math.random() * (nebula_max_size - nebula_min_size));
 					for (const coordinate of coordinates) {
 						create_nebula_actions.push(
 							Action.CreateNebulaAction.make({
@@ -1245,7 +1240,7 @@ export class Generator extends Context.Tag('Generator')<
 							coordinates.every(
 								(coordinate) =>
 									solar_system.coordinate.distance_to(coordinate) >=
-									RANDOM_NEBULA_MIN_DISTANCE,
+									nebula_min_distance,
 							),
 					);
 				}

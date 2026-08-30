@@ -1,3 +1,8 @@
+import {
+	NUM_RANDOM_NEBULAS,
+	RANDOM_NEBULA_MAX_RADIUS,
+	RANDOM_NEBULA_MIN_RADIUS,
+} from '$lib/constants';
 import { Schema } from 'effect';
 
 export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
@@ -64,6 +69,30 @@ export class GeneratorSettings extends Schema.Class<GeneratorSettings>(
 		Schema.withDefaults({
 			constructor: () => 10,
 			decoding: () => 10,
+		}),
+	),
+	number_of_nebulas: Schema.Int.pipe(
+		Schema.greaterThanOrEqualTo(0),
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => NUM_RANDOM_NEBULAS,
+			decoding: () => NUM_RANDOM_NEBULAS,
+		}),
+	),
+	nebula_min_size: Schema.Number.pipe(
+		Schema.greaterThanOrEqualTo(0),
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => RANDOM_NEBULA_MIN_RADIUS,
+			decoding: () => RANDOM_NEBULA_MIN_RADIUS,
+		}),
+	),
+	nebula_max_size: Schema.Number.pipe(
+		Schema.greaterThanOrEqualTo(0),
+		Schema.optional,
+		Schema.withDefaults({
+			constructor: () => RANDOM_NEBULA_MAX_RADIUS,
+			decoding: () => RANDOM_NEBULA_MAX_RADIUS,
 		}),
 	),
 }) {
