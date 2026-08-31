@@ -312,7 +312,6 @@
 		<StatItem
 			{label}
 			warning
-			align_top
 			solar_system_ids={warning.value.system_ids}
 		>
 			{#snippet info()}
@@ -357,7 +356,6 @@
 				<StatItem
 					label="Recommended DLC"
 					value={recommended_dlc.size}
-					align_top
 					solar_system_ids={required_dlc_system_ids}
 				>
 					{#snippet info()}

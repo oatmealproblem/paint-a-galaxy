@@ -56,7 +56,7 @@
 		return () => {
 			editor().warned_solar_system_ids = [];
 			editor().warned_fallen_empire_zone_ids = [];
-		}
+		};
 	});
 </script>
 

@@ -524,7 +524,7 @@ const cluster_move: _Tool<
 	Record<string, never>
 > = {
 	id: 'cluster_move',
-	name: 'Move Cluster',
+	name: 'Move Connected',
 	description:
 		'Move a group of connected systems and Fallen Empire Zones, along with overlapping nebulas.',
 	step: 'tweak',

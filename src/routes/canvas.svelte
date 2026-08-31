@@ -45,6 +45,7 @@
 		FallenEmpireZone,
 		FallenEmpireZoneId,
 	} from '$lib/models/fallen_empire_zone';
+	import { convert_blob_to_data_url } from '$lib/blob';
 
 	const editor = get_editor();
 	const project = $derived(editor().project);
@@ -209,6 +210,10 @@
 		);
 	}
 
+	const is_non_chrome_webkit =
+		navigator.userAgent.includes('WebKit') &&
+		!navigator.userAgent.includes('Chrome');
+	let data_url_fallback = $state('');
 	let canvas = $state<HTMLCanvasElement>();
 	let ctx = $derived(canvas?.getContext('2d'));
 	$effect(() => {
@@ -216,6 +221,11 @@
 			ctx?.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 			ctx?.drawImage(bitmap, 0, 0);
 		});
+		if (is_non_chrome_webkit) {
+			convert_blob_to_data_url(project.canvas).then((data_url) => {
+				data_url_fallback = data_url;
+			});
+		}
 	});
 
 	let container = $state<HTMLElement>();
@@ -704,7 +714,13 @@
 			<g
 				transform="translate({transform.x},{transform.y}) scale({transform.k})"
 			>
-				<foreignObject x="0" y="0" width={CANVAS_WIDTH} height={CANVAS_HEIGHT}>
+				<foreignObject
+					x="0"
+					y="0"
+					width={CANVAS_WIDTH}
+					height={CANVAS_HEIGHT}
+					class:hidden={is_non_chrome_webkit}
+				>
 					<canvas
 						bind:this={canvas}
 						width={CANVAS_WIDTH}
@@ -712,6 +728,14 @@
 						style:opacity={editor().current_step_canvas_opacity}
 					></canvas>
 				</foreignObject>
+				{#if is_non_chrome_webkit}
+					<image
+						width={CANVAS_HEIGHT}
+						height={CANVAS_HEIGHT}
+						style:opacity={editor().current_step_canvas_opacity}
+						xlink:href={data_url_fallback}
+					/>
+				{/if}
 				{#if editor().view_settings.show_center_mark}
 					<path
 						d="M {CANVAS_WIDTH / 2} {CANVAS_HEIGHT / 2 - CENTER_MARK_SIZE}
