@@ -309,11 +309,7 @@
 	label: string,
 )}
 	{#if Option.isSome(warning)}
-		<StatItem
-			{label}
-			warning
-			solar_system_ids={warning.value.system_ids}
-		>
+		<StatItem {label} warning solar_system_ids={warning.value.system_ids}>
 			{#snippet info()}
 				Some unique systems require others to be present.
 			{/snippet}

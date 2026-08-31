@@ -101,7 +101,9 @@
 			</Steps.Content>
 		{/each}
 
-		<div class="flex justify-between">
+		<div
+			class="flex justify-between sticky -bottom-4 p-4 pt-8 -m-4 mt-0 bg-linear-to-t from-65% from-surface-50-950 to-transparent"
+		>
 			<Steps.Context>
 				{#snippet children(context)}
 					<Steps.PrevTrigger class="btn preset-outlined-primary-500 ps-3">
