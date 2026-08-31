@@ -1,7 +1,6 @@
 <script lang="ts">
-	import Info from '$lib/components/info.svelte';
-	import { Icons } from '$lib/components/icons';
 	import SectionHeader from '$lib/components/section_header.svelte';
+	import StatItem from '$lib/components/stat_item.svelte';
 	import {
 		CANVAS_HEIGHT,
 		CANVAS_WIDTH,
@@ -92,6 +91,13 @@
 			Record.reduce(0, (acc, cur) => acc + cur.length),
 		),
 	);
+	const duplicate_unique_system_ids = $derived(
+		pipe(
+			duplicate_unique_systems,
+			Record.values,
+			Array.flatMap((systems) => systems.map((system) => system.id)),
+		),
+	);
 	const duplicate_name_systems = $derived(
 		pipe(
 			solar_systems,
@@ -105,6 +111,13 @@
 		pipe(
 			duplicate_name_systems,
 			Record.reduce(0, (acc, cur) => acc + cur.length),
+		),
+	);
+	const duplicate_name_system_ids = $derived(
+		pipe(
+			duplicate_name_systems,
+			Record.values,
+			Array.flatMap((systems) => systems.map((system) => system.id)),
 		),
 	);
 	const missing_marauder_1 = $derived(
@@ -289,8 +302,6 @@
 			return Option.none();
 		}
 	}
-
-	const WARNING_STYLE = 'preset-filled-warning-500';
 </script>
 
 {#snippet missing_systems_warning(
@@ -298,26 +309,21 @@
 	label: string,
 )}
 	{#if Option.isSome(warning)}
-		<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-		<tr
-			class={WARNING_STYLE}
-			onmouseover={() =>
-				(editor().warned_solar_system_ids = warning.value.system_ids)}
-			onmouseout={() => (editor().warned_solar_system_ids = [])}
+		<StatItem
+			{label}
+			warning
+			align_top
+			solar_system_ids={warning.value.system_ids}
 		>
-			<td class="align-top">
-				<Icons.TriangleAlert class="text-warning-50-950 inline" />
-				{label}
-				<Info class="text-warning-50-950 relative top-0.5">
-					Some unique systems require others to be present.
-				</Info>
-			</td>
-			<td class="text-end">
+			{#snippet info()}
+				Some unique systems require others to be present.
+			{/snippet}
+			{#snippet detail()}
 				{#each warning.value.missing_initializers as initializer (initializer)}
 					<div>{initializer}</div>
 				{/each}
-			</td>
-		</tr>
+			{/snippet}
+		</StatItem>
 	{/if}
 {/snippet}
 
@@ -325,111 +331,72 @@
 <div class="table-wrap">
 	<table class="table">
 		<tbody>
-			<tr class={{ [WARNING_STYLE]: num_solar_systems === 0 }}>
-				<td>
-					{#if num_solar_systems === 0}
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-					{/if}
-					Solar Systems
-				</td>
-				<td class="text-end">{num_solar_systems}</td>
-			</tr>
-			<tr class={{ [WARNING_STYLE]: num_spawns === 0 }}>
-				<td>
-					{#if num_spawns === 0}
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-					{/if}
-					Spawns
-				</td>
-				<td class="text-end">{num_spawns}</td>
-			</tr>
-			<tr>
-				<td>
-					Max Safe AI Empires
-					<Info class="text-secondary-800-200 relative top-0.5">
-						You should not set the AI Empires slider higher than this, with 2
-						exceptions:
-						<ul class="list-disc ms-4">
-							<li>
-								Increase by 1 for for each force-spawned custom design with a
-								Reserved spawn.
-							</li>
-							<li>
-								Decrease by 1 for each player beyond the first (unless using a
-								Reserved spawn).
-							</li>
-						</ul>
-					</Info>
-				</td>
-				<td class="text-end">{num_safe_ai_spawns}</td>
-			</tr>
+			<StatItem
+				label="Solar Systems"
+				value={num_solar_systems}
+				warning={num_solar_systems === 0}
+			/>
+			<StatItem label="Spawns" value={num_spawns} warning={num_spawns === 0} />
+			<StatItem label="Max Safe AI Empires" value={num_safe_ai_spawns}>
+				{#snippet info()}
+					You should not set the AI Empires slider higher than this, with 2
+					exceptions:
+					<ul class="list-disc ms-4">
+						<li>
+							Increase by 1 for for each force-spawned custom design with a
+							Reserved spawn.
+						</li>
+						<li>
+							Decrease by 1 for each player beyond the first (unless using a
+							Reserved spawn).
+						</li>
+					</ul>
+				{/snippet}
+			</StatItem>
 			{#if recommended_dlc.size > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = required_dlc_system_ids)}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				<StatItem
+					label="Recommended DLC"
+					value={recommended_dlc.size}
+					align_top
+					solar_system_ids={required_dlc_system_ids}
 				>
-					<td class="align-top">
-						Recommended DLC
-						<Info class="text-secondary-800-200 relative top-0.5">
-							These DLC are required by the system initializers you've set. If
-							you are missing the DLC, the system will be reset to a basic
-							random system at the start of the game.
-						</Info>
-					</td>
-					<td class="text-end">
+					{#snippet info()}
+						These DLC are required by the system initializers you've set. If you
+						are missing the DLC, the system will be reset to a basic random
+						system at the start of the game.
+					{/snippet}
+					{#snippet detail()}
 						{#each recommended_dlc as dlc (dlc)}
 							<div>{dlc}</div>
 						{/each}
-					</td>
-				</tr>
+					{/snippet}
+				</StatItem>
 			{/if}
 			{#if num_duplicate_unique_systems > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = pipe(
-							duplicate_unique_systems,
-							Record.values,
-							Array.flatMap((systems) => systems.map((system) => system.id)),
-						))}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				<StatItem
+					label="Duplicate Unique Systems"
+					value={num_duplicate_unique_systems}
+					warning
+					solar_system_ids={duplicate_unique_system_ids}
 				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Duplicate Unique Systems
-						<Info class="text-warning-50-950 relative top-0.5">
-							Multiple systems are set to the same unique system initializer.
-							This can cause bugs with event chains.
-						</Info>
-					</td>
-					<td class="text-end">{num_duplicate_unique_systems}</td>
-				</tr>
+					{#snippet info()}
+						Multiple systems are set to the same unique system initializer. This
+						can cause bugs with event chains.
+					{/snippet}
+				</StatItem>
 			{/if}
 			{#if num_duplicate_name_systems > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = pipe(
-							duplicate_name_systems,
-							Record.values,
-							Array.flatMap((systems) => systems.map((system) => system.id)),
-						))}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				<StatItem
+					label="Duplicate Names"
+					value={num_duplicate_name_systems}
+					warning
+					solar_system_ids={duplicate_name_system_ids}
 				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Duplicate Names
-						<Info class="text-warning-50-950 relative top-0.5">
-							Multiple systems share the same name. This won't cause any bugs,
-							but can be confusing and immersion-breaking.
-						</Info>
-					</td>
-					<td class="text-end">{num_duplicate_name_systems}</td>
-				</tr>
+					{#snippet info()}
+						Multiple systems share the same name. This won't cause any bugs, but
+						can be confusing and immersion-breaking.
+					{/snippet}
+				</StatItem>
 			{/if}
 			{@render missing_systems_warning(
 				missing_marauder_1,
@@ -452,91 +419,54 @@
 				'Missing Fiefdom Systems',
 			)}
 			{#if overlapping_fallen_empire_zone_ids.length > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_fallen_empire_zone_ids =
-							overlapping_fallen_empire_zone_ids)}
-					onmouseout={() => (editor().warned_fallen_empire_zone_ids = [])}
+				<StatItem
+					label="Overlapping Fallen Empire Zones"
+					value={overlapping_fallen_empire_zone_ids.length}
+					warning
+					fallen_empire_zone_ids={overlapping_fallen_empire_zone_ids}
 				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Overlapping Fallen Empire Zones
-						<Info class="text-warning-50-950 relative top-0.5">
-							Fallen Empire zones should not overlap. Fallen Empire systems may
-							spawn on top of each other.
-						</Info>
-					</td>
-					<td class="text-end">{overlapping_fallen_empire_zone_ids.length}</td>
-				</tr>
+					{#snippet info()}
+						Fallen Empire zones should not overlap. Fallen Empire systems may
+						spawn on top of each other.
+					{/snippet}
+				</StatItem>
 			{/if}
 			{#if solar_system_ids_in_fallen_empire_zones.length > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids =
-							solar_system_ids_in_fallen_empire_zones)}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
+				<StatItem
+					label="Systems in Fallen Empire Zones"
+					value={solar_system_ids_in_fallen_empire_zones.length}
+					warning
+					solar_system_ids={solar_system_ids_in_fallen_empire_zones}
 				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Systems in Fallen Empire Zones
-						<Info class="text-warning-50-950 relative top-0.5">
-							Fallen Empire zones should be empty. Solar systems inside a zone
-							may overlap with Fallen Empire systems spawned at game start.
-						</Info>
-					</td>
-					<td class="text-end">
-						{solar_system_ids_in_fallen_empire_zones.length}
-					</td>
-				</tr>
+					{#snippet info()}
+						Fallen Empire zones should be empty. Solar systems inside a zone may
+						overlap with Fallen Empire systems spawned at game start.
+					{/snippet}
+				</StatItem>
 			{/if}
 			{#if out_of_bounds_system_ids.length > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = out_of_bounds_system_ids)}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
-				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Out-of-Bounds Solar Systems
-					</td>
-					<td class="text-end">{out_of_bounds_system_ids.length}</td>
-				</tr>
+				<StatItem
+					label="Out-of-Bounds Solar Systems"
+					value={out_of_bounds_system_ids.length}
+					warning
+					solar_system_ids={out_of_bounds_system_ids}
+				/>
 			{/if}
 			{#if systems_in_l_cluster_ids.length > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = systems_in_l_cluster_ids)}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
-				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Systems in L-Cluster
-					</td>
-					<td class="text-end">{systems_in_l_cluster_ids.length}</td>
-				</tr>
+				<StatItem
+					label="Systems in L-Cluster"
+					value={systems_in_l_cluster_ids.length}
+					warning
+					solar_system_ids={systems_in_l_cluster_ids}
+				/>
 			{/if}
 			{#if systems_in_core_ids.length > 0}
-				<!-- svelte-ignore a11y_mouse_events_have_key_events -->
-				<tr
-					class={WARNING_STYLE}
-					onmouseover={() =>
-						(editor().warned_solar_system_ids = systems_in_core_ids)}
-					onmouseout={() => (editor().warned_solar_system_ids = [])}
-				>
-					<td>
-						<Icons.TriangleAlert class="text-warning-50-950 inline" />
-						Systems in Core Zone
-					</td>
-					<td class="text-end">{systems_in_core_ids.length}</td>
-				</tr>
+				<StatItem
+					label="Systems in Core Zone"
+					value={systems_in_core_ids.length}
+					warning
+					solar_system_ids={systems_in_core_ids}
+				/>
 			{/if}
 		</tbody>
 	</table>
