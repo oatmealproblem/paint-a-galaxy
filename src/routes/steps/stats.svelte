@@ -414,7 +414,7 @@
 			)}
 			{#if overlapping_fallen_empire_zone_ids.length > 0}
 				<StatItem
-					label="Overlapping Fallen Empire Zones"
+					label="Overlapping FE Zones"
 					value={overlapping_fallen_empire_zone_ids.length}
 					warning
 					fallen_empire_zone_ids={overlapping_fallen_empire_zone_ids}
@@ -427,7 +427,7 @@
 			{/if}
 			{#if solar_system_ids_in_fallen_empire_zones.length > 0}
 				<StatItem
-					label="Systems in Fallen Empire Zones"
+					label="Systems in FE Zones"
 					value={solar_system_ids_in_fallen_empire_zones.length}
 					warning
 					solar_system_ids={solar_system_ids_in_fallen_empire_zones}
