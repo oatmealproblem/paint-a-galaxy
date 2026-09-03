@@ -171,10 +171,6 @@ export function generate_stellaris_galaxy(project: Project): string {
 		}
 	}
 
-	// const key_to_id = Object.fromEntries(
-	// 	solar_systems.map((coords, i) => [coords.toString(), i]),
-	// );
-
 	const systems_1_jump_from_spawn = new Set(
 		project.hyperlanes.flatMap((connection) => {
 			const from_is_spawn = potential_home_stars.some(

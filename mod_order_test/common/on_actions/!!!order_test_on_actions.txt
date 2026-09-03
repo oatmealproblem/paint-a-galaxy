@@ -1,0 +1,17 @@
+empire_init_capital_colony = {
+	events = {
+		order_test.1
+	}
+}
+
+on_ruler_created = {
+	events = {
+		order_test.2
+	}
+}
+
+empire_init_create_ships = {
+	events = {
+		order_test.3
+	}
+}

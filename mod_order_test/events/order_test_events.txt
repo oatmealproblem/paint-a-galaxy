@@ -1,0 +1,28 @@
+namespace = order_test
+
+colony_event = {
+	id = order_test.1
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		log = "empire_init_capital_colony [This.GetName] [From.GetName]"
+	}
+}
+
+country_event = {
+	id = order_test.2
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		log = "on_ruler_created [This.GetName] [This.Capital.GetName]"
+	}
+}
+
+country_event = {
+	id = order_test.3
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		log = "empire_init_create_ships [This.GetName]"
+	}
+}

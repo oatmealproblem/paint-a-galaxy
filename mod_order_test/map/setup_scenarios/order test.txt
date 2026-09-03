@@ -1,0 +1,580 @@
+# README for what to do with this file, read the Steam Workshop page https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115
+
+# Stats:
+# Solar Systems: 200
+# Total Spawns: 6
+# Reserved Spawns: 0
+# Maximum Safe AI Spawns: 5 (do not spawn more AI empires than this, unless you are force-spawning custom designs that use reserved spawns)
+# Wormholes: 0 (in addition to random wormholes)
+# Recommended DLC: None
+
+static_galaxy_scenario = {
+	name="order test"
+
+	priority = 10
+	supports_shape = elliptical
+	supports_shape = ring
+	supports_shape = spiral_2
+	supports_shape = spiral_3
+	supports_shape = spiral_4
+	supports_shape = spiral_6
+	supports_shape = bar
+	supports_shape = starburst
+	supports_shape = cartwheel
+	supports_shape = spoked
+	random_hyperlanes = no
+
+	num_wormhole_pairs = { min = 0 max = 5 }
+	num_wormhole_pairs_default = 1
+	num_gateways = { min = 0 max = 5 }
+	num_gateways_default = 1
+	num_hyperlanes = { min= 0.5 max= 3 }
+	num_hyperlanes_default = 1
+	colonizable_planet_odds = 1.0
+	primitive_odds = 1.0
+
+	# don't limit by galaxy size; modded players can do crazy things if they want
+	fallen_empire_max = 6
+	marauder_empire_max = 3
+	extra_crisis_strength = { 10 25 }
+
+
+ 	num_empires = { min = 0 max = 5 }	# reduce max by 1 to save a spot for the player
+	num_empire_default = 3 # max/2
+	advanced_empire_default = 1 # max/8
+	nomad_empire_default = 1 # max/10
+	nomad_empire_max = 5 # same as num_empires max, go nomads-only if you want
+	
+
+	fallen_empire_default = 0
+	marauder_empire_default = 1
+	crisis_strength = 0.5
+
+
+	system = { id = "261" position = { x = -17 y = 294 }  initializer = lost_colony_1  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "280" position = { x = -11 y = 254 }  initializer = order_test_init  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_n set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "226" position = { x = -264 y = -80 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "333" position = { x = 129 y = 179 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "238" position = { x = -185 y = 254 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "302" position = { x = -167 y = 280 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "386" position = { x = -99 y = -258 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "357" position = { x = 189 y = -264 }  initializer = basic_init_03  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "360" position = { x = -335 y = 52 }  initializer = random_empire_init_03 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|8| } effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "298" position = { x = 264 y = 57 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "233" position = { x = 256 y = 194 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "288" position = { x = 7 y = -231 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "275" position = { x = 203 y = -216 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "287" position = { x = -251 y = 61 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "239" position = { x = 207 y = 120 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "237" position = { x = -201 y = 144 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "345" position = { x = 287 y = 0 }  initializer = random_empire_init_05 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|6| } effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "253" position = { x = -159 y = 218 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_nw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "383" position = { x = 24 y = 334 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "395" position = { x = -201 y = 220 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "372" position = { x = -291 y = 149 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "212" position = { x = 171 y = -159 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "266" position = { x = 217 y = 111 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_n set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "337" position = { x = 82 y = 303 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "243" position = { x = 193 y = 174 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "382" position = { x = -204 y = -265 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_ne set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "209" position = { x = -15 y = 316 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_s set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "265" position = { x = 242 y = -78 }  initializer = basic_init_02  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "220" position = { x = -340 y = 33 }  initializer = basic_init_02  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "370" position = { x = -304 y = 27 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "258" position = { x = 333 y = 93 }  initializer = basic_init_02  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "328" position = { x = -307 y = 142 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "379" position = { x = 207 y = -239 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "365" position = { x = -258 y = -104 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "398" position = { x = 320 y = 97 }  initializer = special_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "371" position = { x = 13 y = -265 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "390" position = { x = 95 y = -288 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "231" position = { x = -111 y = -228 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "377" position = { x = -273 y = -59 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "309" position = { x = -204 y = 253 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "281" position = { x = 108 y = 202 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "286" position = { x = 181 y = -300 }  initializer = random_empire_init_06 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|1| } effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "380" position = { x = -250 y = -186 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "282" position = { x = -308 y = 8 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "336" position = { x = 197 y = -271 }  initializer = basic_init_03  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "221" position = { x = 271 y = 143 }  initializer = basic_init_05  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "292" position = { x = -311 y = -87 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "353" position = { x = 298 y = -24 }  initializer = basic_init_06  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "284" position = { x = 274 y = -136 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "322" position = { x = 228 y = -37 }  initializer = basic_init_03  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "254" position = { x = 185 y = -243 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "314" position = { x = 259 y = 128 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "326" position = { x = 220 y = 2 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "201" position = { x = -136 y = 307 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "310" position = { x = -227 y = 164 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "267" position = { x = -202 y = 168 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "249" position = { x = -84 y = 272 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "389" position = { x = 114 y = -312 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "290" position = { x = 97 y = 278 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "318" position = { x = 287 y = -84 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "315" position = { x = -268 y = -168 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "311" position = { x = 249 y = 225 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "276" position = { x = 315 y = -75 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "269" position = { x = 90 y = 211 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_ne set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "241" position = { x = 293 y = -108 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "364" position = { x = 237 y = -132 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "256" position = { x = 84 y = -225 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "331" position = { x = -162 y = 244 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "362" position = { x = 172 y = -249 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "308" position = { x = 238 y = 145 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "251" position = { x = 118 y = -222 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "214" position = { x = 80 y = 327 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "228" position = { x = 235 y = -103 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "387" position = { x = -284 y = 65 }  initializer = special_init_09  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "381" position = { x = -209 y = -121 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "204" position = { x = 13 y = 260 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "259" position = { x = -236 y = -141 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "397" position = { x = 57 y = -261 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "230" position = { x = -283 y = 105 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "384" position = { x = -224 y = -255 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "352" position = { x = -193 y = 96 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "340" position = { x = -31 y = -218 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "246" position = { x = 73 y = -341 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_nw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "271" position = { x = -30 y = -292 }  initializer = basic_init_01  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_n set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "378" position = { x = -259 y = -149 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "329" position = { x = 128 y = 313 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_s set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "274" position = { x = -305 y = 63 }  initializer = basic_init_04  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "354" position = { x = -163 y = 258 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "376" position = { x = -247 y = 128 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "217" position = { x = 114 y = -202 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "257" position = { x = 182 y = 282 }  initializer = basic_init_01  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_s set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "399" position = { x = -248 y = 162 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "250" position = { x = -79 y = -250 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_s set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "341" position = { x = -3 y = -269 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "218" position = { x = -67 y = -253 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "369" position = { x = -291 y = -110 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "385" position = { x = 134 y = -222 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "225" position = { x = 26 y = 314 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "323" position = { x = -321 y = 101 }  initializer = basic_init_03  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "293" position = { x = 94 y = 227 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "227" position = { x = -56 y = 332 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "200" position = { x = 30 y = -224 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "335" position = { x = 213 y = -169 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "222" position = { x = 305 y = -33 }  initializer = basic_init_02  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "368" position = { x = 215 y = -262 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "307" position = { x = -79 y = -280 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "312" position = { x = -303 y = -157 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "361" position = { x = 236 y = 45 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "219" position = { x = -331 y = 8 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "334" position = { x = -247 y = -219 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "206" position = { x = -134 y = 223 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "296" position = { x = 338 y = 17 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "363" position = { x = -174 y = -280 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "339" position = { x = 330 y = 105 }  initializer = trinary_init_02  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "277" position = { x = 226 y = -208 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "359" position = { x = 239 y = 107 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "278" position = { x = 119 y = -270 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "344" position = { x = 95 y = 198 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "279" position = { x = -257 y = -199 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "299" position = { x = -223 y = -48 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "306" position = { x = -153 y = 231 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "388" position = { x = 350 y = -10 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "343" position = { x = 170 y = -291 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "289" position = { x = -170 y = -205 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "320" position = { x = 215 y = -87 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "349" position = { x = -122 y = 302 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "300" position = { x = 52 y = -288 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "319" position = { x = 270 y = 177 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "252" position = { x = 287 y = -34 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "304" position = { x = 104 y = -304 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "393" position = { x = -225 y = 178 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "263" position = { x = -175 y = -240 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "229" position = { x = 160 y = 279 }  initializer = basic_init_03  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_n set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "207" position = { x = 310 y = -139 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "205" position = { x = -261 y = -23 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "213" position = { x = 105 y = -274 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "330" position = { x = 275 y = -172 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "375" position = { x = -154 y = -156 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "347" position = { x = 157 y = -259 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "234" position = { x = 221 y = -115 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "216" position = { x = -39 y = -242 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "203" position = { x = 260 y = -184 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "248" position = { x = 233 y = -234 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "373" position = { x = 339 y = -78 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "396" position = { x = 212 y = 194 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "301" position = { x = 245 y = -25 }  initializer = binary_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "211" position = { x = 195 y = -239 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "355" position = { x = -204 y = -167 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "346" position = { x = 73 y = -327 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "236" position = { x = 71 y = -240 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "342" position = { x = 176 y = 270 }  initializer = random_empire_init_01 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|0| } effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "327" position = { x = 342 y = 65 }  initializer = random_empire_init_02 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|1| } effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "295" position = { x = 336 y = -58 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "358" position = { x = 244 y = 38 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "210" position = { x = -222 y = 2 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "215" position = { x = -20 y = -295 }  initializer = special_init_08  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "305" position = { x = -267 y = -50 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "224" position = { x = 247 y = -242 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "392" position = { x = -198 y = -121 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "283" position = { x = -210 y = 190 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "232" position = { x = -222 y = -90 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "202" position = { x = 294 y = -186 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "317" position = { x = -311 y = -39 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "245" position = { x = -186 y = 175 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "394" position = { x = 108 y = -326 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "321" position = { x = -184 y = 132 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_nw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "356" position = { x = 19 y = 302 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "374" position = { x = -52 y = -238 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "273" position = { x = 250 y = 106 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "260" position = { x = 199 y = 146 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "242" position = { x = 304 y = -6 }  initializer = basic_init_01  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_s set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "240" position = { x = -125 y = -313 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "324" position = { x = 170 y = -210 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "338" position = { x = 188 y = 258 }  initializer = special_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "313" position = { x = -179 y = -133 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_sw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "208" position = { x = 194 y = 95 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "366" position = { x = -185 y = -114 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "262" position = { x = 274 y = 51 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "325" position = { x = 94 y = -278 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "223" position = { x = 136 y = -294 }  initializer = basic_init_04  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "291" position = { x = 108 y = -219 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_se set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "351" position = { x = -273 y = 10 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "348" position = { x = 6 y = -345 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_nw set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "285" position = { x = -227 y = -211 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "332" position = { x = -48 y = -284 }  initializer = basic_init_03  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "255" position = { x = -266 y = -204 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_e set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "294" position = { x = -70 y = -299 }  initializer = random_empire_init_01 spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight|RANDOM_MODULO|10|RANDOM_VALUE|6| } effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_ne set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "303" position = { x = 145 y = -214 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "235" position = { x = 215 y = -212 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "316" position = { x = -107 y = -274 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "367" position = { x = 31 y = -248 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "297" position = { x = 316 y = 86 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "268" position = { x = 257 y = 97 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "264" position = { x = -158 y = 171 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "391" position = { x = -201 y = -105 }    effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "244" position = { x = 340 y = 43 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "272" position = { x = 112 y = 250 }  initializer = basic_init_01  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "350" position = { x = 152 y = 305 }  initializer = basic_init_03  effect = {     log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "270" position = { x = 161 y = -284 }  initializer = basic_init_02  effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_n set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+	system = { id = "247" position = { x = 330 y = -39 }    effect = { set_star_flag = painted_galaxy_fe_spawn set_star_flag = painted_galaxy_fe_spawn_w set_star_flag = painted_galaxy_fe_spawn_random set_star_flag = painted_galaxy_fe_spawn_distance_40    log = "static_galaxy_scenario system effect [This.GetName]" } }
+
+	add_hyperlane = { from = "208" to = "266" }
+	add_hyperlane = { from = "266" to = "239" }
+	add_hyperlane = { from = "239" to = "208" }
+	add_hyperlane = { from = "208" to = "359" }
+	add_hyperlane = { from = "359" to = "266" }
+	add_hyperlane = { from = "308" to = "260" }
+	add_hyperlane = { from = "260" to = "239" }
+	add_hyperlane = { from = "268" to = "273" }
+	add_hyperlane = { from = "273" to = "359" }
+	add_hyperlane = { from = "359" to = "361" }
+	add_hyperlane = { from = "273" to = "314" }
+	add_hyperlane = { from = "308" to = "243" }
+	add_hyperlane = { from = "243" to = "260" }
+	add_hyperlane = { from = "314" to = "221" }
+	add_hyperlane = { from = "308" to = "396" }
+	add_hyperlane = { from = "396" to = "243" }
+	add_hyperlane = { from = "361" to = "298" }
+	add_hyperlane = { from = "361" to = "358" }
+	add_hyperlane = { from = "358" to = "298" }
+	add_hyperlane = { from = "233" to = "396" }
+	add_hyperlane = { from = "308" to = "233" }
+	add_hyperlane = { from = "358" to = "262" }
+	add_hyperlane = { from = "262" to = "298" }
+	add_hyperlane = { from = "298" to = "297" }
+	add_hyperlane = { from = "319" to = "221" }
+	add_hyperlane = { from = "221" to = "339" }
+	add_hyperlane = { from = "319" to = "233" }
+	add_hyperlane = { from = "333" to = "243" }
+	add_hyperlane = { from = "326" to = "358" }
+	add_hyperlane = { from = "327" to = "258" }
+	add_hyperlane = { from = "262" to = "297" }
+	add_hyperlane = { from = "297" to = "398" }
+	add_hyperlane = { from = "258" to = "339" }
+	add_hyperlane = { from = "339" to = "398" }
+	add_hyperlane = { from = "311" to = "233" }
+	add_hyperlane = { from = "311" to = "396" }
+	add_hyperlane = { from = "281" to = "333" }
+	add_hyperlane = { from = "297" to = "244" }
+	add_hyperlane = { from = "301" to = "345" }
+	add_hyperlane = { from = "333" to = "344" }
+	add_hyperlane = { from = "281" to = "344" }
+	add_hyperlane = { from = "262" to = "244" }
+	add_hyperlane = { from = "320" to = "322" }
+	add_hyperlane = { from = "322" to = "301" }
+	add_hyperlane = { from = "353" to = "242" }
+	add_hyperlane = { from = "242" to = "345" }
+	add_hyperlane = { from = "345" to = "353" }
+	add_hyperlane = { from = "296" to = "244" }
+	add_hyperlane = { from = "345" to = "252" }
+	add_hyperlane = { from = "252" to = "353" }
+	add_hyperlane = { from = "281" to = "269" }
+	add_hyperlane = { from = "269" to = "344" }
+	add_hyperlane = { from = "293" to = "269" }
+	add_hyperlane = { from = "301" to = "252" }
+	add_hyperlane = { from = "388" to = "296" }
+	add_hyperlane = { from = "265" to = "252" }
+	add_hyperlane = { from = "272" to = "293" }
+	add_hyperlane = { from = "257" to = "342" }
+	add_hyperlane = { from = "342" to = "338" }
+	add_hyperlane = { from = "222" to = "353" }
+	add_hyperlane = { from = "222" to = "242" }
+	add_hyperlane = { from = "342" to = "229" }
+	add_hyperlane = { from = "229" to = "272" }
+	add_hyperlane = { from = "247" to = "388" }
+	add_hyperlane = { from = "320" to = "265" }
+	add_hyperlane = { from = "265" to = "322" }
+	add_hyperlane = { from = "295" to = "247" }
+	add_hyperlane = { from = "247" to = "276" }
+	add_hyperlane = { from = "276" to = "295" }
+	add_hyperlane = { from = "329" to = "290" }
+	add_hyperlane = { from = "290" to = "272" }
+	add_hyperlane = { from = "290" to = "293" }
+	add_hyperlane = { from = "350" to = "229" }
+	add_hyperlane = { from = "228" to = "318" }
+	add_hyperlane = { from = "295" to = "388" }
+	add_hyperlane = { from = "320" to = "228" }
+	add_hyperlane = { from = "373" to = "276" }
+	add_hyperlane = { from = "276" to = "241" }
+	add_hyperlane = { from = "241" to = "373" }
+	add_hyperlane = { from = "318" to = "276" }
+	add_hyperlane = { from = "234" to = "228" }
+	add_hyperlane = { from = "228" to = "241" }
+	add_hyperlane = { from = "241" to = "318" }
+	add_hyperlane = { from = "212" to = "234" }
+	add_hyperlane = { from = "373" to = "295" }
+	add_hyperlane = { from = "337" to = "290" }
+	add_hyperlane = { from = "234" to = "364" }
+	add_hyperlane = { from = "364" to = "284" }
+	add_hyperlane = { from = "214" to = "337" }
+	add_hyperlane = { from = "337" to = "356" }
+	add_hyperlane = { from = "261" to = "280" }
+	add_hyperlane = { from = "280" to = "204" }
+	add_hyperlane = { from = "204" to = "261" }
+	add_hyperlane = { from = "335" to = "364" }
+	add_hyperlane = { from = "330" to = "284" }
+	add_hyperlane = { from = "330" to = "207" }
+	add_hyperlane = { from = "207" to = "284" }
+	add_hyperlane = { from = "225" to = "356" }
+	add_hyperlane = { from = "337" to = "225" }
+	add_hyperlane = { from = "214" to = "225" }
+	add_hyperlane = { from = "356" to = "261" }
+	add_hyperlane = { from = "212" to = "335" }
+	add_hyperlane = { from = "203" to = "330" }
+	add_hyperlane = { from = "364" to = "203" }
+	add_hyperlane = { from = "209" to = "261" }
+	add_hyperlane = { from = "356" to = "209" }
+	add_hyperlane = { from = "383" to = "225" }
+	add_hyperlane = { from = "225" to = "209" }
+	add_hyperlane = { from = "277" to = "203" }
+	add_hyperlane = { from = "335" to = "277" }
+	add_hyperlane = { from = "383" to = "209" }
+	add_hyperlane = { from = "202" to = "330" }
+	add_hyperlane = { from = "202" to = "207" }
+	add_hyperlane = { from = "235" to = "277" }
+	add_hyperlane = { from = "335" to = "235" }
+	add_hyperlane = { from = "303" to = "324" }
+	add_hyperlane = { from = "275" to = "235" }
+	add_hyperlane = { from = "256" to = "217" }
+	add_hyperlane = { from = "324" to = "275" }
+	add_hyperlane = { from = "235" to = "248" }
+	add_hyperlane = { from = "248" to = "277" }
+	add_hyperlane = { from = "379" to = "275" }
+	add_hyperlane = { from = "275" to = "211" }
+	add_hyperlane = { from = "211" to = "379" }
+	add_hyperlane = { from = "217" to = "303" }
+	add_hyperlane = { from = "227" to = "249" }
+	add_hyperlane = { from = "261" to = "227" }
+	add_hyperlane = { from = "385" to = "303" }
+	add_hyperlane = { from = "254" to = "211" }
+	add_hyperlane = { from = "256" to = "291" }
+	add_hyperlane = { from = "291" to = "217" }
+	add_hyperlane = { from = "217" to = "251" }
+	add_hyperlane = { from = "251" to = "385" }
+	add_hyperlane = { from = "291" to = "251" }
+	add_hyperlane = { from = "227" to = "209" }
+	add_hyperlane = { from = "362" to = "254" }
+	add_hyperlane = { from = "368" to = "379" }
+	add_hyperlane = { from = "347" to = "362" }
+	add_hyperlane = { from = "368" to = "224" }
+	add_hyperlane = { from = "224" to = "248" }
+	add_hyperlane = { from = "291" to = "278" }
+	add_hyperlane = { from = "278" to = "251" }
+	add_hyperlane = { from = "385" to = "278" }
+	add_hyperlane = { from = "211" to = "357" }
+	add_hyperlane = { from = "354" to = "331" }
+	add_hyperlane = { from = "331" to = "306" }
+	add_hyperlane = { from = "254" to = "357" }
+	add_hyperlane = { from = "362" to = "357" }
+	add_hyperlane = { from = "347" to = "357" }
+	add_hyperlane = { from = "213" to = "278" }
+	add_hyperlane = { from = "200" to = "236" }
+	add_hyperlane = { from = "236" to = "256" }
+	add_hyperlane = { from = "336" to = "357" }
+	add_hyperlane = { from = "336" to = "368" }
+	add_hyperlane = { from = "270" to = "357" }
+	add_hyperlane = { from = "347" to = "270" }
+	add_hyperlane = { from = "354" to = "206" }
+	add_hyperlane = { from = "306" to = "253" }
+	add_hyperlane = { from = "206" to = "306" }
+	add_hyperlane = { from = "349" to = "249" }
+	add_hyperlane = { from = "245" to = "321" }
+	add_hyperlane = { from = "264" to = "245" }
+	add_hyperlane = { from = "200" to = "367" }
+	add_hyperlane = { from = "325" to = "213" }
+	add_hyperlane = { from = "288" to = "367" }
+	add_hyperlane = { from = "201" to = "349" }
+	add_hyperlane = { from = "367" to = "397" }
+	add_hyperlane = { from = "397" to = "236" }
+	add_hyperlane = { from = "352" to = "321" }
+	add_hyperlane = { from = "321" to = "237" }
+	add_hyperlane = { from = "283" to = "267" }
+	add_hyperlane = { from = "267" to = "245" }
+	add_hyperlane = { from = "245" to = "283" }
+	add_hyperlane = { from = "302" to = "354" }
+	add_hyperlane = { from = "223" to = "343" }
+	add_hyperlane = { from = "343" to = "270" }
+	add_hyperlane = { from = "336" to = "286" }
+	add_hyperlane = { from = "304" to = "223" }
+	add_hyperlane = { from = "288" to = "371" }
+	add_hyperlane = { from = "371" to = "367" }
+	add_hyperlane = { from = "397" to = "300" }
+	add_hyperlane = { from = "213" to = "304" }
+	add_hyperlane = { from = "245" to = "237" }
+	add_hyperlane = { from = "267" to = "237" }
+	add_hyperlane = { from = "286" to = "343" }
+	add_hyperlane = { from = "325" to = "390" }
+	add_hyperlane = { from = "390" to = "213" }
+	add_hyperlane = { from = "201" to = "302" }
+	add_hyperlane = { from = "238" to = "331" }
+	add_hyperlane = { from = "354" to = "238" }
+	add_hyperlane = { from = "302" to = "238" }
+	add_hyperlane = { from = "341" to = "371" }
+	add_hyperlane = { from = "288" to = "341" }
+	add_hyperlane = { from = "238" to = "395" }
+	add_hyperlane = { from = "304" to = "390" }
+	add_hyperlane = { from = "390" to = "346" }
+	add_hyperlane = { from = "223" to = "394" }
+	add_hyperlane = { from = "395" to = "283" }
+	add_hyperlane = { from = "267" to = "310" }
+	add_hyperlane = { from = "310" to = "237" }
+	add_hyperlane = { from = "237" to = "376" }
+	add_hyperlane = { from = "371" to = "215" }
+	add_hyperlane = { from = "374" to = "216" }
+	add_hyperlane = { from = "340" to = "374" }
+	add_hyperlane = { from = "394" to = "389" }
+	add_hyperlane = { from = "389" to = "304" }
+	add_hyperlane = { from = "304" to = "394" }
+	add_hyperlane = { from = "389" to = "223" }
+	add_hyperlane = { from = "216" to = "341" }
+	add_hyperlane = { from = "346" to = "394" }
+	add_hyperlane = { from = "231" to = "374" }
+	add_hyperlane = { from = "271" to = "215" }
+	add_hyperlane = { from = "215" to = "341" }
+	add_hyperlane = { from = "238" to = "309" }
+	add_hyperlane = { from = "309" to = "395" }
+	add_hyperlane = { from = "393" to = "283" }
+	add_hyperlane = { from = "302" to = "309" }
+	add_hyperlane = { from = "393" to = "310" }
+	add_hyperlane = { from = "267" to = "393" }
+	add_hyperlane = { from = "287" to = "210" }
+	add_hyperlane = { from = "352" to = "287" }
+	add_hyperlane = { from = "250" to = "218" }
+	add_hyperlane = { from = "218" to = "374" }
+	add_hyperlane = { from = "313" to = "366" }
+	add_hyperlane = { from = "366" to = "392" }
+	add_hyperlane = { from = "313" to = "375" }
+	add_hyperlane = { from = "231" to = "250" }
+	add_hyperlane = { from = "399" to = "376" }
+	add_hyperlane = { from = "376" to = "310" }
+	add_hyperlane = { from = "310" to = "399" }
+	add_hyperlane = { from = "393" to = "399" }
+	add_hyperlane = { from = "205" to = "299" }
+	add_hyperlane = { from = "210" to = "205" }
+	add_hyperlane = { from = "216" to = "271" }
+	add_hyperlane = { from = "391" to = "366" }
+	add_hyperlane = { from = "287" to = "387" }
+	add_hyperlane = { from = "332" to = "216" }
+	add_hyperlane = { from = "332" to = "271" }
+	add_hyperlane = { from = "381" to = "392" }
+	add_hyperlane = { from = "392" to = "391" }
+	add_hyperlane = { from = "391" to = "381" }
+	add_hyperlane = { from = "218" to = "307" }
+	add_hyperlane = { from = "246" to = "346" }
+	add_hyperlane = { from = "215" to = "348" }
+	add_hyperlane = { from = "246" to = "394" }
+	add_hyperlane = { from = "271" to = "348" }
+	add_hyperlane = { from = "299" to = "226" }
+	add_hyperlane = { from = "232" to = "391" }
+	add_hyperlane = { from = "232" to = "381" }
+	add_hyperlane = { from = "392" to = "355" }
+	add_hyperlane = { from = "355" to = "313" }
+	add_hyperlane = { from = "231" to = "386" }
+	add_hyperlane = { from = "386" to = "250" }
+	add_hyperlane = { from = "316" to = "386" }
+	add_hyperlane = { from = "386" to = "307" }
+	add_hyperlane = { from = "332" to = "294" }
+	add_hyperlane = { from = "294" to = "271" }
+	add_hyperlane = { from = "259" to = "355" }
+	add_hyperlane = { from = "355" to = "381" }
+	add_hyperlane = { from = "381" to = "259" }
+	add_hyperlane = { from = "351" to = "205" }
+	add_hyperlane = { from = "307" to = "316" }
+	add_hyperlane = { from = "230" to = "287" }
+	add_hyperlane = { from = "376" to = "230" }
+	add_hyperlane = { from = "230" to = "387" }
+	add_hyperlane = { from = "377" to = "305" }
+	add_hyperlane = { from = "305" to = "317" }
+	add_hyperlane = { from = "317" to = "377" }
+	add_hyperlane = { from = "205" to = "305" }
+	add_hyperlane = { from = "305" to = "299" }
+	add_hyperlane = { from = "274" to = "387" }
+	add_hyperlane = { from = "377" to = "226" }
+	add_hyperlane = { from = "232" to = "365" }
+	add_hyperlane = { from = "285" to = "263" }
+	add_hyperlane = { from = "263" to = "289" }
+	add_hyperlane = { from = "289" to = "285" }
+	add_hyperlane = { from = "351" to = "282" }
+	add_hyperlane = { from = "365" to = "369" }
+	add_hyperlane = { from = "226" to = "365" }
+	add_hyperlane = { from = "323" to = "274" }
+	add_hyperlane = { from = "230" to = "323" }
+	add_hyperlane = { from = "328" to = "372" }
+	add_hyperlane = { from = "316" to = "240" }
+	add_hyperlane = { from = "274" to = "370" }
+	add_hyperlane = { from = "226" to = "369" }
+	add_hyperlane = { from = "219" to = "282" }
+	add_hyperlane = { from = "282" to = "370" }
+	add_hyperlane = { from = "360" to = "370" }
+	add_hyperlane = { from = "274" to = "360" }
+	add_hyperlane = { from = "226" to = "292" }
+	add_hyperlane = { from = "292" to = "369" }
+	add_hyperlane = { from = "378" to = "259" }
+	add_hyperlane = { from = "363" to = "316" }
+	add_hyperlane = { from = "363" to = "240" }
+	add_hyperlane = { from = "380" to = "285" }
+	add_hyperlane = { from = "315" to = "380" }
+	add_hyperlane = { from = "378" to = "315" }
+	add_hyperlane = { from = "382" to = "263" }
+	add_hyperlane = { from = "384" to = "382" }
+	add_hyperlane = { from = "382" to = "363" }
+	add_hyperlane = { from = "220" to = "219" }
+	add_hyperlane = { from = "370" to = "220" }
+	add_hyperlane = { from = "317" to = "292" }
+	add_hyperlane = { from = "285" to = "384" }
+	add_hyperlane = { from = "369" to = "312" }
+	add_hyperlane = { from = "380" to = "279" }
+	add_hyperlane = { from = "255" to = "279" }
+	add_hyperlane = { from = "279" to = "334" }
+	add_hyperlane = { from = "334" to = "285" }
+	add_hyperlane = { from = "334" to = "384" }
+	add_hyperlane = { from = "255" to = "334" }
+	add_hyperlane = { from = "312" to = "255" }
+	add_hyperlane = { from = "373" to = "388" }
+	add_hyperlane = { from = "327" to = "339" }
+	add_hyperlane = { from = "257" to = "350" }
+	add_hyperlane = { from = "350" to = "329" }
+	add_hyperlane = { from = "214" to = "383" }
+	add_hyperlane = { from = "328" to = "323" }
+
+	nebula = {  position = { x = 105 y = -274 } radius = 46 }
+	nebula = {  position = { x = 256 y = 194 } radius = 42 }
+	nebula = {  position = { x = -236 y = -141 } radius = 41 }
+	nebula = {  position = { x = 260 y = -184 } radius = 49 }
+	nebula = {  position = { x = -308 y = 8 } radius = 55 }
+	nebula = {  position = { x = -79 y = -250 } radius = 44 }
+}
