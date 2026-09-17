@@ -36,14 +36,14 @@
 		pipe(
 			solar_system,
 			Option.fromNullable,
-			Option.flatMap((solar_system) => solar_system.get_initializer()),
+			Option.flatMap((solar_system) => solar_system.resolve_initializer()),
 			Option.getOrElse(() => ''),
 		),
 	);
 
 	const metadata = $derived(
 		pipe(
-			solar_system.get_initializer(),
+			solar_system.resolve_initializer(),
 			Option.flatMapNullable((value) =>
 				value in initializer_metadata ?
 					initializer_metadata[value as InitializerKey]
@@ -66,7 +66,7 @@
 		Array.fromIterable,
 		Array.sortBy(
 			Order.mapInput(Order.boolean, (item) => !item.is_starting_system),
-			Order.mapInput(Order.boolean, (item) => item.unique),
+			Order.mapInput(Order.boolean, (item) => Boolean(item.unique)),
 			Order.mapInput(Order.string, (item) => item.label),
 		),
 	);
@@ -102,8 +102,7 @@
 			itemToValue: (item) => item.key,
 			isItemDisabled: (item) =>
 				contains_whitespace(item.key) ||
-				(solar_system.spawn_type !== 'disabled' &&
-					!(item.is_starting_system ?? false)),
+				(solar_system.is_spawn && !(item.is_starting_system ?? false)),
 			groupBy: (item) => item.type,
 		}),
 	);
@@ -141,8 +140,13 @@
 	onInputValueChange={on_input_value_change}
 	inputBehavior="autohighlight"
 	positioning={{ placement: 'bottom-start' }}
-	value={[Option.getOrElse(solar_system.get_initializer(), () => '')]}
+	value={[Option.getOrElse(solar_system.resolve_initializer(), () => '')]}
 	onValueChange={(details) => {
+		const new_initializer_is_sol =
+			details.value[0] === 'sol_system_initializer';
+		const old_initializer_is_sol = solar_system
+			.resolve_initializer()
+			.pipe(Option.contains('sol_system_initializer'));
 		editor().apply_actions([
 			new Action.UpdateSolarSystemAction({
 				old_value: solar_system,
@@ -153,6 +157,18 @@
 						Array.get(0),
 						Option.flatMapNullable((value) => (value === '' ? null : value)),
 					),
+					spawn_type:
+						// set sol systems to reserved_sol
+						new_initializer_is_sol ? 'reserved_sol'
+							// if this was sol and now it's not, set to disabled
+						: (
+							solar_system.spawn_type === 'reserved_sol' &&
+							!new_initializer_is_sol &&
+							old_initializer_is_sol
+						) ?
+							'disabled'
+							// otherwise keep the same
+						:	solar_system.spawn_type,
 				}),
 			}),
 		]);
@@ -169,7 +185,7 @@
 		<Combobox.Input
 			class="bg-surface-200-800 not-focus-visible:ring-surface-300-700"
 		/>
-		{#if Option.isSome(solar_system.get_initializer())}
+		{#if Option.isSome(solar_system.resolve_initializer())}
 			<Combobox.ClearTrigger
 				class="absolute top-1.5 -translateY-0.5 rounded-base inline-flex justify-center items-center size-6 inset-e-9 p-1.5"
 			>
@@ -234,7 +250,7 @@
 					{/each}
 				</div>
 			{/if}
-		{:else if Option.isSome(solar_system.get_initializer())}
+		{:else if Option.isSome(solar_system.resolve_initializer())}
 			Custom Value / Modded Initializer
 		{:else}
 			Random

@@ -42,7 +42,7 @@
 	const initializer_name = $derived(
 		pipe(
 			solar_system,
-			Option.flatMap((value) => value.get_initializer()),
+			Option.flatMap((value) => value.resolve_initializer()),
 			Option.flatMapNullable((value) =>
 				value in initializer_metadata ?
 					initializer_metadata[value as InitializerKey]
@@ -144,7 +144,7 @@
 								{@attach debounced_value(
 									() =>
 										solar_system.value
-											.get_name()
+											.resolve_name()
 											.pipe(Option.getOrElse(() => '')),
 									(value) => {
 										const name: Option.Option<string> =
@@ -197,6 +197,15 @@
 												locations of players and custom-designed AI.
 											</dd>
 										</div>
+										<div class="ms-4 -indent-4">
+											<dt class="font-bold inline">Reserved Sol</dt>
+											<dd class="inline">
+												Like Reserved, but additionally the UNE will be treated
+												as if they had the Reserved Spawn Sol trait. Unless
+												you're using a modded Sol system, don't set this
+												manually. Instead, set the initializer to Sol.
+											</dd>
+										</div>
 									</dl>
 								</Info>
 							</span>
@@ -245,6 +254,7 @@
 								<option value="reserved_x">Reserved X</option>
 								<option value="reserved_y">Reserved Y</option>
 								<option value="reserved_z">Reserved Z</option>
+								<option value="reserved_sol">Reserved Sol</option>
 							</select>
 						</label>
 						<InitializerCombobox

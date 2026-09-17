@@ -18,16 +18,25 @@
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
 	import type { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
-	import { Array, Iterable, Option, pipe, Record } from 'effect';
+	import {
+		Array,
+		HashMap,
+		HashSet,
+		Iterable,
+		Number,
+		Option,
+		pipe,
+		Record,
+		Struct,
+	} from 'effect';
 
 	const editor = get_editor();
 
 	const solar_systems = $derived(editor().project.solar_systems);
+
 	const num_solar_systems = $derived(solar_systems.length);
 	const num_spawns = $derived(
-		solar_systems.filter(
-			(solar_system) => solar_system.spawn_type !== 'disabled',
-		).length,
+		solar_systems.filter((solar_system) => solar_system.is_spawn).length,
 	);
 	const num_safe_ai_spawns = $derived(
 		Math.max(
@@ -43,7 +52,7 @@
 		pipe(
 			solar_systems,
 			Iterable.groupBy((solar_system) =>
-				Option.getOrElse(solar_system.get_initializer(), () => ''),
+				Option.getOrElse(solar_system.resolve_initializer(), () => ''),
 			),
 		),
 	);
@@ -102,7 +111,7 @@
 		pipe(
 			solar_systems,
 			Iterable.groupBy((solar_system) =>
-				Option.getOrElse(solar_system.get_name(), () => ''),
+				Option.getOrElse(solar_system.resolve_name(), () => ''),
 			),
 			Record.filter((value, key) => key !== '' && value.length > 1),
 		),
@@ -141,6 +150,17 @@
 	const missing_ratling = $derived(
 		check_for_missing_associated_systems({
 			required: ['ratling_1_1', 'ratling_1_2', 'ratling_1_3'],
+			systems_by_initializer,
+		}),
+	);
+	const missing_msi = $derived(
+		check_for_missing_associated_systems({
+			required: [
+				'msi_home_system',
+				'slavers_neighbor_t1',
+				'slavers_neighbor_t1_first_colony',
+				'slavers_neighbor_t2_second_colony',
+			],
 			systems_by_initializer,
 		}),
 	);
@@ -261,6 +281,71 @@
 				Array.fromIterable,
 			)
 		:	[],
+	);
+
+	const spawn_id_to_system_ids_within_2_jumps = $derived(
+		pipe(
+			solar_systems,
+			Iterable.filter((system) => system.is_spawn),
+			Iterable.map(
+				(system) =>
+					[
+						system.id,
+						pipe(
+							editor().project.get_solar_system_neighbor_ids(system.id),
+							Iterable.flatMap((neighbor_id) =>
+								Iterable.append(
+									editor().project.get_solar_system_neighbor_ids(neighbor_id),
+									neighbor_id,
+								),
+							),
+							HashSet.fromIterable,
+						),
+					] as const,
+			),
+			HashMap.fromIterable,
+		),
+	);
+
+	const guaranteed_colony_system_ids_too_far_from_spawn = $derived(
+		pipe(
+			solar_systems,
+			Iterable.filter((solar_system) =>
+				solar_system
+					.resolve_initializer_metadata()
+					.pipe(Option.exists((m) => m.guaranteed_colony != null)),
+			),
+			Iterable.filter(
+				(solar_system) =>
+					!spawn_id_to_system_ids_within_2_jumps.pipe(
+						HashMap.values,
+						Iterable.some(HashSet.has(solar_system.id)),
+					),
+			),
+			Iterable.map(Struct.get('id')),
+			Array.fromIterable,
+		),
+	);
+
+	const ambiguous_guaranteed_colony_system_ids = $derived(
+		pipe(
+			solar_systems,
+			Iterable.filter((solar_system) =>
+				solar_system
+					.resolve_initializer_metadata()
+					.pipe(Option.exists((m) => m.guaranteed_colony != null)),
+			),
+			Iterable.filter((solar_system) =>
+				spawn_id_to_system_ids_within_2_jumps.pipe(
+					HashMap.values,
+					Iterable.filter(HashSet.has(solar_system.id)),
+					Iterable.size,
+					Number.greaterThan(1),
+				),
+			),
+			Iterable.map(Struct.get('id')),
+			Array.fromIterable,
+		),
 	);
 
 	type MissingSystemsWarning = {
@@ -408,10 +493,37 @@
 				missing_ratling,
 				'Missing Ketling Systems',
 			)}
+			{@render missing_systems_warning(missing_msi, 'Missing MSI Systems')}
 			{@render missing_systems_warning(
 				missing_imperial_fiefdom,
 				'Missing Fiefdom Systems',
 			)}
+			{#if guaranteed_colony_system_ids_too_far_from_spawn.length > 0}
+				<StatItem
+					label="Guaranteed Colonies Too Far From Spawn"
+					value={guaranteed_colony_system_ids_too_far_from_spawn.length}
+					warning
+					solar_system_ids={guaranteed_colony_system_ids_too_far_from_spawn}
+				>
+					{#snippet info()}
+						Guaranteed colony systems are only used if they're within 2 jumps of
+						an empire's home system.
+					{/snippet}
+				</StatItem>
+			{/if}
+			{#if ambiguous_guaranteed_colony_system_ids.length > 0}
+				<StatItem
+					label="Ambiguous Guaranteed Colonies"
+					value={ambiguous_guaranteed_colony_system_ids.length}
+					warning
+					solar_system_ids={ambiguous_guaranteed_colony_system_ids}
+				>
+					{#snippet info()}
+						These guaranteed colony systems are within 2 jumps of multiple
+						spawns, so either empire could claim them.
+					{/snippet}
+				</StatItem>
+			{/if}
 			{#if overlapping_fallen_empire_zone_ids.length > 0}
 				<StatItem
 					label="Overlapping FE Zones"

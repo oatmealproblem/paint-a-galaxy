@@ -7,18 +7,28 @@ event = {
 	hide_window = yes
 	trigger = {
 		is_maybe_painted_galaxy = yes
-		num_guaranteed_colonies > 0
-		# sanity check
-		NOT = {
-			any_system = {
+	}
+	immediate = {
+		# first, reset any guaranteed colonies to barren
+		every_system = {
+			limit = {
 				OR = {
 					has_star_flag = neighbor_t1_first_colony
 					has_star_flag = neighbor_t2_second_colony
 				}
 			}
+			random_system_planet = {
+				limit = {
+					has_planet_flag = prescripted_ideal
+					# as a precaution, don't reset colonized planets
+					is_colony = no
+				}
+				change_pc = pc_barren
+				reroll_planet = yes
+			}
 		}
-	}
-	immediate = {
+
+		# then for each valid country, find or create guaranteed colony and set correct planet class
 		set_spawn_system_batch = begin
 		every_country = {
 			limit = {
@@ -40,15 +50,76 @@ event = {
 				# specifically forbidden origins
 				NOT = {
 					has_origin = origin_doomsday
+					has_origin = origin_mindwardens
 					has_origin = origin_slavers # MSI, has special logic
 				}
 			}
 			save_event_target_as = painted_galaxy_current_country
+
 			capital_scope.solar_system = {
-				random_neighbor_system = {
-					limit = { NOT = { is_same_value = last_created_system } }
-					painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t1_first_colony }
+				log = "capital system [This.GetName]"
+				# find existing guaranteed colony systems
+				closest_system = {
+					max_steps = 2
+					limit = { has_star_flag = neighbor_t1_first_colony }
+					save_global_event_target_as = painted_galaxy_guaranteed_t1
+					log = "found guaranteed_t1 [This.GetName]"
+				}
+				closest_system = {
+					max_steps = 2
+					limit = { has_star_flag = neighbor_t2_second_colony }
+					save_global_event_target_as = painted_galaxy_guaranteed_t2
+					log = "found guaranteed_t2 [This.GetName]"
+				}
+
+				# create systems if needed
+				if = {
+					limit = {
+						num_guaranteed_colonies >= 1
+						NOT = { exists = event_target:painted_galaxy_guaranteed_t1 }
+					}
+					if = {
+						limit = { has_star_flag = sol }
+						painted_galaxy_spawn_connected_system = { INITIALIZER = sol_neighbor_t1_first_colony }
+					} else = {
+						painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t1_first_colony }
+					}
 					last_created_system = {
+						save_global_event_target_as = painted_galaxy_guaranteed_t1
+						log = "created guaranteed_t1 [This.GetName]"
+					}
+				}
+				if = {
+					limit = {
+						num_guaranteed_colonies >= 2
+						NOT = { exists = event_target:painted_galaxy_guaranteed_t2 }
+					}
+					random_neighbor_system = {
+						limit = {
+							OR = {
+								# avoid spawning t2 directly connected to t1
+								NOT = { is_same_value = event_target:painted_galaxy_guaranteed_t1 }
+								# but allow it if no other neighbors
+								prev = { count_neighbor_system = { count = 1 } }
+							}
+						}
+						if = {
+							limit = { prev = { has_star_flag = sol } }
+							painted_galaxy_spawn_connected_system = { INITIALIZER = sol_neighbor_t2_second_colony }
+						} else = {
+							painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t2_second_colony }
+						}
+					}
+					last_created_system = {
+						save_global_event_target_as = painted_galaxy_guaranteed_t2
+						log = "created guaranteed_t2 [This.GetName]"
+					}
+				}
+
+				# change planet classes
+				if = {
+					limit = { num_guaranteed_colonies >= 1 }
+					event_target:painted_galaxy_guaranteed_t1 = {
 						random_system_planet = {
 							limit = { has_planet_flag = prescripted_ideal }
 							change_pc = event_target:painted_galaxy_current_country
@@ -58,22 +129,25 @@ event = {
 				}
 				if = {
 					limit = { num_guaranteed_colonies >= 2 }
-					reroll_random = yes
-					random_neighbor_system = {
-						random_neighbor_system = {
-							limit = { NOT = { is_same_value = last_created_system } }
-							painted_galaxy_spawn_connected_system = { INITIALIZER = neighbor_t2_second_colony }
-							last_created_system = {
-								random_system_planet = {
-									limit = { has_planet_flag = prescripted_ideal }
-									change_pc = event_target:painted_galaxy_current_country
-									reroll_planet = yes
-								}
-							}
+					event_target:painted_galaxy_guaranteed_t2 = {
+						random_system_planet = {
+							limit = { has_planet_flag = prescripted_ideal }
+							change_pc = event_target:painted_galaxy_current_country
+							reroll_planet = yes
 						}
 					}
 				}
-				# currently no support for modded 3+ guaranteed colonies
+
+				# clear references so they're not reused by another country
+				# note: this is why we're using global event_targets here; non-global can't be cleared
+				if = {
+					limit = { exists = event_target:painted_galaxy_guaranteed_t1 }
+					clear_global_event_target = painted_galaxy_guaranteed_t1
+				}
+				if = {
+					limit = { exists = event_target:painted_galaxy_guaranteed_t2 }
+					clear_global_event_target = painted_galaxy_guaranteed_t2
+				}
 			}
 		}
 		set_spawn_system_batch = end

@@ -25,6 +25,7 @@ export interface InitializerMetadata {
 	)[];
 	init_effect?: string;
 	is_starting_system?: boolean;
+	guaranteed_colony?: 1 | 2;
 }
 
 export type InitializerKey =
@@ -723,9 +724,21 @@ export const initializer_metadata: Record<
 	random_empire_init_05: null, // starting
 	random_empire_init_06: null, // starting
 	neighbor_t1: null, // guaranteed
-	neighbor_t1_first_colony: null, // guaranteed
+	neighbor_t1_first_colony: {
+		name: null,
+		unique: false,
+		description: '1st guaranteed colony',
+		dlc: [],
+		guaranteed_colony: 1,
+	},
 	neighbor_t2: null, // guaranteed
-	neighbor_t2_second_colony: null, // guaranteed
+	neighbor_t2_second_colony: {
+		name: null,
+		unique: false,
+		description: '2nd guaranteed colony',
+		dlc: [],
+		guaranteed_colony: 2,
+	},
 
 	// example.txt
 	example_initializer: null, // never
@@ -834,10 +847,33 @@ export const initializer_metadata: Record<
 		name: null,
 		description: 'MSI Home',
 		dlc: ['First Contact'],
+		before: [
+			'slavers_neighbor_t1',
+			'slavers_neighbor_t1_first_colony',
+			'slavers_neighbor_t2_second_colony',
+		],
 	},
-	slavers_neighbor_t1: null, // guaranteed
-	slavers_neighbor_t1_first_colony: null, // guaranteed
-	slavers_neighbor_t2_second_colony: null, // guaranteed
+	slavers_neighbor_t1: {
+		unique: true,
+		name: null,
+		description: 'MSI uncolonized system',
+		dlc: ['First Contact'],
+		after: 'msi_home_system',
+	},
+	slavers_neighbor_t1_first_colony: {
+		unique: true,
+		name: null,
+		description: 'MSI 1st colony',
+		dlc: ['First Contact'],
+		after: 'msi_home_system',
+	},
+	slavers_neighbor_t2_second_colony: {
+		unique: true,
+		name: null,
+		description: 'MSI 2nd colony',
+		dlc: ['First Contact'],
+		after: 'msi_home_system',
+	},
 	fear_of_the_dark_system: null, // origin
 	hunter_of_the_dark_system: null, // event
 	broken_shackles_parent_system: null, // TODO
@@ -1467,7 +1503,7 @@ export const initializer_metadata: Record<
 		description: 'Pre-FTL',
 		dlc: [],
 	},
-	pre_ftl_init_sol: null, // "Sol" event
+	pre_ftl_init_sol: null, // event (game_start)
 	sanctuary_system: {
 		unique: true,
 		name: 'Sanctuary',
@@ -1499,8 +1535,6 @@ export const initializer_metadata: Record<
 		unique: false,
 		name: null,
 		description: 'Pre-FTL Hive Mind Infernals',
-		// technically this should (Infernals && Biogensis) || (Infernals && Utopia)
-		// but Utopia will soon be folded into the base game, so this can be pre-simplified to just Infernals
 		dlc: ['Infernals'],
 		init_effect: 'set_star_flag = painted_galaxy_infernal_pre_ftl_system',
 	},
@@ -1530,12 +1564,40 @@ export const initializer_metadata: Record<
 	exiled_system_5: null, // event
 
 	// sol_initializers.txt
-	sol_system_initializer: null, // "Sol" starting
-	sol_neighbor_t1: null, // "Barnard's Star" guaranteed
-	sol_neighbor_t1_first_colony: null, // "Alpha Centauri" guaranteed
+	sol_system_initializer: {
+		unique: true,
+		name: 'Sol',
+		description: 'standard Sol system',
+		dlc: [],
+		is_starting_system: true,
+	},
+	sol_neighbor_t1: {
+		unique: true,
+		name: "Barnard's Star",
+		description: 'Sol neighbor',
+		dlc: [],
+	},
+	sol_neighbor_t1_first_colony: {
+		unique: true,
+		name: 'Alpha Centauri',
+		description: 'Sol neighbor, 1st guaranteed colony',
+		dlc: [],
+		guaranteed_colony: 1,
+	},
 	sol_neighbor_t1_no_guaranteed_colony: null, // "Alpha Centauri" guaranteed
-	sol_neighbor_t2: null, // "Procyon" guaranteed
-	sol_neighbor_t2_second_colony: null, // "Sirius" guaranteed
+	sol_neighbor_t2: {
+		unique: true,
+		name: 'Procyon',
+		description: 'Sol neighbor',
+		dlc: [],
+	},
+	sol_neighbor_t2_second_colony: {
+		unique: true,
+		name: 'Sirius',
+		description: 'Sol neighbor, 2nd guaranteed colony',
+		dlc: [],
+		guaranteed_colony: 2,
+	},
 	sol_neighbor_t2_no_guaranteed_colony: null, // "Sirius" guaranteed
 	com_sol_system: null, // "Sol" TODO
 	ai_sol_system: null, // "Sol" event
@@ -1548,8 +1610,8 @@ export const initializer_metadata: Record<
 	lost_colony_sol_neighbor_t2_second_colony: null, // "Sirius" guaranteed
 	toxic_knights_sol_start: null, // "Sol" origin
 	sol_system_fear_of_the_dark_system: null, // "Sol" origin
-	special_init_04: null, // "Sol" TODO
-	init_sol_geocentric: null, // "Helios" event
+	special_init_04: null, // event (game_start)
+	init_sol_geocentric: null, // event (game_start)
 	mindwarden_sol_system_init: null, // "Sol" origin
 	mindwarden_sol_buffer_system: null, // "Alpha Centauri" event
 

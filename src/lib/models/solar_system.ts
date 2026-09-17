@@ -42,6 +42,7 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 		'reserved_x',
 		'reserved_y',
 		'reserved_z',
+		'reserved_sol',
 	).pipe(
 		Schema.propertySignature,
 		Schema.withConstructorDefault(() => 'disabled'),
@@ -59,10 +60,17 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 		Schema.withDefaults({ constructor: () => false, decoding: () => false }),
 	),
 }) {
-	get_initializer(): Option.Option<string> {
+	get is_spawn() {
+		return this.spawn_type !== 'disabled';
+	}
+
+	resolve_initializer(): Option.Option<string> {
 		return (
-				this.spawn_type === 'disabled' ||
-					this.#get_initializer_metadata().pipe(
+				!this.is_spawn ||
+					this.initializer.pipe(
+						Option.flatMapNullable(
+							(key) => initializer_metadata[key as InitializerKey],
+						),
 						Option.match({
 							onNone: () => true, // assume custom values ok
 							onSome: (metadata) => metadata.is_starting_system,
@@ -73,24 +81,16 @@ export class SolarSystem extends Schema.Class<SolarSystem>('SolarSystem')({
 			:	Option.none();
 	}
 
-	get_initializer_metadata(): Option.Option<InitializerMetadata> {
-		return this.get_initializer().pipe(
+	resolve_initializer_metadata(): Option.Option<InitializerMetadata> {
+		return this.resolve_initializer().pipe(
 			Option.flatMapNullable(
 				(key) => initializer_metadata[key as InitializerKey],
 			),
 		);
 	}
 
-	#get_initializer_metadata(): Option.Option<InitializerMetadata> {
-		return this.initializer.pipe(
-			Option.flatMapNullable(
-				(key) => initializer_metadata[key as InitializerKey],
-			),
-		);
-	}
-
-	get_name(): Option.Option<string> {
-		return this.get_initializer().pipe(
+	resolve_name(): Option.Option<string> {
+		return this.resolve_initializer().pipe(
 			Option.flatMap((initializer) =>
 				Option.fromNullable(
 					(

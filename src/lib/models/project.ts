@@ -117,6 +117,18 @@ export class Project extends Schema.Class<Project>('Project')({
 		);
 	}
 
+	get_solar_system_neighbor_ids(id: SolarSystemId): Iterable<SolarSystemId> {
+		return pipe(
+			this.hyperlanes,
+			Iterable.filter(
+				(connection) => connection.a === id || connection.b === id,
+			),
+			Iterable.map((connection) =>
+				connection.a === id ? connection.b : connection.a,
+			),
+		);
+	}
+
 	get_solar_system_unsafe(id: SolarSystemId): SolarSystem {
 		return Option.getOrThrow(this.get_solar_system(id));
 	}
@@ -223,6 +235,10 @@ export class Project extends Schema.Class<Project>('Project')({
 					}),
 				);
 
+				const effect_json_string = JSON.stringify(
+					system.find((entry) => entry[0] === 'effect') ?? [],
+				);
+
 				const spawn_weight_json_string = JSON.stringify(
 					system.find((entry) => entry[0] === 'spawn_weight'),
 				);
@@ -257,6 +273,7 @@ export class Project extends Schema.Class<Project>('Project')({
 					: spawn_weight_json_string.includes('RESERVED|y|') ? 'reserved_y'
 					: spawn_weight_json_string.includes('RESERVED|y|') ? 'reserved_y'
 					: spawn_weight_json_string.includes('RESERVED|z|') ? 'reserved_z'
+					: spawn_weight_json_string.includes('SOL|yes|') ? 'reserved_sol'
 					: 'enabled';
 
 				const name = Option.fromNullable(
@@ -287,14 +304,23 @@ export class Project extends Schema.Class<Project>('Project')({
 					'special_init_09',
 				]);
 				const initializer_value = find_text_entry(system, 'initializer');
+				const is_custom_initializer = effect_json_string.includes(
+					'painted_galaxy_custom_initializer',
+				);
+				const is_automatic_initializer = effect_json_string.includes(
+					'painted_galaxy_automatic_initializer',
+				);
 				const initializer =
-					IGNORED_INITIALIZERS.has(initializer_value) ?
+					(
+						is_automatic_initializer ||
+						// IGNORED_INITIALIZERS is for legacy support;
+						// eventually, we can drop this and just use the flags
+						(IGNORED_INITIALIZERS.has(initializer_value) &&
+							!is_custom_initializer)
+					) ?
 						Option.none()
 					:	Option.some(initializer_value);
 
-				const effect_json_string = JSON.stringify(
-					system.find((entry) => entry[0] === 'effect') ?? [],
-				);
 				const wormhole_index_match = effect_json_string.match(
 					/painted_galaxy_wormhole_(\d+)/,
 				);

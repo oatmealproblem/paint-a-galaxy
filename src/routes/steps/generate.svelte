@@ -142,7 +142,7 @@
 			<Info>
 				Maximum number of solar systems per cluster. Systems within a cluster
 				will be more densely connected than systems in different clusters. Set
-				to 0 to disable clustering.
+				to 1 to disable clustering.
 			</Info>
 		{/snippet}
 	</Slider>

@@ -1111,9 +1111,11 @@
 							text-anchor="middle"
 							font-size={7}
 						>
-							{solar_system.spawn_type.at(-1)?.toUpperCase()}
+							{solar_system.spawn_type === 'reserved_sol' ?
+								'♁'
+							:	solar_system.spawn_type.at(-1)?.toUpperCase()}
 						</text>
-					{:else if solar_system.spawn_type !== 'disabled'}
+					{:else if solar_system.is_spawn}
 						<circle
 							cx={solar_system.coordinate.x}
 							cy={solar_system.coordinate.y}
@@ -1122,7 +1124,7 @@
 							{stroke}
 							stroke-width="1"
 						/>
-					{:else if Option.isSome(solar_system.get_initializer()) || Option.isSome(solar_system.get_name())}
+					{:else if Option.isSome(solar_system.resolve_initializer()) || Option.isSome(solar_system.resolve_name())}
 						{@const size = 6}
 						<rect
 							x={solar_system.coordinate.x - size / 2}
@@ -1249,9 +1251,11 @@
 					snapped_solar_system.value.coordinate.to_stellaris_coordinate()}
 				<div>
 					closest system
-					{#if Option.isSome(snapped_solar_system.value.get_name())}
+					{#if Option.isSome(snapped_solar_system.value.resolve_name())}
 						<em>
-							{snapped_solar_system.value.get_name().pipe(Option.getOrThrow)}
+							{snapped_solar_system.value
+								.resolve_name()
+								.pipe(Option.getOrThrow)}
 						</em>
 					{/if}
 					{stellaris_coordinate.x}, {stellaris_coordinate.y}

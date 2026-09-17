@@ -36,6 +36,7 @@ event = {
 			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_x } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_x } }
 			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_y } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_y } }
 			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_z } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_z } }
+			if = { limit = { has_trait = trait_painted_galaxy_reserved_spawn_sol } change_species_characteristics = { remove_trait = trait_painted_galaxy_reserved_spawn_sol } }
 		}
 	}
 }

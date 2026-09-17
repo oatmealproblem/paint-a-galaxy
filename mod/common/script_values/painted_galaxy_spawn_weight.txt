@@ -1,13 +1,6 @@
 painted_galaxy_spawn_weight = {
 	base = 10
 	[[PREFERRED] add = 100 ]
-	[[RESERVED]
-	multiply = 0
-	modifier = {
-		add = 1000
-		has_trait = trait_painted_galaxy_reserved_spawn_$RESERVED$
-	}
-	]
 	# without randomness, the player always spawns in the same place
 	# these values add some semi-random weight based on leader age
 	modifier = {
@@ -20,4 +13,21 @@ painted_galaxy_spawn_weight = {
 			}
 		}
 	}
+	[[RESERVED]
+	multiply = 0
+	modifier = {
+		add = 1000
+		has_trait = trait_painted_galaxy_reserved_spawn_$RESERVED$
+	}
+	]
+	[[SOL]
+	multiply = 0
+	modifier = {
+		add = 1000
+		or = {
+			has_trait = trait_painted_galaxy_reserved_spawn_sol
+			has_country_flag = human_1
+		}
+	}
+	]
 }

@@ -8,18 +8,64 @@ event = {
 	trigger = {
 		is_maybe_painted_galaxy = yes
 		exists = event_target:MSI_country
-		event_target:MSI_country = {
-			count_owned_planet = { count = 1 }
-		}
 	}
 	immediate = {
 		set_spawn_system_batch = begin
 		event_target:MSI_country = {
+			random_system_within_border = {
+				limit = { has_star_flag = neighbor_t1 }
+				save_event_target_as = neighbor_t1
+			}
+			random_system_within_border = {
+				limit = { has_star_flag = neighbor_t1_first_colony }
+				save_event_target_as = neighbor_t1_first_colony
+			}
+			random_system_within_border = {
+				limit = { has_star_flag = neighbor_t2_second_colony }
+				save_event_target_as = neighbor_t2_second_colony
+			}
 			capital_scope.solar_system = {
-				random_neighbor_system = {
-					painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t2_second_colony }
+				# first, if neighbor_t1 not spawned, try to use an existing neighbor
+				if = {
+					limit = {
+						NOT = { exists = event_target:neighbor_t1 }
+					}
+					random_neighbor_system = {
+						limit = {
+							has_special_star_flag_trigger = no
+							count_fleet_in_system = { count = 0 }
+						}
+						save_event_target_as = neighbor_t1
+						create_starbase = {
+							size = starbase_outpost
+							owner = event_target:MSI_country
+						}
+					}
 				}
-				painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t1_first_colony }
+				# if still no neighbor_t1, spawn a system
+				if = {
+					limit = {
+						NOT = { exists = event_target:neighbor_t1 }
+					}
+					painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t1 }
+					last_created_system = { save_event_target_as = neighbor_t1 }
+				}
+				# spawn neighbor_t1_first_colony if needed
+				if = {
+					limit = {
+						NOT = { exists = event_target:neighbor_t1_first_colony }
+					}
+					painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t1_first_colony }
+				}
+				# finally, if needed, spawn neighbor_t2_second_colony from neighbor_t1
+				if = {
+					limit = {
+						NOT = { exists = event_target:neighbor_t2_second_colony }
+					}
+					event_target:neighbor_t1 = {
+						painted_galaxy_spawn_connected_system = { INITIALIZER = slavers_neighbor_t2_second_colony }
+					}
+				}
 			}
 		}
 		set_spawn_system_batch = end

@@ -1,4 +1,16 @@
-import { Array, Effect, Iterable, Option, Order, pipe } from 'effect';
+import {
+	Array,
+	Effect,
+	Function,
+	HashMap,
+	HashSet,
+	Iterable,
+	Option,
+	Order,
+	pipe,
+	String,
+	Tuple,
+} from 'effect';
 
 import {
 	FALLEN_EMPIRE_ZONE_RADIUS,
@@ -98,7 +110,7 @@ const HUGE = `
 
 export function generate_stellaris_galaxy(project: Project): string {
 	const potential_home_stars = project.solar_systems.filter(
-		(solar_system) => solar_system.spawn_type !== 'disabled',
+		(solar_system) => solar_system.is_spawn,
 	);
 	const preferred_home_stars = project.solar_systems.filter(
 		(solar_system) => solar_system.spawn_type === 'preferred',
@@ -107,7 +119,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 	// stats
 	const num_solar_systems = project.solar_systems.length;
 	const num_spawns = project.solar_systems.filter(
-		(system) => system.spawn_type !== 'disabled',
+		(system) => system.is_spawn,
 	).length;
 	const num_reserved_spawns = project.solar_systems.filter((system) =>
 		system.spawn_type.startsWith('reserved'),
@@ -117,7 +129,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 	const recommended_dlc = pipe(
 		project.solar_systems,
 		Iterable.filterMap((solar_system) =>
-			solar_system.get_initializer_metadata(),
+			solar_system.resolve_initializer_metadata(),
 		),
 		Iterable.flatMap((metadata) => metadata.dlc),
 		Array.sort(Order.string),
@@ -171,35 +183,131 @@ export function generate_stellaris_galaxy(project: Project): string {
 		}
 	}
 
-	const systems_1_jump_from_spawn = new Set(
-		project.hyperlanes.flatMap((connection) => {
-			const from_is_spawn = potential_home_stars.some(
-				(solar_system) => solar_system.id === connection.a,
-			);
-			const to_is_spawn = potential_home_stars.some(
-				(solar_system) => solar_system.id === connection.b,
-			);
-			if (from_is_spawn && !to_is_spawn) return [connection.b];
-			if (to_is_spawn && !from_is_spawn) return [connection.a];
-			return [];
-		}),
+	const spawn_to_systems_within_2_jumps = pipe(
+		project.solar_systems,
+		Iterable.filter((system) => system.is_spawn),
+		Iterable.map(
+			(spawn_system) =>
+				[
+					spawn_system,
+					pipe(
+						project.get_solar_system_neighbor_ids(spawn_system.id),
+						Iterable.flatMap((neighbor_id) =>
+							Iterable.append(
+								project.get_solar_system_neighbor_ids(neighbor_id),
+								neighbor_id,
+							),
+						),
+						Iterable.map((id) => project.get_solar_system_unsafe(id)),
+						HashSet.fromIterable,
+						HashSet.remove(spawn_system),
+					),
+				] as const,
+		),
+		HashMap.fromIterable,
 	);
-	const systems_2_jumps_from_spawn = new Set(
-		project.hyperlanes.flatMap((connection) => {
-			const from_is_spawn = potential_home_stars.some(
-				(solar_system) => solar_system.id === connection.a,
+
+	const systems_with_2_jumps_of_any_spawn = pipe(
+		spawn_to_systems_within_2_jumps,
+		HashMap.values,
+		Iterable.flatMap(HashSet.values),
+		HashSet.fromIterable,
+	);
+
+	const [guaranteed_1_systems, guaranteed_2_systems] = pipe(
+		spawn_to_systems_within_2_jumps,
+		HashMap.map((systems_within_2_jumps, key) => {
+			const other_spawns_systems_within_2_jumps = pipe(
+				spawn_to_systems_within_2_jumps,
+				HashMap.entries,
+				Iterable.filter(([other_key]) => other_key !== key),
+				Iterable.flatMap(([, other_value]) => other_value),
+				HashSet.fromIterable,
 			);
-			const to_is_spawn = potential_home_stars.some(
-				(solar_system) => solar_system.id === connection.b,
+			const unique_systems_within_2_jumps = pipe(
+				systems_within_2_jumps,
+				HashSet.difference(other_spawns_systems_within_2_jumps),
+				HashSet.values,
 			);
-			const from_is_adjacent = systems_1_jump_from_spawn.has(connection.a);
-			const to_is_adjacent = systems_1_jump_from_spawn.has(connection.b);
-			if (from_is_adjacent && !to_is_adjacent && !to_is_spawn)
-				return [connection.b];
-			if (to_is_adjacent && !from_is_adjacent && !from_is_spawn)
-				return [connection.a];
-			return [];
+
+			const user_specified_guaranteed_1 = pipe(
+				systems_within_2_jumps,
+				Iterable.findFirst((system) =>
+					system
+						.resolve_initializer_metadata()
+						.pipe(
+							Option.exists((metadata) => metadata.guaranteed_colony === 1),
+						),
+				),
+			);
+			const guaranteed_1_system = pipe(
+				user_specified_guaranteed_1,
+				Option.orElse(() => Iterable.head(unique_systems_within_2_jumps)),
+			);
+
+			const user_specified_guaranteed_2 = pipe(
+				systems_within_2_jumps,
+				Iterable.findFirst((system) =>
+					system
+						.resolve_initializer_metadata()
+						.pipe(
+							Option.exists((metadata) => metadata.guaranteed_colony === 2),
+						),
+				),
+			);
+			const guaranteed_2_system = pipe(
+				user_specified_guaranteed_2,
+				Option.orElse(() =>
+					pipe(
+						unique_systems_within_2_jumps,
+						Iterable.filter(
+							(system) => !Option.contains(guaranteed_1_system, system),
+						),
+						Iterable.findLast(Function.constTrue),
+					),
+				),
+			);
+
+			return [guaranteed_1_system, guaranteed_2_system] as const;
 		}),
+		HashMap.values,
+		Iterable.reduce(
+			[[], []] as [Array<SolarSystem>, Array<SolarSystem>],
+			(acc, cur) => {
+				if (Option.isSome(cur[0])) {
+					acc[0].push(cur[0].value);
+				}
+				if (Option.isSome(cur[1])) {
+					acc[1].push(cur[1].value);
+				}
+				return acc;
+			},
+		),
+		([guaranteed_1_systems, guaranteed_2_systems]) =>
+			[
+				HashSet.fromIterable(guaranteed_1_systems),
+				HashSet.fromIterable(guaranteed_2_systems),
+			] as const,
+	);
+
+	const systems_within_2_jumps_of_sol = pipe(
+		spawn_to_systems_within_2_jumps,
+		HashMap.findFirst(
+			(value, key) =>
+				key
+					.resolve_initializer()
+					.pipe(Option.contains('sol_system_initializer')) ||
+				key.spawn_type === 'reserved_sol',
+		),
+		Option.map(Tuple.getSecond),
+		Option.getOrElse(HashSet.empty<SolarSystem>),
+	);
+
+	let sol_neighbor_t1_used = project.solar_systems.some((system) =>
+		system.resolve_initializer().pipe(Option.contains('sol_neighbor_t1')),
+	);
+	let sol_neighbor_t2_used = project.solar_systems.some((system) =>
+		system.resolve_initializer().pipe(Option.contains('sol_neighbor_t2')),
 	);
 
 	const systems_entries = pipe(
@@ -211,7 +319,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 		// sort systems with initializers to the top, otherwise random systems might use unique initializers first
 		Array.sortBy(
 			Order.mapInput(Order.number, (solar_system) =>
-				Option.match(solar_system.get_initializer(), {
+				Option.match(solar_system.resolve_initializer(), {
 					onSome: (initializer) => {
 						if (
 							initializer in initializer_metadata &&
@@ -237,49 +345,64 @@ export function generate_stellaris_galaxy(project: Project): string {
 						`name = "${value.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`,
 				}),
 			);
+
+			const is_sol_neighbor = HashSet.has(
+				systems_within_2_jumps_of_sol,
+				solar_system,
+			);
 			let initializer = '';
 			let initializer_effect = '';
 			let spawn_weight = '';
 			if (potential_home_stars.includes(solar_system)) {
 				const initializer_key = solar_system
-					.get_initializer()
+					.resolve_initializer()
 					.pipe(Option.getOrElse(() => `random_empire_init_0${(i % 6) + 1}`));
 				initializer = `initializer = ${initializer_key}`;
 				const params =
-					solar_system.spawn_type.startsWith('reserved') ?
+					solar_system.spawn_type === 'reserved_sol' ?
+						`|SOL|yes|RANDOM_MODULO|1|RANDOM_VALUE|0|`
+					: solar_system.spawn_type.startsWith('reserved') ?
 						`|RESERVED|${solar_system.spawn_type.at(-1)}|RANDOM_MODULO|3|RANDOM_VALUE|${i % 3}|`
 					: solar_system.spawn_type === 'preferred' ?
 						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;
 				spawn_weight = `spawn_weight = { base = 0 add = value:painted_galaxy_spawn_weight${params} }`;
-			} else if (Option.isSome(solar_system.get_initializer())) {
-				initializer = `initializer = ${solar_system.get_initializer().pipe(Option.getOrThrow)}`;
-				const metadata =
-					initializer_metadata[
-						solar_system
-							.get_initializer()
-							.pipe(Option.getOrThrow) as InitializerKey
-					];
-				if (metadata?.init_effect) {
-					initializer_effect = metadata.init_effect;
+			} else if (Option.isSome(solar_system.resolve_initializer())) {
+				initializer = `initializer = ${solar_system.resolve_initializer().pipe(Option.getOrThrow)}`;
+				const metadata = solar_system
+					.resolve_initializer_metadata()
+					.pipe(Option.getOrNull);
+				initializer_effect = `set_star_flag = painted_galaxy_custom_initializer ${metadata?.init_effect ?? ''}`;
+			} else if (HashSet.has(guaranteed_1_systems, solar_system)) {
+				if (is_sol_neighbor) {
+					initializer = 'initializer = sol_neighbor_t1_first_colony';
+				} else {
+					initializer = 'initializer = neighbor_t1_first_colony';
 				}
-			} else if (systems_1_jump_from_spawn.has(solar_system.id)) {
-				// all systems with 1 of a spawn point get a random basic initializer
+				initializer_effect =
+					'set_star_flag = painted_galaxy_automatic_initializer';
+			} else if (HashSet.has(guaranteed_2_systems, solar_system)) {
+				if (is_sol_neighbor) {
+					initializer = 'initializer = sol_neighbor_t2_second_colony';
+				} else {
+					initializer = 'initializer = neighbor_t2_second_colony';
+				}
+				initializer_effect =
+					'set_star_flag = painted_galaxy_automatic_initializer';
+			} else if (HashSet.has(systems_with_2_jumps_of_any_spawn, solar_system)) {
+				// all systems within 2 jumps of a spawn point get a random basic initializer
 				// this mimics the effect of the "empire_cluster" flag in a random galaxy
-				initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
-			} else if (systems_2_jumps_from_spawn.has(solar_system.id)) {
-				// in a random galaxy, all systems within 2 of a spawn also get the "empire_cluster" effect
-				// however, not all spawn points will actually be used, so we don't want to overly restrict system spawns, so a random chance is used
-				// the chance is based on the total number systems within 2 jumps of a spawn point, so it scaled inversely with the connectedness and number of spawns
-				// eg on a low connectivity map, systems within 2 are more likely to get a basic init; this helps empires not get boxed in by hostile creatures etc
-				const num_basic_systems =
-					potential_home_stars.length +
-					systems_1_jump_from_spawn.size +
-					systems_2_jumps_from_spawn.size;
-				const chance = 1 - num_basic_systems / project.solar_systems.length;
-				if (Math.random() < chance) {
+				if (is_sol_neighbor && !sol_neighbor_t1_used) {
+					initializer = `initializer = sol_neighbor_t1`;
+					sol_neighbor_t1_used = true;
+				} else if (is_sol_neighbor && !sol_neighbor_t2_used) {
+					initializer = `initializer = sol_neighbor_t2`;
+					sol_neighbor_t2_used = true;
+				} else {
 					initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
 				}
+				initializer_effect =
+					'set_star_flag = painted_galaxy_automatic_initializer';
 			}
 
 			const fe_zone = Array.findFirst(
@@ -333,7 +456,9 @@ export function generate_stellaris_galaxy(project: Project): string {
 				initializer_effect,
 			];
 			const effect =
-				effects.some(Boolean) ? `effect = { ${effects.join(' ')} }` : '';
+				effects.some(String.isNonEmpty) ?
+					`effect = { ${effects.join(' ')} }`
+				:	'';
 			return `\tsystem = { ${basics} ${name} ${initializer} ${spawn_weight} ${effect} }`;
 		}),
 		Array.join('\n'),

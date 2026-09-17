@@ -1,3 +1,4 @@
+inline_script = { script = painted_galaxy_reserved_spawn_trait/switch HAS_RESERVED_SPAWNS = @has_painted_galaxy_reserved_spawns VALUE = sol }
 inline_script = { script = painted_galaxy_reserved_spawn_trait/switch HAS_RESERVED_SPAWNS = @has_painted_galaxy_reserved_spawns VALUE = a }
 inline_script = { script = painted_galaxy_reserved_spawn_trait/switch HAS_RESERVED_SPAWNS = @has_painted_galaxy_reserved_spawns VALUE = b }
 inline_script = { script = painted_galaxy_reserved_spawn_trait/switch HAS_RESERVED_SPAWNS = @has_painted_galaxy_reserved_spawns VALUE = c }

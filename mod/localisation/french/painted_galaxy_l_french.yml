@@ -1,5 +1,7 @@
 ﻿l_french:
-  trait_painted_galaxy_reserved_spawn_desc: "This trait is used to customizing the empire spawn location in Paint a Galaxy maps, and will be automatically removed when the game starts. If the reserved solar system is not available (it was not designated in the map, or another empire with this trait spawned first), then this empire will instead spawn in a random location."
+  trait_painted_galaxy_reserved_spawn_desc: "This trait is used to customizing the empire spawn location in Paint a Galaxy maps, and will be automatically removed when the game starts. If the reserved solar system is not available (it was not designated in the map, or another empire with this trait spawned first), then this empire will instead spawn in a random location. Consult the specific map for which reserved spawns are used and where they are located."
+  trait_painted_galaxy_reserved_spawn_sol: "Reserved Spawn Sol"
+  trait_painted_galaxy_reserved_spawn_sol_desc: "$trait_painted_galaxy_reserved_spawn_desc$\n\nAn empire with this trait should also be set to use Sol (or a variant) for its starting system."
   trait_painted_galaxy_reserved_spawn_a: "Reserved Spawn A"
   trait_painted_galaxy_reserved_spawn_a_desc: "$trait_painted_galaxy_reserved_spawn_desc$"
   trait_painted_galaxy_reserved_spawn_b: "Reserved Spawn B"

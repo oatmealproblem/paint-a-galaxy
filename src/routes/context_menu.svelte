@@ -154,9 +154,9 @@
 						<Menu.ItemGroup>
 							<Menu.ItemGroupLabel class="text-surface-800-200">
 								Solar system at {stellaris_coordinate.x}, {stellaris_coordinate.y}
-								{#if Option.isSome(solar_system.get_name())}
+								{#if Option.isSome(solar_system.resolve_name())}
 									<em class="block">
-										{solar_system.get_name().pipe(Option.getOrThrow)}
+										{solar_system.resolve_name().pipe(Option.getOrThrow)}
 									</em>
 								{/if}
 							</Menu.ItemGroupLabel>

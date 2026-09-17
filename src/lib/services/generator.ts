@@ -1080,8 +1080,7 @@ export class Generator extends Context.Tag('Generator')<
 			);
 			// locked systems with a spawn count towards the target
 			const locked_spawn_systems = project.solar_systems.filter(
-				(solar_system) =>
-					solar_system.locked && solar_system.spawn_type !== 'disabled',
+				(solar_system) => solar_system.locked && solar_system.is_spawn,
 			);
 			const new_spawns = new Set<SolarSystem>();
 
@@ -1166,10 +1165,7 @@ export class Generator extends Context.Tag('Generator')<
 									}),
 								}),
 							);
-						} else if (
-							!is_new_spawn &&
-							solar_system.spawn_type !== 'disabled'
-						) {
+						} else if (!is_new_spawn && solar_system.is_spawn) {
 							return Option.some(
 								Action.UpdateSolarSystemAction.make({
 									old_value: solar_system,

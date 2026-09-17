@@ -1039,10 +1039,7 @@ export class Tools extends Context.Tag('Tools')<
 								actions: solar_systems.map((solar_system) => {
 									const updated_solar_system = new SolarSystem({
 										...solar_system,
-										spawn_type:
-											solar_system.spawn_type === 'disabled' ?
-												'enabled'
-											:	'disabled',
+										spawn_type: solar_system.is_spawn ? 'disabled' : 'enabled',
 									});
 									return new Action.UpdateSolarSystemAction({
 										old_value: solar_system,
