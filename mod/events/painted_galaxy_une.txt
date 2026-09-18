@@ -1,0 +1,171 @@
+namespace = painted_galaxy_une
+
+event = {
+	id = painted_galaxy_une.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		is_maybe_painted_galaxy = yes
+		exists = event_target:sol_system_earth
+		event_target:sol_system_earth = { is_colony = no }
+		any_country = {
+			OR = {
+				has_country_flag = human_2
+				has_country_flag = human_3
+				AND = {
+					is_human_species = yes
+					has_origin = origin_lost_colony
+				}
+			}
+		}
+	}
+	immediate = {
+		event_target:sol_system_earth = {
+			# adapted from col_sol_system initializer
+			random_country = {
+				limit = {
+					OR = {
+						has_country_flag = human_2
+						has_country_flag = human_3
+						AND = {
+							is_human_species = yes
+							has_origin = origin_lost_colony
+						}
+					}
+				}
+				owner_species = {
+					save_event_target_as = human_species
+				}
+			}
+			modify_species = {
+				species = event_target:human_species
+				ideal_planet_class = pc_continental
+				change_scoped_species = no
+				effect = { save_event_target_as = UNE_human_species }
+			}
+			create_country = {
+				name = "NAME_United_Nations_of_Earth"
+				adjective = "PRESCRIPTED_adjective_humans1"
+				inline_script = {
+					script = pgcompat/une/switch
+					ECAF = @has_eca_funefork
+					ECBB = @has_bug_branch
+					ECC = @has_ecc_cog
+					MSI = @has_msi
+				}
+				species = event_target:UNE_human_species
+				name_list = "HUMAN1"
+				ship_prefix = "UNS"
+				flag = {
+					icon = {
+						category = "human"
+						file = "flag_human_8.dds"
+					}
+					background = {
+						category = "backgrounds"
+						file = "00_solid.dds"
+					}
+					colors = {
+						"dark_blue"
+						"dark_blue"
+						"null"
+						"null"
+					}
+				}
+				type = default
+				origin = "origin_default"
+				effect = {
+					save_event_target_as = npc_UNoE
+					add_resource = {
+						minerals = 2400
+						energy = 2400
+						food = 2400
+						alloys = 800
+						consumer_goods = 1200
+						influence = 600
+					}
+					if = {
+						limit = {
+							any_country = {
+								OR = {
+									has_country_flag = human_2
+									has_country_flag = human_3
+								}
+								has_origin = origin_necrophage
+							}
+						}
+						set_origin = origin_necrophage
+						set_country_flag = necrophage_une
+					}
+					if = {
+						limit = {
+							any_country = {
+								OR = {
+									has_country_flag = human_2
+									has_country_flag = human_3
+								}
+								has_origin = origin_clone_army
+							}
+						}
+						set_origin = origin_clone_army
+					}
+				}
+			}
+			create_colony = {
+				owner = event_target:npc_UNoE
+			}
+			generate_earth_deposits_and_blockers = yes
+			set_earth_entity = yes
+			clear_blockers = yes
+			colony = {
+				generate_start_buildings_and_districts = yes
+				generate_start_pops = yes
+				generate_lost_colony_parent_bonus = yes
+			}
+			event_target:npc_UNoE = {
+				set_country_flag = human_1
+				set_country_flag = lost_colony_parent
+				create_starting_leaders = yes
+				country_event = { id = game_start.9 }
+				country_event = { id = game_start.33 days = 1 } # needs delay for system ownership to settle
+			}
+			every_country = {
+				limit = {
+					OR = {
+						has_country_flag = human_2
+						has_country_flag = human_3
+						AND = {
+							is_human_species = yes
+							has_origin = origin_lost_colony
+						}
+					}
+				}
+				save_event_target_as = current_lost_colony
+				set_country_flag = parent_system_spawned
+				set_country_flag = special_intro_for@event_target:npc_UNoE
+				owner_species = {
+					set_species_homeworld = event_target:sol_system_earth
+				}
+				event_target:npc_UNoE = {
+					set_country_flag = special_intro_for@event_target:current_lost_colony
+					set_country_flag = lost_colony_parent_of@event_target:current_lost_colony
+				}
+			}
+			set_name = "NAME_Earth"
+			solar_system = {
+				create_starbase = {
+					size = starbase_starport
+					module = shipyard
+					building = crew_quarters
+					owner = event_target:npc_UNoE
+					effect = {
+						set_starbase_module = {
+							slot = 2
+							module = trading_hub
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,9 @@
+authority = auth_democratic
+civics = {
+	civic = civic_beacon_of_liberty
+	civic = civic_idealistic_foundation
+}
+ethos = {
+	ethic = "ethic_xenophile"
+	ethic = "ethic_fanatic_egalitarian"
+}

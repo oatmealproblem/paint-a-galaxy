@@ -1,0 +1,12 @@
+authority = auth_democratic
+civics = {
+	civic = civic_political_pluralism
+	civic = civic_free_haven
+	civic = civic_meritocracy
+}
+ethos = {
+	ethic = ethic_fanatic_egalitarian
+	ethic = ethic_xenophile
+	ethic = ethic_socialism
+	ethic = ethic_materialist
+}

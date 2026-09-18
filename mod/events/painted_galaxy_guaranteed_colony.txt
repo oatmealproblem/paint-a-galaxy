@@ -117,6 +117,7 @@ event = {
 				}
 
 				# change planet classes
+				# also set up colonies if country is lost colony parent
 				if = {
 					limit = { num_guaranteed_colonies >= 1 }
 					event_target:painted_galaxy_guaranteed_t1 = {
@@ -124,6 +125,24 @@ event = {
 							limit = { has_planet_flag = prescripted_ideal }
 							change_pc = event_target:painted_galaxy_current_country
 							reroll_planet = yes
+						}
+						if = {
+							limit = {
+								event_target:painted_galaxy_current_country = { has_country_flag = lost_colony_parent }
+							}
+							set_planet_flag = lost_colony_planet
+							create_colony = {
+								owner = event_target:painted_galaxy_current_country
+							}
+							colony = {
+								generate_lost_colony_parent_colony_1 = yes
+							}
+							solar_system = {
+								create_starbase = {
+									size = starbase_outpost
+									owner = event_target:painted_galaxy_current_country
+								}
+							}
 						}
 					}
 				}
@@ -134,6 +153,24 @@ event = {
 							limit = { has_planet_flag = prescripted_ideal }
 							change_pc = event_target:painted_galaxy_current_country
 							reroll_planet = yes
+						}
+						if = {
+							limit = {
+								event_target:painted_galaxy_current_country = { has_country_flag = lost_colony_parent }
+							}
+							set_planet_flag = lost_colony_planet
+							create_colony = {
+								owner = event_target:painted_galaxy_current_country
+							}
+							colony = {
+								generate_lost_colony_parent_colony_2 = yes
+							}
+							solar_system = {
+								create_starbase = {
+									size = starbase_outpost
+									owner = event_target:painted_galaxy_current_country
+								}
+							}
 						}
 					}
 				}

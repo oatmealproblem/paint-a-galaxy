@@ -1,0 +1,1 @@
+inline_script = pgcompat/une/ecaf_$ECAF$_ecbb_$ECBB$_ecc_$ECC$_msi_$MSI$

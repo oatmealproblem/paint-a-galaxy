@@ -1,3 +1,7 @@
+@has_ancient_caches = 0 # Ancient Cache of Technology
+@has_bug_branch = 0 # Ethics & Civics: Bug Branch
+@has_eca_funefork = 0 # Ethics & Civics: Alternative FunEFork
+@has_ecc_cog = 0 # Ethics & Civics: Classic
+@has_msi = 0 # More Societies: Infinity (variable requested, but not yet implemented)
+
 @has_painted_galaxy_reserved_spawns = 0
-@has_bug_branch = 0
-@has_ancient_caches = 0

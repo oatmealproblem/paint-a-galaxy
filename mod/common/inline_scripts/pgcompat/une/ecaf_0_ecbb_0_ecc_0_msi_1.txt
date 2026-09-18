@@ -1,0 +1,12 @@
+authority = auth_oligarchic
+civics = {
+	civic = civic_coalition_government
+	civic = civic_globalism
+	civic = civic_satisfactory
+	civic = civic_welfare_state
+}
+ethos = {
+	ethic = ethic_pragmatism
+	ethic = ethic_xenophile
+	ethic = ethic_conciliationsm
+}
