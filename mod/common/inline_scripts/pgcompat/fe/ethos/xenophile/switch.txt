@@ -1,1 +1,1 @@
-inline_script = pgcompat/fe/ethos/xenophile/bug_branch_$BUG_BRANCH$
+inline_script = pgcompat/fe/ethos/xenophile/ecbb_$ECBB$

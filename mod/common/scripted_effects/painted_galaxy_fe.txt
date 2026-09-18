@@ -378,7 +378,7 @@ painted_galaxy_create_materialist_fe = {
 		inline_script = {
 			script = pgcompat/fe/trait_points/materialist/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		allow_negative_traits = no
 	}
@@ -398,7 +398,7 @@ painted_galaxy_create_materialist_fe = {
 		inline_script = {
 			script = pgcompat/fe/authority/materialist/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		civics = {
 			civic = civic_lethargic_leadership
@@ -407,7 +407,7 @@ painted_galaxy_create_materialist_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/materialist/switch
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
@@ -416,7 +416,7 @@ painted_galaxy_create_materialist_fe = {
 			inline_script = {
 				script = pgcompat/fe/resources/switch
 				ACOT = @has_ancient_caches
-				BUG_BRANCH = @has_bug_branch
+				ECBB = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Enforcer"
@@ -451,7 +451,7 @@ painted_galaxy_create_spiritualist_fe = {
 		inline_script = {
 			script = pgcompat/fe/trait_points/spiritualist/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		allow_negative_traits = no
 	}
@@ -473,7 +473,7 @@ painted_galaxy_create_spiritualist_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/spiritualist/switch
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
@@ -482,7 +482,7 @@ painted_galaxy_create_spiritualist_fe = {
 			inline_script = {
 				script = pgcompat/fe/resources/switch
 				ACOT = @has_ancient_caches
-				BUG_BRANCH = @has_bug_branch
+				ECBB = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Cleanser"
@@ -517,7 +517,7 @@ painted_galaxy_create_xenophile_fe = {
 		inline_script = {
 			script = pgcompat/fe/trait_points/xenophile/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		allow_negative_traits = no
 		effect = {
@@ -531,7 +531,7 @@ painted_galaxy_create_xenophile_fe = {
 		inline_script = {
 			script = pgcompat/fe/authority/xenophile/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		civics = {
 			civic = civic_lethargic_leadership
@@ -540,7 +540,7 @@ painted_galaxy_create_xenophile_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/xenophile/switch
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
@@ -549,7 +549,7 @@ painted_galaxy_create_xenophile_fe = {
 			inline_script = {
 				script = pgcompat/fe/resources/switch
 				ACOT = @has_ancient_caches
-				BUG_BRANCH = @has_bug_branch
+				ECBB = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Adjuster"
@@ -584,7 +584,7 @@ painted_galaxy_create_xenophobe_fe = {
 		inline_script = {
 			script = pgcompat/fe/trait_points/xenophobe/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		allow_negative_traits = no
 		effect = {
@@ -599,7 +599,7 @@ painted_galaxy_create_xenophobe_fe = {
 		inline_script = {
 			script = pgcompat/fe/authority/xenophobe/switch
 			ACOT = @has_ancient_caches
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		civics = {
 			civic = civic_lethargic_leadership
@@ -608,7 +608,7 @@ painted_galaxy_create_xenophobe_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/xenophobe/switch
-			BUG_BRANCH = @has_bug_branch
+			ECBB = @has_bug_branch
 		}
 		flag = random
 		origin = "origin_fallen_empire"
@@ -617,7 +617,7 @@ painted_galaxy_create_xenophobe_fe = {
 			inline_script = {
 				script = pgcompat/fe/resources/switch
 				ACOT = @has_ancient_caches
-				BUG_BRANCH = @has_bug_branch
+				ECBB = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Reaper"
@@ -677,7 +677,7 @@ painted_galaxy_create_machine_fe = {
 			inline_script = {
 				script = pgcompat/fe/resources/switch
 				ACOT = @has_ancient_caches
-				BUG_BRANCH = @has_bug_branch
+				ECBB = @has_bug_branch
 			}
 			# must initialize global designs here
 			add_global_ship_design = "NAME_Omega"
