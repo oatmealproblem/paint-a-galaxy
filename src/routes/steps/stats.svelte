@@ -129,6 +129,20 @@
 			Array.flatMap((systems) => systems.map((system) => system.id)),
 		),
 	);
+	const unsupported_initializer_system_ids = $derived(
+		pipe(
+			systems_by_initializer,
+			Record.toEntries,
+			Iterable.filter(
+				([initializer]) =>
+					initializer in initializer_metadata &&
+					initializer_metadata[initializer as InitializerKey] == null,
+			),
+			Iterable.flatMap(([, systems]) => systems),
+			Iterable.map((solar_system) => solar_system.id),
+			Array.fromIterable,
+		),
+	);
 	const missing_marauder_1 = $derived(
 		check_for_missing_associated_systems({
 			required: ['marauder_1_1', 'marauder_1_2', 'marauder_1_3'],
@@ -448,6 +462,20 @@
 						{#each recommended_dlc as dlc (dlc)}
 							<div>{dlc}</div>
 						{/each}
+					{/snippet}
+				</StatItem>
+			{/if}
+			{#if unsupported_initializer_system_ids.length > 0}
+				<StatItem
+					label="Unsupported Initializers"
+					value={unsupported_initializer_system_ids.length}
+					warning
+					solar_system_ids={unsupported_initializer_system_ids}
+				>
+					{#snippet info()}
+						These systems use vanilla initializers that Painted Galaxy doesn't
+						support. This can cause issues such as duplicate systems and broken
+						event chains.
 					{/snippet}
 				</StatItem>
 			{/if}
