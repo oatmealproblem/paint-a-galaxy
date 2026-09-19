@@ -124,7 +124,10 @@ event = {
 							}
 							modifier = {
 								factor = 99999
-								any_country = { has_origin = origin_scion }
+								inline_script = {
+									script = pgcompat/fe/scion_trigger/materialist/switch
+									ECC = @has_ecc_cog
+								}
 							}
 							modifier = {
 								factor = 0
@@ -143,7 +146,10 @@ event = {
 							}
 							modifier = {
 								factor = 99999
-								any_country = { has_origin = origin_scion }
+								inline_script = {
+									script = pgcompat/fe/scion_trigger/spiritualist/switch
+									ECC = @has_ecc_cog
+								}
 							}
 							modifier = {
 								factor = 0

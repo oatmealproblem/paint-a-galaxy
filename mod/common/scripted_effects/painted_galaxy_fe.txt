@@ -407,6 +407,7 @@ painted_galaxy_create_materialist_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/materialist/switch
+			ECAF = @has_eca_funefork
 			ECBB = @has_bug_branch
 		}
 		flag = random
@@ -473,6 +474,7 @@ painted_galaxy_create_spiritualist_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/spiritualist/switch
+			ECAF = @has_eca_funefork
 			ECBB = @has_bug_branch
 		}
 		flag = random
@@ -540,6 +542,7 @@ painted_galaxy_create_xenophile_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/xenophile/switch
+			ECAF = @has_eca_funefork
 			ECBB = @has_bug_branch
 		}
 		flag = random
@@ -608,6 +611,7 @@ painted_galaxy_create_xenophobe_fe = {
 		species = last_created_species
 		inline_script = {
 			script = pgcompat/fe/ethos/xenophobe/switch
+			ECAF = @has_eca_funefork
 			ECBB = @has_bug_branch
 		}
 		flag = random

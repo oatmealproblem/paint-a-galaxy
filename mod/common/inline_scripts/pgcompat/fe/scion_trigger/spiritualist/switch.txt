@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/scion_trigger/spiritualist/ecc_$ECC$

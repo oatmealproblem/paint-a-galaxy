@@ -1,0 +1,1 @@
+inline_script = pgcompat/fe/ethos/spiritualist/ecaf_0_ecbb_1

@@ -1,1 +1,1 @@
-inline_script = pgcompat/fe/ethos/spiritualist/ecbb_$ECBB$
+inline_script = pgcompat/fe/ethos/spiritualist/ecaf_$ECAF$_ecbb_$ECBB$

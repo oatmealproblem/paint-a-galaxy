@@ -1,0 +1,5 @@
+any_country = {
+	has_origin = origin_scion
+	has_civic = PrimPlayer_civic_scion_materialist
+	has_civic = civic_scion_materialist
+}
