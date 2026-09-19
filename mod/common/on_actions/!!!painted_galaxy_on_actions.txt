@@ -13,6 +13,7 @@ on_game_start = {
 		painted_galaxy_advanced_start.1 # create advanced starts (should happen after creating guaranteed colonies)
 		painted_galaxy_msi.1 # spawn missing MSI systems (should happen after creating advanced starts)
 		painted_galaxy_reserved_spawn.1 # remove reserved spawn traits
+		painted_galaxy_empire_cluster.1 # adds empire_cluster to systems within 2 jumps of home system
 	}
 }
 

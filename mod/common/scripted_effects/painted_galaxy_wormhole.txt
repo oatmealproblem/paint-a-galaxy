@@ -3,7 +3,16 @@ painted_galaxy_create_wormhole_pair = {
 	random_system = {
 		limit = { has_star_flag = painted_galaxy_wormhole_$NUMBER$ }
 		if = {
-			limit = { NOT = { any_neighbor_system = { any_neighbor_system = { starting_system = yes } } } }
+			limit = {
+				NOT = {
+					any_neighbor_system = {
+						OR = {
+							starting_system = yes
+							any_neighbor_system = { starting_system = yes }
+						}
+					}
+				}
+			}
 			# no starting system within 2 jumps, not a real empire_cluster, clean it up
 			# this was presumably set by Paint a Galaxy to prevent a random wormhole from spawning here
 			remove_star_flag = empire_cluster

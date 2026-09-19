@@ -1,0 +1,27 @@
+namespace = painted_galaxy_empire_cluster
+
+event = {
+	id = painted_galaxy_empire_cluster.1
+	is_triggered_only = yes
+	hide_window = yes
+	trigger = {
+		is_maybe_painted_galaxy = yes
+	}
+	immediate = {
+		every_country = {
+			limit = {
+				is_country_type = default
+				exists = capital_scope
+			}
+			capital_scope.solar_system = {
+				set_star_flag = empire_cluster
+				every_neighbor_system = {
+					set_star_flag = empire_cluster
+					every_neighbor_system = {
+						set_star_flag = empire_cluster
+					}
+				}
+			}
+		}
+	}
+}
