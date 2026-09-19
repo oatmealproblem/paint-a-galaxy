@@ -67,9 +67,12 @@ event = {
 					}
 					weights = {
 						base = 1
-						# choose MSI first
+						# choose MSI and lost colony parents first
 						modifier = {
-							has_origin = origin_slavers
+							OR = {
+								has_origin = origin_slavers
+								has_country_flag = lost_colony_parent
+							}
 							add = 9999
 						}
 					}
