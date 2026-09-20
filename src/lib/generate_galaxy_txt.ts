@@ -1,7 +1,6 @@
 import {
 	Array,
 	Effect,
-	Function,
 	HashMap,
 	HashSet,
 	Iterable,
@@ -230,6 +229,20 @@ export function generate_stellaris_galaxy(project: Project): string {
 				HashSet.values,
 			);
 
+			const sortImmediateNeighborsFirst = Array.sortWith<
+				Iterable<SolarSystem>,
+				number
+			>(
+				(system) =>
+					Number(
+						!Iterable.contains(
+							project.get_solar_system_neighbor_ids(system.id),
+							key.id,
+						),
+					),
+				Order.number,
+			);
+
 			const user_specified_guaranteed_1 = pipe(
 				systems_within_2_jumps,
 				Iterable.findFirst((system) =>
@@ -242,7 +255,15 @@ export function generate_stellaris_galaxy(project: Project): string {
 			);
 			const guaranteed_1_system = pipe(
 				user_specified_guaranteed_1,
-				Option.orElse(() => Iterable.head(unique_systems_within_2_jumps)),
+
+				Option.orElse(() =>
+					pipe(
+						unique_systems_within_2_jumps,
+						// prefer systems 1 jump away
+						sortImmediateNeighborsFirst,
+						Array.head,
+					),
+				),
 			);
 
 			const user_specified_guaranteed_2 = pipe(
@@ -263,7 +284,9 @@ export function generate_stellaris_galaxy(project: Project): string {
 						Iterable.filter(
 							(system) => !Option.contains(guaranteed_1_system, system),
 						),
-						Iterable.findLast(Function.constTrue),
+						// prefer systems 2 jumps away
+						sortImmediateNeighborsFirst,
+						Array.last,
 					),
 				),
 			);
