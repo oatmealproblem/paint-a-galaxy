@@ -422,7 +422,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 					initializer = `initializer = sol_neighbor_t2`;
 					sol_neighbor_t2_used = true;
 				} else {
-					initializer = `initializer = ${get_random_system_basic_system_initializer()}`;
+					initializer = 'initializer = painted_galaxy_rl_basic';
 				}
 				initializer_effect =
 					'set_star_flag = painted_galaxy_automatic_initializer';
@@ -601,29 +601,4 @@ function can_spawn_fallen_empire_in_direction(
 		is_near_solar_system ||
 		is_near_fe_zone
 	);
-}
-
-const WEIGHTED_MISC_SYSTEM_INITIALIZERS = pipe(
-	Iterable.empty(),
-	Iterable.appendAll(Iterable.replicate('basic_init_01', 20)),
-	Iterable.appendAll(Iterable.replicate('basic_init_02', 20)),
-	Iterable.appendAll(Iterable.replicate('basic_init_03', 10)),
-	Iterable.appendAll(Iterable.replicate('basic_init_04', 10)),
-	Iterable.appendAll(Iterable.replicate('basic_init_05', 6)),
-	Iterable.appendAll(Iterable.replicate('basic_init_06', 4)),
-	Iterable.appendAll(Iterable.replicate('asteroid_init_01', 2)),
-	Iterable.appendAll(Iterable.replicate('binary_init_01', 6)),
-	Iterable.appendAll(Iterable.replicate('binary_init_02', 4)),
-	Iterable.appendAll(Iterable.replicate('trinary_init_01', 3)),
-	Iterable.appendAll(Iterable.replicate('trinary_init_02', 3)),
-	Iterable.appendAll(Iterable.replicate('special_init_01', 2)), // black hole
-	Iterable.appendAll(Iterable.replicate('special_init_08', 2)), // neutron star
-	Iterable.appendAll(Iterable.replicate('special_init_09', 2)), // pulsar
-	Array.fromIterable,
-);
-function get_random_system_basic_system_initializer() {
-	const index = Math.floor(
-		Math.random() * WEIGHTED_MISC_SYSTEM_INITIALIZERS.length,
-	);
-	return WEIGHTED_MISC_SYSTEM_INITIALIZERS[index];
 }
