@@ -1,6 +1,6 @@
 namespace = galaxy_size_fix
 
-planet_event = {
+carrier_event = {
 	id = galaxy_size_fix.4550 # crisis.4550
 	hide_window = yes
 
