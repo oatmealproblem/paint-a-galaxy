@@ -1,6 +1,12 @@
 painted_galaxy_spawn_weight = {
 	base = 10
-	[[PREFERRED] add = 100 ]
+	[[PREFERRED]
+	multiply = 0
+	modifier = {
+		add = 100
+		has_country_flag = painted_galaxy_host
+	}
+	]
 	# without randomness, the player always spawns in the same place
 	# these values add some semi-random weight based on leader age
 	modifier = {

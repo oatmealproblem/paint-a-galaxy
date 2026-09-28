@@ -1,0 +1,15 @@
+namespace = painted_galaxy_host
+
+# runs on_ruler_created, so it's before map init
+country_event = {
+	id = painted_galaxy_host.1
+	is_triggered_only = yes
+	hide_window = yes
+	immediate = {
+		if = {
+			limit = { NOT = { has_global_flag = painted_galaxy_host_found } }
+			set_country_flag = painted_galaxy_host
+			set_global_flag = painted_galaxy_host_found
+		}
+	}
+}

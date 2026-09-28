@@ -177,15 +177,14 @@
 											<dd class="inline">Empires can spawn here.</dd>
 										</div>
 										<div class="ms-4 -indent-4">
-											<dt class="font-bold inline">Preferred</dt>
+											<dt class="font-bold inline">1st Player</dt>
 											<dd class="inline">
-												Empires will spawn here before using normal <em>
-													Enabled
+												The 1st player will spawn here. AI empires (and other
+												players in multiplayer) will never spawn here. Use <em>
+													Reserved
 												</em>
-												locations. In single player, the player is first, so if there's
-												only one
-												<em>Preferred</em>
-												location, they will start there.
+												spawns if you want to control the location of other AIs or
+												other players.
 											</dd>
 										</div>
 										<div class="ms-4 -indent-4">
@@ -227,7 +226,7 @@
 							>
 								<option value="disabled">Disabled</option>
 								<option value="enabled">Enabled</option>
-								<option value="preferred">Preferred</option>
+								<option value="preferred">1st Player</option>
 								<option value="reserved_a">Reserved A</option>
 								<option value="reserved_b">Reserved B</option>
 								<option value="reserved_c">Reserved C</option>

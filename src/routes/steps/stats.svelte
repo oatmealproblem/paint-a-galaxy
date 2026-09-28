@@ -42,10 +42,15 @@
 		Math.max(
 			0,
 			solar_systems.filter(
-				(solar_system) =>
-					solar_system.spawn_type === 'enabled' ||
-					solar_system.spawn_type === 'preferred',
-			).length - 1,
+				(solar_system) => solar_system.spawn_type === 'enabled',
+			).length -
+				((
+					solar_systems.some(
+						(solar_system) => solar_system.spawn_type === 'preferred',
+					)
+				) ?
+					0
+				:	1),
 		),
 	);
 	const systems_by_initializer = $derived(

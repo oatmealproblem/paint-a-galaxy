@@ -123,7 +123,13 @@ export function generate_stellaris_galaxy(project: Project): string {
 	const num_reserved_spawns = project.solar_systems.filter((system) =>
 		system.spawn_type.startsWith('reserved'),
 	).length;
-	const max_safe_ai_spawns = Math.max(0, num_spawns - num_reserved_spawns - 1);
+	const max_safe_ai_spawns = Math.max(
+		0,
+		num_spawns -
+			preferred_home_stars.length -
+			num_reserved_spawns -
+			(preferred_home_stars.length > 0 ? 0 : 1),
+	);
 	const num_wormholes = project.wormholes.length;
 	const recommended_dlc = pipe(
 		project.solar_systems,

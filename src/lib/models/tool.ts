@@ -546,9 +546,9 @@ const spawn_preferred_toggle: _Tool<
 	Record<string, never>
 > = {
 	id: 'spawn_preferred_toggle',
-	name: 'Toggle Preferred Spawn',
+	name: 'Toggle 1st Player Spawn',
 	description:
-		'Mark/unmark preferred spawn. Right-click the map and Open Details for more info and options.',
+		'Mark/unmark 1st Player spawn. Right-click the map and Open Details for more info and options.',
 	step: 'tweak',
 	action_type: 'single_point',
 	snap_to_solar_system: 'all',
