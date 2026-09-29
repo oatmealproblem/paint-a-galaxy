@@ -2,7 +2,7 @@ Choose where each player and custom-designed AI spawns!
 (for [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115]Paint a Galaxy[/url])
 
 [list]
-  [*] In [url=https://oatmealproblem.github.io/paint-a-galaxy]the web app[/url], open system details and set the spawn to Reserved A-Z
+  [*] In [url=https://oatmealproblem.github.io/paint-a-galaxy]the web app[/url], open system details and set the spawn to Reserved A-Z or Reserved α-ω
   [list]
     [*] alternatively subscribe to [url=https://steamcommunity.com/workshop/filedetails/?id=3541574403]a community map[/url] with Reserved spawns
   [/list]

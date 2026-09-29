@@ -18,6 +18,7 @@
 	} from '$lib/constants';
 	import { get_editor } from '$lib/editor.svelte';
 	import { Coordinate } from '$lib/models/coordinate';
+	import { get_reserved_spawn_symbol } from '$lib/models/reserved_spawn';
 	import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 	import type { Tool } from '$lib/models/tool';
 	import { Delaunay } from 'd3-delaunay';
@@ -1111,9 +1112,7 @@
 							text-anchor="middle"
 							font-size={7}
 						>
-							{solar_system.spawn_type === 'reserved_sol' ?
-								'♁'
-							:	solar_system.spawn_type.at(-1)?.toUpperCase()}
+							{get_reserved_spawn_symbol(solar_system.spawn_type)}
 						</text>
 					{:else if solar_system.is_spawn}
 						<circle

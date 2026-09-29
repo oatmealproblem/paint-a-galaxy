@@ -1,4 +1,6 @@
 inline_script = {
 	script = painted_galaxy_reserved_spawn_trait/$HAS_RESERVED_SPAWNS$
 	VALUE = $VALUE$
+	# these quotes required around $OPPOSITES$; the value coming in is quoted and otherwise loses its quotes going from one inline_script to the next
+	OPPOSITES = "$OPPOSITES$"
 }

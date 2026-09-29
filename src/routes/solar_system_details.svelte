@@ -5,6 +5,10 @@
 	import { get_editor } from '$lib/editor.svelte';
 	import { Action } from '$lib/models/action';
 
+	import {
+		get_reserved_spawn_label,
+		RESERVED_SPAWN_TYPES,
+	} from '$lib/models/reserved_spawn';
 	import { SolarSystem, SolarSystemId } from '$lib/models/solar_system';
 	import { FloatingPanel, Portal, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { Option, pipe } from 'effect';
@@ -51,6 +55,11 @@
 			Option.flatMapNullable((value) => value.name),
 		),
 	);
+
+	const reserved_spawn_options = RESERVED_SPAWN_TYPES.map((spawn_type) => ({
+		value: spawn_type,
+		label: `Reserved ${get_reserved_spawn_label(spawn_type)}`,
+	}));
 </script>
 
 <FloatingPanel
@@ -227,33 +236,9 @@
 								<option value="disabled">Disabled</option>
 								<option value="enabled">Enabled</option>
 								<option value="preferred">1st Player</option>
-								<option value="reserved_a">Reserved A</option>
-								<option value="reserved_b">Reserved B</option>
-								<option value="reserved_c">Reserved C</option>
-								<option value="reserved_d">Reserved D</option>
-								<option value="reserved_e">Reserved E</option>
-								<option value="reserved_f">Reserved F</option>
-								<option value="reserved_g">Reserved G</option>
-								<option value="reserved_h">Reserved H</option>
-								<option value="reserved_i">Reserved I</option>
-								<option value="reserved_j">Reserved J</option>
-								<option value="reserved_k">Reserved K</option>
-								<option value="reserved_l">Reserved L</option>
-								<option value="reserved_m">Reserved M</option>
-								<option value="reserved_n">Reserved N</option>
-								<option value="reserved_o">Reserved O</option>
-								<option value="reserved_p">Reserved P</option>
-								<option value="reserved_q">Reserved Q</option>
-								<option value="reserved_r">Reserved R</option>
-								<option value="reserved_s">Reserved S</option>
-								<option value="reserved_t">Reserved T</option>
-								<option value="reserved_u">Reserved U</option>
-								<option value="reserved_v">Reserved V</option>
-								<option value="reserved_w">Reserved W</option>
-								<option value="reserved_x">Reserved X</option>
-								<option value="reserved_y">Reserved Y</option>
-								<option value="reserved_z">Reserved Z</option>
-								<option value="reserved_sol">Reserved Sol</option>
+								{#each reserved_spawn_options as option (option.value)}
+									<option value={option.value}>{option.label}</option>
+								{/each}
 							</select>
 						</label>
 						<InitializerCombobox

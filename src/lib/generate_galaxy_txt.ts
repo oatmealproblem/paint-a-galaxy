@@ -392,7 +392,7 @@ export function generate_stellaris_galaxy(project: Project): string {
 					solar_system.spawn_type === 'reserved_sol' ?
 						`|SOL|yes|RANDOM_MODULO|1|RANDOM_VALUE|0|`
 					: solar_system.spawn_type.startsWith('reserved') ?
-						`|RESERVED|${solar_system.spawn_type.at(-1)}|RANDOM_MODULO|3|RANDOM_VALUE|${i % 3}|`
+						`|RESERVED|${solar_system.spawn_type.slice('reserved_'.length)}|RANDOM_MODULO|3|RANDOM_VALUE|${i % 3}|`
 					: solar_system.spawn_type === 'preferred' ?
 						`|PREFERRED|yes|RANDOM_MODULO|${preferred_home_stars.length}|RANDOM_VALUE|${preferred_home_stars.indexOf(solar_system)}|`
 					:	`|RANDOM_MODULO|10|RANDOM_VALUE|${i % 10}|`;

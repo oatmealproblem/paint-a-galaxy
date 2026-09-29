@@ -12,6 +12,7 @@ import { Delaunay } from 'd3-delaunay';
 import { Connection } from './connection';
 import { Nebula } from './nebula';
 import { SolarSystem, SolarSystemId } from './solar_system';
+import { RESERVED_SPAWN_TYPES } from './reserved_spawn';
 import { GeneratorSettings } from './generator_settings';
 import { make_blank_image } from '$lib/canvas';
 import { GridConfig } from './grid_config';
@@ -250,39 +251,22 @@ export class Project extends Schema.Class<Project>('Project')({
 				const spawn_weight_json_string = JSON.stringify(
 					system.find((entry) => entry[0] === 'spawn_weight'),
 				);
-				const spawn_type =
+				const reserved_spawn_suffix = spawn_weight_json_string?.match(
+					/\|RESERVED\|([a-z]+)\|/,
+				)?.[1];
+				const reserved_spawn_type = `reserved_${reserved_spawn_suffix ?? ''}`;
+				const spawn_type: SolarSystem['spawn_type'] =
 					spawn_weight_json_string == null ? 'disabled'
 					: spawn_weight_json_string.includes('PREFERRED') ? 'preferred'
-					: spawn_weight_json_string.includes('RESERVED|a|') ? 'reserved_a'
-					: spawn_weight_json_string.includes('RESERVED|b|') ? 'reserved_b'
-					: spawn_weight_json_string.includes('RESERVED|c|') ? 'reserved_c'
-					: spawn_weight_json_string.includes('RESERVED|d|') ? 'reserved_d'
-					: spawn_weight_json_string.includes('RESERVED|e|') ? 'reserved_e'
-					: spawn_weight_json_string.includes('RESERVED|f|') ? 'reserved_f'
-					: spawn_weight_json_string.includes('RESERVED|g|') ? 'reserved_g'
-					: spawn_weight_json_string.includes('RESERVED|h|') ? 'reserved_h'
-					: spawn_weight_json_string.includes('RESERVED|i|') ? 'reserved_i'
-					: spawn_weight_json_string.includes('RESERVED|j|') ? 'reserved_j'
-					: spawn_weight_json_string.includes('RESERVED|k|') ? 'reserved_k'
-					: spawn_weight_json_string.includes('RESERVED|l|') ? 'reserved_l'
-					: spawn_weight_json_string.includes('RESERVED|m|') ? 'reserved_m'
-					: spawn_weight_json_string.includes('RESERVED|n|') ? 'reserved_n'
-					: spawn_weight_json_string.includes('RESERVED|o|') ? 'reserved_o'
-					: spawn_weight_json_string.includes('RESERVED|p|') ? 'reserved_p'
-					: spawn_weight_json_string.includes('RESERVED|q|') ? 'reserved_q'
-					: spawn_weight_json_string.includes('RESERVED|r|') ? 'reserved_r'
-					: spawn_weight_json_string.includes('RESERVED|s|') ? 'reserved_s'
-					: spawn_weight_json_string.includes('RESERVED|t|') ? 'reserved_t'
-					: spawn_weight_json_string.includes('RESERVED|u|') ? 'reserved_u'
-					: spawn_weight_json_string.includes('RESERVED|v|') ? 'reserved_v'
-					: spawn_weight_json_string.includes('RESERVED|w|') ? 'reserved_w'
-					: spawn_weight_json_string.includes('RESERVED|x|') ? 'reserved_x'
-					: spawn_weight_json_string.includes('RESERVED|y|') ? 'reserved_y'
-					: spawn_weight_json_string.includes('RESERVED|y|') ? 'reserved_y'
-					: spawn_weight_json_string.includes('RESERVED|y|') ? 'reserved_y'
-					: spawn_weight_json_string.includes('RESERVED|z|') ? 'reserved_z'
 					: spawn_weight_json_string.includes('SOL|yes|') ? 'reserved_sol'
-					: 'enabled';
+					: (
+						reserved_spawn_suffix != null &&
+						(RESERVED_SPAWN_TYPES as readonly string[]).includes(
+							reserved_spawn_type,
+						)
+					) ?
+						(reserved_spawn_type as SolarSystem['spawn_type'])
+					:	'enabled';
 
 				const name = Option.fromNullable(
 					find_text_entry(system, 'name') || null,
