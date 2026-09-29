@@ -22,6 +22,7 @@ painted_galaxy_spawn_weight = {
 	}
 	modifier = {
 		add = 10
+		has_country_flag = painted_galaxy_host
 		ruler = {
 			check_variable_arithmetic = {
 				which = trigger:leader_age
@@ -39,6 +40,7 @@ painted_galaxy_spawn_weight = {
 	}
 	modifier = {
 		add = 10
+		has_trait = trait_painted_galaxy_reserved_spawn_$RESERVED$
 		ruler = {
 			check_variable_arithmetic = {
 				which = trigger:leader_age
