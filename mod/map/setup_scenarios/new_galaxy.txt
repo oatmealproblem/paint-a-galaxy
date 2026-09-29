@@ -1,0 +1,356 @@
+#​ created by Stellaris Galaxy Forge 0.17.0
+# Written by Stellaris Galaxy Forge for the Paint a Galaxy mod (Steam Workshop 3532904115), which this map requires.
+static_galaxy_scenario = {
+	name = "new_galaxy"
+	priority = 10
+	supports_shape = elliptical
+	supports_shape = ring
+	supports_shape = spiral_2
+	supports_shape = spiral_3
+	supports_shape = spiral_4
+	supports_shape = spiral_6
+	supports_shape = bar
+	supports_shape = starburst
+	supports_shape = cartwheel
+	supports_shape = spoked
+	random_hyperlanes = no
+	num_wormhole_pairs = { min = 0 max = 5 }
+	num_wormhole_pairs_default = 1
+	num_gateways = { min = 0 max = 5 }
+	num_gateways_default = 1
+	num_hyperlanes = { min = 0.5 max = 3 }
+	num_hyperlanes_default = 1
+	colonizable_planet_odds = 1.0
+	primitive_odds = 1.0
+	fallen_empire_max = 0
+	marauder_empire_max = 0
+	extra_crisis_strength = { 10 25 }
+	num_empires = { min = 0 max = 0 }
+	num_empire_default = 0
+	advanced_empire_default = 0
+	nomad_empire_default = 0
+	nomad_empire_max = 0
+	fallen_empire_default = 0
+	marauder_empire_default = 0
+	crisis_strength = 0.5
+	core_radius = 100
+
+	system = { id = "1" name = "" position = { x = 278.9224 y = -80.9574 } }
+	system = { id = "2" name = "" position = { x = 253.56828 y = -79.15935 } }
+	system = { id = "3" name = "" position = { x = 270.26837 y = -106.26986 } }
+	system = { id = "4" name = "" position = { x = 242.42717 y = -106.37255 } }
+	system = { id = "5" name = "" position = { x = 254.37055 y = -129.562 } }
+	system = { id = "6" name = "" position = { x = 228.39586 y = -129.61124 } }
+	system = { id = "7" name = "" position = { x = 235.95749 y = -154.39663 } }
+	system = { id = "8" name = "" position = { x = 210.87144 y = -158.00709 } }
+	system = { id = "9" name = "" position = { x = 200.55192 y = -134.27081 } }
+	system = { id = "10" name = "" position = { x = 189.50287 y = -174.14068 } }
+	system = { id = "11" name = "" position = { x = 167.72085 y = -190.17715 } }
+	system = { id = "12" name = "" position = { x = 166.30544 y = -164.05293 } }
+	system = { id = "13" name = "" position = { x = 141.54334 y = -192.75616 } }
+	system = { id = "14" name = "" position = { x = 122.92581 y = -211.43312 } }
+	system = { id = "15" name = "" position = { x = 99.66212 y = -223.13394 } }
+	system = { id = "16" name = "" position = { x = 104.865 y = -191.77542 } }
+	system = { id = "17" name = "" position = { x = 152.01665 y = -215.73301 } }
+	system = { id = "18" name = "" position = { x = 73.05837 y = -214.08885 } }
+	system = { id = "19" name = "" position = { x = 52.18644 y = -228.90602 } }
+	system = { id = "20" name = "" position = { x = 77.14334 y = -239.74888 } }
+	system = { id = "21" name = "" position = { x = 32.47035 y = -211.15121 } }
+	system = { id = "22" name = "" position = { x = 26.80019 y = -235.8582 } }
+	add_hyperlane = { from = "22" to = "21" }
+	add_hyperlane = { from = "22" to = "19" }
+	add_hyperlane = { from = "21" to = "19" }
+	add_hyperlane = { from = "20" to = "19" }
+	add_hyperlane = { from = "20" to = "18" }
+	add_hyperlane = { from = "20" to = "15" }
+	add_hyperlane = { from = "19" to = "18" }
+	add_hyperlane = { from = "18" to = "16" }
+	add_hyperlane = { from = "18" to = "15" }
+	add_hyperlane = { from = "17" to = "14" }
+	add_hyperlane = { from = "17" to = "13" }
+	add_hyperlane = { from = "17" to = "11" }
+	add_hyperlane = { from = "16" to = "15" }
+	add_hyperlane = { from = "16" to = "14" }
+	add_hyperlane = { from = "16" to = "13" }
+	add_hyperlane = { from = "15" to = "14" }
+	add_hyperlane = { from = "14" to = "13" }
+	add_hyperlane = { from = "13" to = "11" }
+	add_hyperlane = { from = "12" to = "11" }
+	add_hyperlane = { from = "12" to = "10" }
+	add_hyperlane = { from = "12" to = "9" }
+	add_hyperlane = { from = "11" to = "10" }
+	add_hyperlane = { from = "10" to = "8" }
+	add_hyperlane = { from = "9" to = "8" }
+	add_hyperlane = { from = "9" to = "6" }
+	add_hyperlane = { from = "8" to = "7" }
+	add_hyperlane = { from = "8" to = "6" }
+	add_hyperlane = { from = "7" to = "6" }
+	add_hyperlane = { from = "7" to = "5" }
+	add_hyperlane = { from = "6" to = "5" }
+	add_hyperlane = { from = "6" to = "4" }
+	add_hyperlane = { from = "5" to = "4" }
+	add_hyperlane = { from = "5" to = "3" }
+	add_hyperlane = { from = "4" to = "3" }
+	add_hyperlane = { from = "4" to = "2" }
+	add_hyperlane = { from = "3" to = "2" }
+	add_hyperlane = { from = "3" to = "1" }
+	add_hyperlane = { from = "2" to = "1" }
+	system = { id = "23" name = "" position = { x = -231.99997 y = -181.52122 } }
+	system = { id = "24" name = "" position = { x = -270.32508 y = -66.83732 } }
+	system = { id = "25" name = "" position = { x = -276.7799 y = 54.34041 } }
+	system = { id = "26" name = "" position = { x = -269.8644 y = 176.65724 } }
+	system = { id = "27" name = "" position = { x = -183.98018 y = 262.00576 } }
+	system = { id = "28" name = "" position = { x = -94.72716 y = 343.27789 } }
+	system = { id = "29" name = "" position = { x = -278.09254 y = 341.97771 } }
+	system = { id = "30" name = "" position = { x = -366.91325 y = 252.24365 } }
+	system = { id = "31" name = "" position = { x = -394.9572 y = 134.62065 } }
+	system = { id = "32" name = "" position = { x = -399.36178 y = 9.41354 } }
+	system = { id = "33" name = "" position = { x = -384.82486 y = -111.73468 } }
+	system = { id = "34" name = "" position = { x = -69.3079 y = 222.36367 } }
+	system = { id = "35" name = "" position = { x = -161.72922 y = 99.30629 } }
+	add_hyperlane = { from = "35" to = "34" }
+	add_hyperlane = { from = "35" to = "27" }
+	add_hyperlane = { from = "35" to = "26" }
+	add_hyperlane = { from = "35" to = "25" }
+	add_hyperlane = { from = "34" to = "28" }
+	add_hyperlane = { from = "34" to = "27" }
+	add_hyperlane = { from = "33" to = "32" }
+	add_hyperlane = { from = "33" to = "24" }
+	add_hyperlane = { from = "33" to = "23" }
+	add_hyperlane = { from = "32" to = "31" }
+	add_hyperlane = { from = "32" to = "25" }
+	add_hyperlane = { from = "32" to = "24" }
+	add_hyperlane = { from = "31" to = "30" }
+	add_hyperlane = { from = "31" to = "26" }
+	add_hyperlane = { from = "31" to = "25" }
+	add_hyperlane = { from = "30" to = "29" }
+	add_hyperlane = { from = "30" to = "26" }
+	add_hyperlane = { from = "29" to = "27" }
+	add_hyperlane = { from = "29" to = "26" }
+	add_hyperlane = { from = "28" to = "27" }
+	add_hyperlane = { from = "27" to = "26" }
+	add_hyperlane = { from = "26" to = "25" }
+	add_hyperlane = { from = "25" to = "24" }
+	add_hyperlane = { from = "24" to = "23" }
+	add_hyperlane = { from = "23" to = "22" }
+	system = { id = "36" name = "" position = { x = 248.94494 y = 119.63622 } }
+	system = { id = "37" name = "" position = { x = 271.02297 y = 239.72931 } }
+	system = { id = "38" name = "" position = { x = 186.92403 y = 327.89581 } }
+	system = { id = "39" name = "" position = { x = 66.30718 y = 333.51944 } }
+	system = { id = "40" name = "" position = { x = 87.27119 y = 214.59735 } }
+	system = { id = "41" name = "" position = { x = 24.62511 y = 107.18319 } }
+	add_hyperlane = { from = "41" to = "40" }
+	add_hyperlane = { from = "41" to = "36" }
+	add_hyperlane = { from = "41" to = "2" }
+	add_hyperlane = { from = "41" to = "9" }
+	add_hyperlane = { from = "41" to = "16" }
+	add_hyperlane = { from = "41" to = "21" }
+	add_hyperlane = { from = "41" to = "34" }
+	add_hyperlane = { from = "41" to = "35" }
+	add_hyperlane = { from = "40" to = "39" }
+	add_hyperlane = { from = "40" to = "38" }
+	add_hyperlane = { from = "40" to = "37" }
+	add_hyperlane = { from = "40" to = "36" }
+	add_hyperlane = { from = "40" to = "34" }
+	add_hyperlane = { from = "39" to = "38" }
+	add_hyperlane = { from = "39" to = "28" }
+	add_hyperlane = { from = "39" to = "34" }
+	add_hyperlane = { from = "38" to = "37" }
+	add_hyperlane = { from = "37" to = "36" }
+	add_hyperlane = { from = "36" to = "2" }
+	system = { id = "42" name = "" position = { x = -114.76493 y = -14.99059 } }
+	system = { id = "43" name = "" position = { x = -94.31451 y = -138.47726 } }
+	add_hyperlane = { from = "43" to = "42" }
+	add_hyperlane = { from = "43" to = "21" }
+	add_hyperlane = { from = "43" to = "22" }
+	add_hyperlane = { from = "43" to = "23" }
+	add_hyperlane = { from = "43" to = "24" }
+	add_hyperlane = { from = "42" to = "24" }
+	add_hyperlane = { from = "42" to = "25" }
+	add_hyperlane = { from = "42" to = "35" }
+	add_hyperlane = { from = "42" to = "41" }
+	system = { id = "44" name = "" position = { x = -26.63386 y = -283.83421 } }
+	system = { id = "45" name = "" position = { x = -71.91133 y = -302.52497 } }
+	system = { id = "46" name = "" position = { x = -110.4723 y = -272.96488 } }
+	system = { id = "47" name = "" position = { x = -159.16182 y = -278.44314 } }
+	system = { id = "48" name = "" position = { x = -201.81139 y = -252.8025 } }
+	system = { id = "49" name = "" position = { x = -246.06304 y = -234.02372 } }
+	system = { id = "50" name = "" position = { x = -293.58629 y = -237.1951 } }
+	system = { id = "51" name = "" position = { x = -334.77057 y = -215.27544 } }
+	system = { id = "52" name = "" position = { x = -344.03006 y = -261.89127 } }
+	system = { id = "53" name = "" position = { x = -313.27176 y = -298.27685 } }
+	system = { id = "54" name = "" position = { x = -267.27954 y = -311.33256 } }
+	system = { id = "55" name = "" position = { x = -219.54093 y = -316.85851 } }
+	system = { id = "56" name = "" position = { x = -174.31396 y = -328.53053 } }
+	system = { id = "57" name = "" position = { x = -142.76973 y = -362.45949 } }
+	system = { id = "58" name = "" position = { x = -96.05045 y = -349.15067 } }
+	system = { id = "59" name = "" position = { x = -55.06823 y = -370.95304 } }
+	system = { id = "60" name = "" position = { x = -7.72859 y = -362.97522 } }
+	system = { id = "61" name = "" position = { x = 37.98182 y = -352.18493 } }
+	system = { id = "62" name = "" position = { x = 71.85887 y = -316.04217 } }
+	system = { id = "63" name = "" position = { x = 117.68891 y = -304.73157 } }
+	system = { id = "64" name = "" position = { x = 131.38915 y = -259.92452 } }
+	system = { id = "65" name = "" position = { x = -21.74574 y = -216.14137 } }
+	system = { id = "66" name = "" position = { x = -64.34582 y = -196.73435 } }
+	system = { id = "67" name = "" position = { x = -110.63218 y = -211.66745 } }
+	system = { id = "68" name = "" position = { x = 6.91502 y = -317.0996 } }
+	system = { id = "69" name = "" position = { x = 36.35168 y = -281.59473 } }
+	system = { id = "70" name = "" position = { x = -25.34974 y = -170.03863 } }
+	system = { id = "71" name = "" position = { x = -41.9198 y = -124.85164 } }
+	system = { id = "72" name = "" position = { x = -49.34733 y = -78.49772 } }
+	system = { id = "73" name = "" position = { x = -50.99434 y = -32.18026 } }
+	system = { id = "74" name = "" position = { x = -48.2735 y = 16.11753 } }
+	system = { id = "75" name = "" position = { x = -13.32701 y = 49.90104 } }
+	system = { id = "76" name = "" position = { x = 9.7556 y = 151.08147 } }
+	system = { id = "77" name = "" position = { x = -28.57901 y = 177.28656 } }
+	system = { id = "78" name = "" position = { x = -76.84334 y = 175.00481 } }
+	system = { id = "79" name = "" position = { x = -121.76848 y = 194.99009 } }
+	system = { id = "80" name = "" position = { x = -171.05231 y = 201.96693 } }
+	system = { id = "81" name = "" position = { x = -217.78837 y = 198.87754 } }
+	system = { id = "82" name = "" position = { x = -317.38682 y = 175.82007 } }
+	system = { id = "83" name = "" position = { x = -333.08659 y = 124.4159 } }
+	system = { id = "84" name = "" position = { x = -346.661 y = 76.01788 } }
+	system = { id = "85" name = "" position = { x = -355.38021 y = 30.40163 } }
+	system = { id = "86" name = "" position = { x = -351.89882 y = -16.18427 } }
+	system = { id = "87" name = "" position = { x = -379.24513 y = -63.12241 } }
+	system = { id = "88" name = "" position = { x = -358.33543 y = -151.44639 } }
+	system = { id = "89" name = "" position = { x = -382.85388 y = -191.90287 } }
+	system = { id = "90" name = "" position = { x = -384.85019 y = -238.92819 } }
+	system = { id = "91" name = "" position = { x = -176.71261 y = -211.21376 } }
+	system = { id = "92" name = "" position = { x = -150.09995 y = -171.98217 } }
+	system = { id = "93" name = "" position = { x = -162.89272 y = -127.38635 } }
+	system = { id = "94" name = "" position = { x = -161.61287 y = -79.98578 } }
+	system = { id = "95" name = "" position = { x = -198.48883 y = -50.33333 } }
+	system = { id = "96" name = "" position = { x = -223.56766 y = -10.94555 } }
+	system = { id = "97" name = "" position = { x = -272.25094 y = 6.07482 } }
+	system = { id = "98" name = "" position = { x = -269.42454 y = 99.90837 } }
+	system = { id = "99" name = "" position = { x = -222.28379 y = 111.84789 } }
+	system = { id = "100" name = "" position = { x = -190.20539 y = 145.71944 } }
+	system = { id = "101" name = "" position = { x = -134.74334 y = 239.82388 } }
+	system = { id = "102" name = "" position = { x = -89.5988 y = 265.86456 } }
+	system = { id = "103" name = "" position = { x = -160.65576 y = -21.54884 } }
+	system = { id = "104" name = "" position = { x = -97.43687 y = 29.31361 } }
+	system = { id = "105" name = "" position = { x = -61.14603 y = 63.43078 } }
+	system = { id = "106" name = "" position = { x = -46.29114 y = 107.85586 } }
+	system = { id = "107" name = "" position = { x = -91.46894 y = 128.39831 } }
+	system = { id = "108" name = "" position = { x = -135.15502 y = 146.58899 } }
+	system = { id = "109" name = "" position = { x = -235.20346 y = 33.90518 } }
+	system = { id = "110" name = "" position = { x = -146.90744 y = 24.39562 } }
+	system = { id = "111" name = "" position = { x = 40.90768 y = 191.4536 } }
+	system = { id = "112" name = "" position = { x = 10.36678 y = 226.02842 } }
+	system = { id = "113" name = "" position = { x = -236.93193 y = 243.54907 } }
+	system = { id = "114" name = "" position = { x = -278.55834 y = 222.74602 } }
+	system = { id = "115" name = "" position = { x = -320.10959 y = 243.31684 } }
+	system = { id = "116" name = "" position = { x = -351.0412 y = 208.72985 } }
+	system = { id = "117" name = "" position = { x = -400.12588 y = 219.24175 } }
+	system = { id = "118" name = "" position = { x = -445.18222 y = 204.66227 } }
+	add_hyperlane = { from = "118" to = "117" }
+	add_hyperlane = { from = "118" to = "31" }
+	add_hyperlane = { from = "117" to = "30" }
+	add_hyperlane = { from = "117" to = "31" }
+	add_hyperlane = { from = "116" to = "82" }
+	add_hyperlane = { from = "116" to = "30" }
+	add_hyperlane = { from = "116" to = "31" }
+	add_hyperlane = { from = "115" to = "114" }
+	add_hyperlane = { from = "115" to = "29" }
+	add_hyperlane = { from = "115" to = "30" }
+	add_hyperlane = { from = "114" to = "26" }
+	add_hyperlane = { from = "113" to = "27" }
+	add_hyperlane = { from = "113" to = "29" }
+	add_hyperlane = { from = "112" to = "39" }
+	add_hyperlane = { from = "111" to = "76" }
+	add_hyperlane = { from = "111" to = "40" }
+	add_hyperlane = { from = "110" to = "35" }
+	add_hyperlane = { from = "110" to = "42" }
+	add_hyperlane = { from = "109" to = "97" }
+	add_hyperlane = { from = "109" to = "96" }
+	add_hyperlane = { from = "109" to = "25" }
+	add_hyperlane = { from = "108" to = "79" }
+	add_hyperlane = { from = "108" to = "35" }
+	add_hyperlane = { from = "107" to = "106" }
+	add_hyperlane = { from = "107" to = "78" }
+	add_hyperlane = { from = "106" to = "41" }
+	add_hyperlane = { from = "105" to = "104" }
+	add_hyperlane = { from = "104" to = "42" }
+	add_hyperlane = { from = "103" to = "42" }
+	add_hyperlane = { from = "102" to = "28" }
+	add_hyperlane = { from = "102" to = "34" }
+	add_hyperlane = { from = "101" to = "80" }
+	add_hyperlane = { from = "101" to = "79" }
+	add_hyperlane = { from = "101" to = "27" }
+	add_hyperlane = { from = "100" to = "81" }
+	add_hyperlane = { from = "100" to = "35" }
+	add_hyperlane = { from = "99" to = "98" }
+	add_hyperlane = { from = "98" to = "25" }
+	add_hyperlane = { from = "98" to = "26" }
+	add_hyperlane = { from = "97" to = "24" }
+	add_hyperlane = { from = "97" to = "25" }
+	add_hyperlane = { from = "96" to = "24" }
+	add_hyperlane = { from = "95" to = "94" }
+	add_hyperlane = { from = "95" to = "24" }
+	add_hyperlane = { from = "92" to = "43" }
+	add_hyperlane = { from = "91" to = "48" }
+	add_hyperlane = { from = "91" to = "23" }
+	add_hyperlane = { from = "90" to = "89" }
+	add_hyperlane = { from = "90" to = "52" }
+	add_hyperlane = { from = "89" to = "88" }
+	add_hyperlane = { from = "89" to = "51" }
+	add_hyperlane = { from = "88" to = "33" }
+	add_hyperlane = { from = "87" to = "33" }
+	add_hyperlane = { from = "85" to = "84" }
+	add_hyperlane = { from = "85" to = "32" }
+	add_hyperlane = { from = "84" to = "25" }
+	add_hyperlane = { from = "83" to = "31" }
+	add_hyperlane = { from = "82" to = "26" }
+	add_hyperlane = { from = "81" to = "26" }
+	add_hyperlane = { from = "80" to = "79" }
+	add_hyperlane = { from = "78" to = "34" }
+	add_hyperlane = { from = "77" to = "76" }
+	add_hyperlane = { from = "76" to = "41" }
+	add_hyperlane = { from = "75" to = "74" }
+	add_hyperlane = { from = "75" to = "41" }
+	add_hyperlane = { from = "74" to = "73" }
+	add_hyperlane = { from = "73" to = "72" }
+	add_hyperlane = { from = "73" to = "42" }
+	add_hyperlane = { from = "72" to = "71" }
+	add_hyperlane = { from = "71" to = "70" }
+	add_hyperlane = { from = "71" to = "43" }
+	add_hyperlane = { from = "69" to = "68" }
+	add_hyperlane = { from = "69" to = "62" }
+	add_hyperlane = { from = "69" to = "22" }
+	add_hyperlane = { from = "68" to = "61" }
+	add_hyperlane = { from = "68" to = "60" }
+	add_hyperlane = { from = "68" to = "44" }
+	add_hyperlane = { from = "67" to = "46" }
+	add_hyperlane = { from = "66" to = "65" }
+	add_hyperlane = { from = "66" to = "43" }
+	add_hyperlane = { from = "65" to = "22" }
+	add_hyperlane = { from = "64" to = "63" }
+	add_hyperlane = { from = "64" to = "14" }
+	add_hyperlane = { from = "64" to = "15" }
+	add_hyperlane = { from = "64" to = "17" }
+	add_hyperlane = { from = "63" to = "62" }
+	add_hyperlane = { from = "62" to = "61" }
+	add_hyperlane = { from = "61" to = "60" }
+	add_hyperlane = { from = "60" to = "59" }
+	add_hyperlane = { from = "59" to = "58" }
+	add_hyperlane = { from = "58" to = "57" }
+	add_hyperlane = { from = "58" to = "45" }
+	add_hyperlane = { from = "57" to = "56" }
+	add_hyperlane = { from = "56" to = "55" }
+	add_hyperlane = { from = "56" to = "47" }
+	add_hyperlane = { from = "55" to = "54" }
+	add_hyperlane = { from = "55" to = "48" }
+	add_hyperlane = { from = "54" to = "53" }
+	add_hyperlane = { from = "54" to = "49" }
+	add_hyperlane = { from = "53" to = "52" }
+	add_hyperlane = { from = "52" to = "51" }
+	add_hyperlane = { from = "51" to = "50" }
+	add_hyperlane = { from = "50" to = "49" }
+	add_hyperlane = { from = "49" to = "48" }
+	add_hyperlane = { from = "49" to = "23" }
+	add_hyperlane = { from = "48" to = "47" }
+	add_hyperlane = { from = "47" to = "46" }
+	add_hyperlane = { from = "46" to = "45" }
+	add_hyperlane = { from = "45" to = "44" }
+}

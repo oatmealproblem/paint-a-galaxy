@@ -89,6 +89,10 @@ export class Project extends Schema.Class<Project>('Project')({
 			decoding: () => SymmetryConfig.default(),
 		}),
 	),
+	txt_import_source: Schema.OptionFromNullishOr(Schema.String, null).pipe(
+		Schema.optional,
+		Schema.withDefaults({ constructor: Option.none, decoding: Option.none }),
+	),
 }) {
 	#delaunay: Option.Option<Delaunay<unknown>> = Option.none();
 
@@ -217,6 +221,10 @@ export class Project extends Schema.Class<Project>('Project')({
 		const name = find_text_entry(scenario, 'name') || 'none';
 		const step = 'tweak';
 		const canvas = await make_blank_image();
+
+		const txt_import_source = Option.some(
+			txt.match(/#\u200b created by (.*)/)?.[1] ?? 'generic_txt',
+		);
 
 		const wormhole_flags: Record<number, Set<SolarSystemId>> = {};
 
@@ -504,6 +512,7 @@ export class Project extends Schema.Class<Project>('Project')({
 			hyperlanes,
 			wormholes,
 			fallen_empire_zones,
+			txt_import_source,
 		});
 	}
 }

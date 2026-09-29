@@ -36,6 +36,7 @@ import {
 } from './models/fallen_empire_zone';
 import { convert_degrees_to_radians } from './math';
 import { Random } from 'effect';
+import { version } from '../../package.json';
 
 const DIRECTIONS = {
 	0: 'e',
@@ -538,6 +539,11 @@ export function generate_stellaris_galaxy(project: Project): string {
 		.join('\n');
 
 	return [
+		`#\u200b created by Paint a Galaxy ${version}${pipe(
+			project.txt_import_source,
+			Option.map((source) => ` (imported from txt created by ${source})`),
+			Option.getOrElse(() => ''),
+		)}`,
 		'# README for what to do with this file, read the Steam Workshop page https://steamcommunity.com/sharedfiles/filedetails/?id=3532904115',
 		'',
 		'# Stats:',
