@@ -1,14 +1,9 @@
 painted_galaxy_spawn_weight = {
 	base = 10
-	[[PREFERRED]
-	multiply = 0
-	modifier = {
-		add = 100
-		has_country_flag = painted_galaxy_host
-	}
-	]
 	# without randomness, the player always spawns in the same place
 	# these values add some semi-random weight based on leader age
+	# (this modifier is repeated in the PREFERRED and RESERVED blocks
+	# to add some variation if multiple systems are preferred or reserved)
 	modifier = {
 		add = 10
 		ruler = {
@@ -19,11 +14,38 @@ painted_galaxy_spawn_weight = {
 			}
 		}
 	}
+	[[PREFERRED]
+	multiply = 0
+	modifier = {
+		add = 100
+		has_country_flag = painted_galaxy_host
+	}
+	modifier = {
+		add = 10
+		ruler = {
+			check_variable_arithmetic = {
+				which = trigger:leader_age
+				modulo = $RANDOM_MODULO$
+				value = $RANDOM_VALUE$
+			}
+		}
+	}
+	]
 	[[RESERVED]
 	multiply = 0
 	modifier = {
 		add = 1000
 		has_trait = trait_painted_galaxy_reserved_spawn_$RESERVED$
+	}
+	modifier = {
+		add = 10
+		ruler = {
+			check_variable_arithmetic = {
+				which = trigger:leader_age
+				modulo = $RANDOM_MODULO$
+				value = $RANDOM_VALUE$
+			}
+		}
 	}
 	]
 	[[SOL]
